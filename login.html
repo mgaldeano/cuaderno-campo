@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
+    <title>Iniciar sesión</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <script type="module">
       import { createClient } from './supabaseClient.js';
@@ -15,22 +15,21 @@
         const email = form.email.value;
         const password = form.password.value;
 
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert("❌ Error de login: " + error.message);
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        if (mode === "register") {
+          const { error } = await supabase.auth.signUp({ email, password });
+          if (error) return alert("❌ Registro fallido: " + error.message);
         } else {
-          // ✅ Redirige al inicio
-          window.location.href = "index.html";
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) return alert("❌ Error de login: " + error.message);
         }
+        window.location.href = "index.html";
       });
 
-      // También login con Google
       document.querySelector("#google").addEventListener("click", async () => {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
-          options: {
-            redirectTo: `${location.origin}/index.html`,
-          },
+          options: { redirectTo: `${location.origin}/index.html` }
         });
         if (error) alert("Google login error: " + error.message);
       });
@@ -39,16 +38,24 @@
   <body>
     <main class="container">
       <hgroup>
-        <h2>Ingresar</h2>
-        <h3>Accedé con tu email o Google</h3>
+        <h2>Acceso</h2>
+        <h3>Ingresar o registrarse</h3>
       </hgroup>
       <form>
+        <fieldset>
+          <label>
+            <input type="radio" name="mode" value="login" checked /> Iniciar sesión
+          </label>
+          <label>
+            <input type="radio" name="mode" value="register" /> Registrarse
+          </label>
+        </fieldset>
         <input type="email" name="email" placeholder="Email" required />
         <input type="password" name="password" placeholder="Contraseña" required />
-        <button type="submit">Ingresar</button>
+        <button type="submit">Continuar</button>
       </form>
       <hr />
-      <button id="google" role="button">Iniciar con Google</button>
+      <button id="google" role="button">Continuar con Google</button>
     </main>
   </body>
 </html>
