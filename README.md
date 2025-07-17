@@ -1,49 +1,21 @@
-# 📒 Cuaderno de Campo para Fincas Vitivinícolas
+# 📒 Cuaderno de Campo Digital
 
-Aplicación web para registrar tareas agrícolas por cuarteles y fincas, ideal para productores o cooperativas del ámbito vitivinícola. Incluye gestión de usuarios, tareas, reportes y soporte multi-organización.
-
----
-
-## 🛠️ Funcionalidades
-
-- Registro de usuarios (con email y Google)
-- Gestión de fincas, cuarteles y tareas
-- Reportes dinámicos por cuartel o tipo de tarea
-- Acceso basado en roles: productor, técnico, superadmin
-- Adaptable para diferentes organizaciones
+Aplicación web para cooperativas, productores y técnicos vitícolas. Permite registrar tareas, gestionar fincas, cuarteles y usuarios. Desarrollada con Supabase, HTML + PicoCSS.
 
 ---
 
-## 🧩 Estructura del Proyecto
-/cuaderno-campo/
-│
-├── index.html # Página de inicio
-├── fincas.html # Gestión de fincas
-├── cuarteles.html # Gestión de cuarteles
-├── tareas.html # Registro de tareas
-├── reportes.html # Visualización de reportes
-├── usuarios.html # Listado de usuarios
-├── supabaseClient.js # Conexión centralizada con Supabase
-└── README.md # Este archivo
+## 🚀 Funcionalidades principales
 
+- 🏡 Inicio y navegación por secciones
+- 🌱 Gestión de Fincas y Cuarteles
+- 🛠 Registro de Tareas (Riego, Tratamiento, Cosecha, etc.)
+- 📊 Reportes por tipo de tarea y cuartel
+- 👤 Sistema de autenticación:
+  - Email y contraseña
+  - Google Auth (OAuth)
+- 🛡 Control de acceso por organización y roles
 
 ---
 
-## 🌐 Requisitos
-
-- Una cuenta en [Supabase](https://supabase.com)
-- Haber creado las siguientes tablas:
-  - `usuarios`, `fincas`, `cuarteles`, `tareas`, `tipos_tarea`, `organizaciones`
-- Aplicadas las políticas RLS y triggers provistos
-- Clave pública de Supabase configurada en `supabaseClient.js`
-
----
-
-## 🚀 Uso
-
-1. Clonar este repositorio:
-
-```bash
-git clone https://github.com/mgaldeano/CuadernoDeCampo.git
-
+## 🧪 Estructura de carpetas
 
