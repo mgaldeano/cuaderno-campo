@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      );
+
+      document.querySelector("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.querySelector("#email").value;
+        const password = document.querySelector("#password").value;
+
+        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+          document.querySelector("#status").innerText = "❌ Error al iniciar sesión: " + error.message;
+        } else {
+          document.querySelector("#status").innerText = "✅ Login exitoso. Redirigiendo...";
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1500);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <main class="container">
+      <hgroup>
+        <h2>Iniciar Sesión</h2>
+        <h3>Accedé a tu cuenta</h3>
+      </hgroup>
+      <form>
+        <input type="email" id="email" placeholder="Tu correo" required />
+        <input type="password" id="password" placeholder="Contraseña" required />
+        <button type="submit">Ingresar</button>
+        <p id="status"></p>
+      </form>
+    </main>
+    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
+  </body>
+</html>
