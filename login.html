@@ -3,46 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login | Cuaderno de Campo</title>
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-      const supabase = createClient(
-        "https://djvdjulfeuqohpnatdmt.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      );
+      import { createClient } from './supabaseClient.js';
+      const supabase = createClient();
 
-      document.querySelector("form").addEventListener("submit", async (e) => {
+      const form = document.querySelector("form");
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = document.querySelector("#email").value;
-        const password = document.querySelector("#password").value;
+        const email = form.email.value;
+        const password = form.password.value;
 
-        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          document.querySelector("#status").innerText = "❌ Error al iniciar sesión: " + error.message;
+          alert("❌ Error de login: " + error.message);
         } else {
-          document.querySelector("#status").innerText = "✅ Login exitoso. Redirigiendo...";
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1500);
+          // ✅ Redirige al inicio
+          window.location.href = "index.html";
         }
+      });
+
+      // También login con Google
+      document.querySelector("#google").addEventListener("click", async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${location.origin}/index.html`,
+          },
+        });
+        if (error) alert("Google login error: " + error.message);
       });
     </script>
   </head>
   <body>
     <main class="container">
       <hgroup>
-        <h2>Iniciar Sesión</h2>
-        <h3>Accedé a tu cuenta</h3>
+        <h2>Ingresar</h2>
+        <h3>Accedé con tu email o Google</h3>
       </hgroup>
       <form>
-        <input type="email" id="email" placeholder="Tu correo" required />
-        <input type="password" id="password" placeholder="Contraseña" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Contraseña" required />
         <button type="submit">Ingresar</button>
-        <p id="status"></p>
       </form>
+      <hr />
+      <button id="google" role="button">Iniciar con Google</button>
     </main>
-    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
   </body>
 </html>
