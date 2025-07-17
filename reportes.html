@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reportes | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <script type="module">
+      import { createClient } from "./supabaseClient.js";
+
+      const supabase = createClient();
+      const contenedor = document.querySelector("#reporte-tareas");
+
+      async function cargarReporte() {
+        const { data, error } = await supabase
+          .from("tareas")
+          .select("id, tipo_tarea, fecha, cuartel_id, duracion")
+          .order("fecha", { ascending: false });
+
+        if (error) {
+          contenedor.innerHTML = "<p>❌ Error al cargar el reporte</p>";
+          return;
+        }
+
+        if (data.length === 0) {
+          contenedor.innerHTML = "<p>No hay tareas registradas aún.</p>";
+          return;
+        }
+
+        const tabla = document.createElement("table");
+        tabla.innerHTML = `
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo de Tarea</th>
+              <th>Cuartel</th>
+              <th>Duración (min)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data
+              .map(
+                t => `
+              <tr>
+                <td>${t.fecha}</td>
+                <td>${t.tipo_tarea}</td>
+                <td>${t.cuartel_id}</td>
+                <td>${t.duracion ?? "-"}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        `;
+        contenedor.appendChild(tabla);
+      }
+
+      cargarReporte();
+    </script>
+  </head>
+  <body>
+    <nav class="container-fluid">
+      <ul><li><strong>Cuaderno de Campo</strong></li></ul>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="fincas.html">Fincas</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+      </ul>
+    </nav>
+
+    <main class="container">
+      <hgroup>
+        <h2>Reporte de Tareas</h2>
+        <h3>Resumen agrupado por cuartel y tipo</h3>
+      </hgroup>
+      <div id="reporte-tareas"></div>
+    </main>
+
+    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
+  </body>
+</html>
