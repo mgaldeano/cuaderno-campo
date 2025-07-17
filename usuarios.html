@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Usuarios | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      );
+
+      const tabla = document.querySelector("#usuarios-list");
+      const status = document.querySelector("#status");
+
+      async function cargarUsuarios() {
+        const { data, error } = await supabase.from("usuarios").select("*");
+        if (error) return (status.textContent = "❌ Error cargando usuarios");
+        tabla.innerHTML = "";
+        data.forEach(u => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${u.id}</td><td>${u.nombre}</td><td>${u.rol}</td>`;
+          tabla.appendChild(row);
+        });
+      }
+
+      cargarUsuarios();
+    </script>
+  </head>
+  <body>
+    <nav class="container-fluid">
+      <ul><li><strong>Cuaderno de Campo</strong></li></ul>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="fincas.html">Fincas</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+      </ul>
+    </nav>
+
+    <main class="container">
+      <hgroup>
+        <h2>Gestión de Usuarios</h2>
+        <h3>Usuarios registrados en la aplicación</h3>
+      </hgroup>
+      <p id="status"></p>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Nombre</th><th>Rol</th></tr>
+        </thead>
+        <tbody id="usuarios-list"></tbody>
+      </table>
+    </main>
+
+    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
+  </body>
+</html>
