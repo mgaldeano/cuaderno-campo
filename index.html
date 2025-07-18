@@ -6,22 +6,6 @@
     <title>Inicio | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
   </head>
-  
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-  const supabase = createClient(
-    "https://djvdjulfeuqohpnatdmt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw" // poné tu clave pública si hace falta
-  );
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    window.location.href = "login.html"; // redirigir si no está logueado
-  }
-</script>
-
   <body>
     <nav class="container-fluid">
       <ul><li><strong>Cuaderno de Campo</strong></li></ul>
@@ -29,7 +13,8 @@
         <li><a href="usuarios.html">Usuarios</a></li>
         <li><a href="fincas.html">Fincas</a></li>
         <li><a href="cuarteles.html">Cuarteles</a></li>
-        <li><a href="tareas.html" role="button">Tareas</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+        <li><a href="#" id="logoutBtn" role="button">Cerrar sesión</a></li>
       </ul>
     </nav>
 
@@ -51,6 +36,29 @@
     <footer class="container">
       <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
     </footer>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // ← reemplazá con tu anon key si hace falta
+      );
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "login.html";
+      }
+
+      // Logout handler
+      const logoutBtn = document.querySelector("#logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          await supabase.auth.signOut();
+          window.location.href = "login.html";
+        });
+      }
+    </script>
   </body>
 </html>
-
