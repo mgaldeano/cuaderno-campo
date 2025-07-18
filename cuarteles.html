@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cuarteles</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <script type="module">
+      import { createClientInstance } from './supabaseClient.js';
+      const supabase = createClientInstance();
+
+      async function cargarFincas() {
+        const { data: user } = await supabase.auth.getUser();
+        const { data, error } = await supabase.from("fincas").select("id, nombre_finca").eq("usuario_id", user.user.id);
+        const select = document.getElementById("finca_id");
+        if (error || !data) {
+          alert("❌ Error cargando fincas");
+          return;
+        }
+        data.forEach((f) => {
+          const opt = document.createElement("option");
+          opt.value = f.id;
+          opt.textContent = f.nombre_finca;
+          select.appendChild(opt);
+        });
+      }
+
+      async function registrarCuartel(e) {
+        e.preventDefault();
+        const form = e.target;
+        const payload = {
+          nombre_cuartel: form.nombre.value,
+          finca_id: form.finca_id.value,
+          superficie: form.superficie.value,
+          nro_viñedo: form.nro_viñedo.value,
+          Provincia: form.provincia.value,
+          Departamento: form.departamento.value
+        };
+        const { error } = await supabase.from("cuarteles").insert(payload);
+        if (error) alert("❌ Error al guardar cuartel\n" + error.message);
+        else {
+          alert("✅ Cuartel guardado!");
+          form.reset();
+          cargarCuarteles();
+        }
+      }
+
+      async function cargarCuarteles() {
+        const { data: user } = await supabase.auth.getUser();
+        const { data: fincas } = await supabase.from("fincas").select("id").eq("usuario_id", user.user.id);
+        const fincaIds = fincas.map(f => f.id);
+        const { data, error } = await supabase.from("cuarteles").select("*").in("finca_id", fincaIds);
+        const tabla = document.getElementById("tabla");
+        tabla.innerHTML = "";
+        if (error) return (tabla.innerHTML = "<tr><td colspan='6'>❌ Error cargando cuarteles</td></tr>");
+        data.forEach((c) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${c.nombre_cuartel}</td>
+            <td>${c.nro_viñedo || '-'}</td>
+            <td>${c.superficie || '-'}</td>
+            <td>${c.Provincia || '-'}</td>
+            <td>${c.Departamento || '-'}</td>
+          `;
+          tabla.appendChild(tr);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        cargarFincas();
+        cargarCuarteles();
+        document.querySelector("form").addEventListener("submit", registrarCuartel);
+      });
+    </script>
+  </head>
+  <body>
+    <main class="container">
+      <hgroup>
+        <h2>Registrar Cuartel</h2>
+        <h3>Formulario con finca seleccionable</h3>
+      </hgroup>
+      <form>
+        <label>Nombre del Cuartel <input type="text" name="nombre" required /></label>
+        <label>Finca asociada
+          <select name="finca_id" id="finca_id" required>
+            <option value="">Seleccionar...</option>
+          </select>
+        </label>
+        <label>Superficie (ha) <input type="number" step="0.01" name="superficie" /></label>
+        <label>Nro Viñedo <input type="text" name="nro_viñedo" /></label>
+        <label>Provincia <input type="text" name="provincia" /></label>
+        <label>Departamento <input type="text" name="departamento" /></label>
+        <button type="submit">Guardar Cuartel</button>
+      </form>
+
+      <h3>Cuarteles registrados</h3>
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>Viñedo</th><th>Superficie</th><th>Provincia</th><th>Departamento</th></tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+      </table>
+    </main>
+  </body>
+</html>
