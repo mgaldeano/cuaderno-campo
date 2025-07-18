@@ -6,16 +6,28 @@
     <title>Cuarteles</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <script type="module">
-      import { supabase } from './supabaseClient.js';
+      import { supabase } from "./supabaseClient.js";
+
+      async function verificarSesion() {
+        const { data, error } = await supabase.auth.getSession();
+        if (!data.session) window.location.href = "login.html";
+      }
+
+      async function cerrarSesion() {
+        await supabase.auth.signOut();
+        window.location.href = "login.html";
+      }
 
       async function cargarFincas() {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: user } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("fincas")
           .select("id, nombre_finca")
-          .eq("usuario_id", user.id);
+          .eq("usuario_id", user.user.id);
 
         const select = document.getElementById("finca_id");
+        select.innerHTML = '<option value="">Seleccionar...</option>';
+
         if (error || !data) {
           alert("❌ Error cargando fincas");
           return;
@@ -32,14 +44,18 @@
       async function registrarCuartel(e) {
         e.preventDefault();
         const form = e.target;
+
         const payload = {
-          nombre_cuartel: form.nombre.value,
+          nombre: form.nombre.value,
           finca_id: form.finca_id.value,
-          superficie: form.superficie.value,
-          nro_viñedo: form.nro_viñedo.value,
-          provincia: form.provincia.value,
-          departamento: form.departamento.value
+          superficie: form.superficie.value || null,
+          nro_viñedo: form.nro_viñedo.value || null,
+          Provincia: form.provincia.value || null,
+          Departamento: form.departamento.value || null,
+          especie: form.especie.value || null,
+          variedad: form.variedad.value || null
         };
+
         const { error } = await supabase.from("cuarteles").insert(payload);
         if (error) alert("❌ Error al guardar cuartel\n" + error.message);
         else {
@@ -50,13 +66,13 @@
       }
 
       async function cargarCuarteles() {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: user } = await supabase.auth.getUser();
         const { data: fincas } = await supabase
           .from("fincas")
           .select("id")
-          .eq("usuario_id", user.id);
+          .eq("usuario_id", user.user.id);
 
-        const fincaIds = fincas.map(f => f.id);
+        const fincaIds = fincas.map((f) => f.id);
         const { data, error } = await supabase
           .from("cuarteles")
           .select("*")
@@ -64,33 +80,33 @@
 
         const tabla = document.getElementById("tabla");
         tabla.innerHTML = "";
+
         if (error) {
-          tabla.innerHTML = "<tr><td colspan='6'>❌ Error cargando cuarteles</td></tr>";
+          tabla.innerHTML = "<tr><td colspan='8'>❌ Error cargando cuarteles</td></tr>";
           return;
         }
 
         data.forEach((c) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${c.nombre_cuartel}</td>
+            <td>${c.nombre}</td>
             <td>${c.nro_viñedo || '-'}</td>
             <td>${c.superficie || '-'}</td>
-            <td>${c.provincia || '-'}</td>
-            <td>${c.departamento || '-'}</td>
+            <td>${c.Provincia || '-'}</td>
+            <td>${c.Departamento || '-'}</td>
+            <td>${c.especie || '-'}</td>
+            <td>${c.variedad || '-'}</td>
           `;
           tabla.appendChild(tr);
         });
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        cargarFincas();
-        cargarCuarteles();
+      document.addEventListener("DOMContentLoaded", async () => {
+        await verificarSesion();
+        await cargarFincas();
+        await cargarCuarteles();
         document.querySelector("form").addEventListener("submit", registrarCuartel);
-
-        document.getElementById("logout")?.addEventListener("click", async () => {
-          await supabase.auth.signOut();
-          window.location.href = "login.html";
-        });
+        document.querySelector("#logout").addEventListener("click", cerrarSesion);
       });
     </script>
   </head>
@@ -99,15 +115,16 @@
       <ul><li><strong>Cuaderno de Campo</strong></li></ul>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="#" id="logout" role="button">Cerrar sesión</a></li>
+        <li><a href="#" id="logout">Cerrar sesión</a></li>
       </ul>
     </nav>
 
     <main class="container">
       <hgroup>
         <h2>Registrar Cuartel</h2>
-        <h3>Formulario con finca seleccionable</h3>
+        <h3>Formulario completo con finca y datos técnicos</h3>
       </hgroup>
+
       <form>
         <label>Nombre del Cuartel <input type="text" name="nombre" required /></label>
         <label>Finca asociada
@@ -119,13 +136,15 @@
         <label>Nro Viñedo <input type="text" name="nro_viñedo" /></label>
         <label>Provincia <input type="text" name="provincia" /></label>
         <label>Departamento <input type="text" name="departamento" /></label>
+        <label>Especie <input type="text" name="especie" /></label>
+        <label>Variedad <input type="text" name="variedad" /></label>
         <button type="submit">Guardar Cuartel</button>
       </form>
 
       <h3>Cuarteles registrados</h3>
       <table>
         <thead>
-          <tr><th>Nombre</th><th>Viñedo</th><th>Superficie</th><th>Provincia</th><th>Departamento</th></tr>
+          <tr><th>Nombre</th><th>Viñedo</th><th>Superficie</th><th>Provincia</th><th>Departamento</th><th>Especie</th><th>Variedad</th></tr>
         </thead>
         <tbody id="tabla"></tbody>
       </table>
