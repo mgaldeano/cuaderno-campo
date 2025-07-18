@@ -6,18 +6,8 @@
     <title>Cuarteles</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <script type="module">
-      import { createClientInstance } from './supabaseClient.js';
-      const supabase = createClientInstance();
+      import { supabase } from './supabaseClient.js';
 
-      // Verifica si el usuario está logueado
-      async function verificarSesion() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          window.location.href = 'login.html';
-        }
-      }
-
-      // Carga las fincas del usuario autenticado
       async function cargarFincas() {
         const { data: { user } } = await supabase.auth.getUser();
         const { data, error } = await supabase
@@ -30,6 +20,7 @@
           alert("❌ Error cargando fincas");
           return;
         }
+
         data.forEach((f) => {
           const opt = document.createElement("option");
           opt.value = f.id;
@@ -38,7 +29,6 @@
         });
       }
 
-      // Guarda nuevo cuartel
       async function registrarCuartel(e) {
         e.preventDefault();
         const form = e.target;
@@ -59,7 +49,6 @@
         }
       }
 
-      // Lista los cuarteles de las fincas del usuario
       async function cargarCuarteles() {
         const { data: { user } } = await supabase.auth.getUser();
         const { data: fincas } = await supabase
@@ -86,18 +75,22 @@
             <td>${c.nombre_cuartel}</td>
             <td>${c.nro_viñedo || '-'}</td>
             <td>${c.superficie || '-'}</td>
-            <td>${c.Provincia || '-'}</td>
-            <td>${c.Departamento || '-'}</td>
+            <td>${c.provincia || '-'}</td>
+            <td>${c.departamento || '-'}</td>
           `;
           tabla.appendChild(tr);
         });
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        verificarSesion();
         cargarFincas();
         cargarCuarteles();
         document.querySelector("form").addEventListener("submit", registrarCuartel);
+
+        document.getElementById("logout")?.addEventListener("click", async () => {
+          await supabase.auth.signOut();
+          window.location.href = "login.html";
+        });
       });
     </script>
   </head>
@@ -106,9 +99,7 @@
       <ul><li><strong>Cuaderno de Campo</strong></li></ul>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="fincas.html">Fincas</a></li>
-        <li><a href="tareas.html">Tareas</a></li>
-        <li><a href="#" id="logoutBtn" role="button">Cerrar sesión</a></li>
+        <li><a href="#" id="logout" role="button">Cerrar sesión</a></li>
       </ul>
     </nav>
 
@@ -139,17 +130,5 @@
         <tbody id="tabla"></tbody>
       </table>
     </main>
-
-    <script type="module">
-      import { createClientInstance } from './supabaseClient.js';
-      const supabase = createClientInstance();
-
-      // Cerrar sesión
-      document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-        e.preventDefault();
-        await supabase.auth.signOut();
-        window.location.href = 'login.html';
-      });
-    </script>
   </body>
 </html>
