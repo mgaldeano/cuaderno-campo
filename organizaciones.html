@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Organizaciones</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  <script type="module">
+    import { createClientInstance } from './supabaseClient.js';
+    const supabase = createClientInstance();
+
+    async function registrarOrganizacion(e) {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value;
+      const { error } = await supabase.from("organizaciones").insert({ nombre });
+      if (error) alert("❌ Error: " + error.message);
+      else {
+        alert("✅ Organización registrada correctamente");
+        document.querySelector("form").reset();
+        cargarOrganizaciones();
+      }
+    }
+
+    async function cargarOrganizaciones() {
+      const tabla = document.getElementById("tabla");
+      tabla.innerHTML = "";
+      const { data, error } = await supabase.from("organizaciones").select("*").order("created_at", { ascending: false });
+      if (error) return (tabla.innerHTML = `<tr><td colspan='2'>❌ Error al cargar: ${error.message}</td></tr>`);
+      data.forEach((org) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${org.nombre}</td><td>${new Date(org.created_at).toLocaleDateString()}</td>`;
+        tabla.appendChild(tr);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelector("form").addEventListener("submit", registrarOrganizacion);
+      cargarOrganizaciones();
+    });
+  </script>
+</head>
+<body>
+  <main class="container">
+    <hgroup>
+      <h2>Organizaciones</h2>
+      <h3>Crear una nueva organización</h3>
+    </hgroup>
+    <form>
+      <label for="nombre">Nombre de la organización</label>
+      <input type="text" id="nombre" name="nombre" required>
+      <button type="submit">Registrar</button>
+    </form>
+    <h3>Organizaciones registradas</h3>
+    <table>
+      <thead><tr><th>Nombre</th><th>Creado</th></tr></thead>
+      <tbody id="tabla"></tbody>
+    </table>
+  </main>
+</body>
+</html>
