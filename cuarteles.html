@@ -3,22 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cuarteles | Cuaderno de Campo</title>
+    <title>Cuarteles</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <script type="module">
       import { createClientInstance } from './supabaseClient.js';
       const supabase = createClientInstance();
 
-      // Redirección si no está logueado
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) window.location.href = "login.html";
+      // Verifica si el usuario está logueado
+      async function verificarSesion() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          window.location.href = 'login.html';
+        }
+      }
 
+      // Carga las fincas del usuario autenticado
       async function cargarFincas() {
-        const { data: user } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("fincas")
           .select("id, nombre_finca")
-          .eq("usuario_id", user.user.id);
+          .eq("usuario_id", user.id);
 
         const select = document.getElementById("finca_id");
         if (error || !data) {
@@ -33,6 +38,7 @@
         });
       }
 
+      // Guarda nuevo cuartel
       async function registrarCuartel(e) {
         e.preventDefault();
         const form = e.target;
@@ -53,12 +59,13 @@
         }
       }
 
+      // Lista los cuarteles de las fincas del usuario
       async function cargarCuarteles() {
-        const { data: user } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         const { data: fincas } = await supabase
           .from("fincas")
           .select("id")
-          .eq("usuario_id", user.user.id);
+          .eq("usuario_id", user.id);
 
         const fincaIds = fincas.map(f => f.id);
         const { data, error } = await supabase
@@ -68,7 +75,11 @@
 
         const tabla = document.getElementById("tabla");
         tabla.innerHTML = "";
-        if (error) return (tabla.innerHTML = "<tr><td colspan='6'>❌ Error cargando cuarteles</td></tr>");
+        if (error) {
+          tabla.innerHTML = "<tr><td colspan='6'>❌ Error cargando cuarteles</td></tr>";
+          return;
+        }
+
         data.forEach((c) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -83,6 +94,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        verificarSesion();
         cargarFincas();
         cargarCuarteles();
         document.querySelector("form").addEventListener("submit", registrarCuartel);
@@ -127,5 +139,17 @@
         <tbody id="tabla"></tbody>
       </table>
     </main>
+
+    <script type="module">
+      import { createClientInstance } from './supabaseClient.js';
+      const supabase = createClientInstance();
+
+      // Cerrar sesión
+      document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+        e.preventDefault();
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+      });
+    </script>
   </body>
 </html>
