@@ -47,8 +47,8 @@
           finca_id: form.finca_id.value,
           superficie: form.superficie.value,
           nro_viñedo: form.nro_viñedo.value,
-          Provincia: form.provincia.value,
-          Departamento: form.departamento.value
+          provincia: form.provincia.value,
+          departamento: form.departamento.value
         };
         const { error } = await supabase.from("cuarteles").insert(payload);
         if (error) alert("❌ Error al guardar cuartel\n" + error.message);
