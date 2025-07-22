@@ -38,13 +38,9 @@
         }
         const user = data.user;
         if (user) {
-          // Insertar en la tabla usuarios con todos los campos
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email: user.email,
-            nombre,
-            cuit,
-            telefono,
             rol
           });
           if (dbError) {
