@@ -11,29 +11,40 @@
 
     const form = document.querySelector("form");
     const messageElement = document.querySelector("#message");
+    const rolFieldset = document.getElementById("rol-fieldset");
+
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        rolFieldset.style.display = radio.value === "register" ? "" : "none";
+      });
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
-      // Limpiamos mensajes anteriores
-      messageElement.textContent = ""; 
-      
+      messageElement.textContent = "";
       const email = form.email.value;
       const password = form.password.value;
       const mode = document.querySelector('input[name="mode"]:checked').value;
 
       if (mode === "register") {
-        // --- Registro de usuario ---
+        const rol = form.rol.value; // obtiene el rol seleccionado
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           messageElement.textContent = "❌ Registro fallido: " + error.message;
-          return; // Detenemos la ejecución si hay un error
+          return;
         }
-        // ¡Éxito! Informamos al usuario y redirigimos.
-        // Nota: Supabase puede requerir confirmación por email. Si es así, el usuario no podrá iniciar sesión hasta confirmarlo.
+        const user = data.user;
+        if (user) {
+          // Insertar en la tabla usuarios con el rol
+          await supabase.from("usuarios").insert({
+            id: user.id,
+            email: user.email,
+            nombre: "",
+            rol: rol
+          });
+        }
         alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
         window.location.href = "index.html";
-
       } else {
         // --- Inicio de sesión ---
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -81,9 +92,12 @@
       </fieldset>
       <input type="email" name="email" placeholder="Email" autocomplete="email" required />
       <input type="password" name="password" placeholder="Contraseña" autocomplete="current-password" required />
-      
+      <fieldset id="rol-fieldset" style="display:none;">
+        <legend>Tipo de usuario</legend>
+        <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
+        <label><input type="radio" name="rol" value="operario" /> Operario</label>
+      </fieldset>
       <p id="message" style="color: red;"></p>
-
       <button type="submit">Continuar</button>
     </form>
     <hr />
