@@ -68,6 +68,13 @@
         }
         const user = data.user;
         if (user) {
+          // Verificar si el usuario ya existe en la tabla
+          const { data: existe } = await supabase.from("usuarios").select("id").eq("id", user.id).single();
+          if (existe) {
+            messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
+            return;
+          }
+          // Insertar usuario si no existe
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email: user.email,
