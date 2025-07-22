@@ -7,8 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <script type="module">
     // 1. Asegúrate de que la ruta a tu cliente Supabase es correcta.
-    import { createClient } from './supabaseClient.js';
-    const supabase = createClient();
+    import { supabase } from './supabaseClient.js';
 
     const form = document.querySelector("form");
     const messageElement = document.querySelector("#message");
