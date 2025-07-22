@@ -88,9 +88,10 @@
             messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
             return;
           }
+          // Solo aquí muestra el mensaje de éxito y redirige
+          alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
+          window.location.href = "index.html";
         }
-        alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
-        window.location.href = "index.html";
       } else {
         // --- Inicio de sesión ---
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
