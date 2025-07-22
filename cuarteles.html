@@ -62,7 +62,13 @@
           <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
           <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
           <input type="text" name="especie" id="especie" placeholder="Especie" />
-          <input type="text" name="variedad" id="variedad" placeholder="Variedad" />
+        </fieldset>
+        <fieldset>
+          <legend>Variedades</legend>
+          <select id="variedades_cuartel" multiple size="3">
+            <!-- Opciones generadas dinámicamente -->
+          </select>
+          <small>Puedes seleccionar hasta 3 variedades</small>
         </fieldset>
         <button type="submit">Guardar Cuartel</button>
         <button type="button" id="cancelEdit" style="display:none;">Cancelar</button>
@@ -86,10 +92,12 @@
       const departamentoInput = document.getElementById("departamento");
       const especieInput = document.getElementById("especie");
       const variedadInput = document.getElementById("variedad");
+      const variedadesSelect = document.getElementById("variedades_cuartel");
       const cancelEditBtn = document.getElementById("cancelEdit");
 
       let editId = null;
       let fincasMap = {};
+      let variedadesMap = {};
 
       // Obtener usuario actual
       const { data: { user } } = await supabase.auth.getUser();
@@ -117,6 +125,40 @@
         });
       }
 
+      async function cargarVariedades() {
+        const { data, error } = await supabase
+          .from("variedades")
+          .select("id, nombre");
+        variedadesSelect.innerHTML = "";
+        variedadesMap = {};
+        if (error || !data) return;
+        data.forEach(v => {
+          variedadesMap[v.id] = v.nombre;
+          const opt = document.createElement("option");
+          opt.value = v.id;
+          opt.textContent = v.nombre;
+          variedadesSelect.appendChild(opt);
+        });
+      }
+
+      // Obtener variedades de un cuartel
+      async function obtenerVariedadesCuartel(cuartelId) {
+        const { data, error } = await supabase
+          .from("cuartel_variedades")
+          .select("variedad_id")
+          .eq("cuartel_id", cuartelId);
+        if (error || !data) return [];
+        return data.map(v => v.variedad_id);
+      }
+
+      // Guardar variedades seleccionadas para un cuartel
+      async function guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas) {
+        await supabase.from("cuartel_variedades").delete().eq("cuartel_id", cuartelId);
+        for (const variedadId of variedadesSeleccionadas) {
+          await supabase.from("cuartel_variedades").insert({ cuartel_id: cuartelId, variedad_id: variedadId });
+        }
+      }
+
       async function cargarCuarteles() {
         const { data, error } = await supabase
           .from("cuarteles")
@@ -129,7 +171,9 @@
           return;
         }
         lista.innerHTML = "";
-        data.forEach(c => {
+        for (const c of data) {
+          const variedadesIds = await obtenerVariedadesCuartel(c.id);
+          const variedadesNombres = variedadesIds.map(id => variedadesMap[id]).filter(Boolean);
           const li = document.createElement("li");
           li.innerHTML = `
             <span class="cuartel-info">
@@ -140,7 +184,7 @@
               ${c.provincia ? `<small class="info-secundaria">Provincia: ${c.provincia}</small>` : ""}
               ${c.departamento ? `<small class="info-secundaria">Departamento: ${c.departamento}</small>` : ""}
               ${c.especie ? `<small class="info-secundaria">Especie: ${c.especie}</small>` : ""}
-              ${c.variedad ? `<small class="info-secundaria">Variedad: ${c.variedad}</small>` : ""}
+              ${variedadesNombres.length ? `<small class="info-secundaria">Variedades: ${variedadesNombres.join(", ")}</small>` : ""}
             </span>
             <span class="cuartel-actions">
               <button data-id="${c.id}" class="edit btn-small">Editar</button>
@@ -149,11 +193,11 @@
           `;
           li.classList.add("cuartel-item");
           lista.appendChild(li);
-        });
+        }
 
         // Editar cuartel
         lista.querySelectorAll(".edit").forEach(btn => {
-          btn.onclick = () => {
+          btn.onclick = async () => {
             editId = btn.dataset.id;
             const cuartel = data.find(c => c.id == editId);
             fincaSelect.value = cuartel.finca_id;
@@ -163,7 +207,11 @@
             provinciaInput.value = cuartel.provincia || "";
             departamentoInput.value = cuartel.departamento || "";
             especieInput.value = cuartel.especie || "";
-            variedadInput.value = cuartel.variedad || "";
+            // Cargar variedades seleccionadas
+            const variedadesIds = await obtenerVariedadesCuartel(editId);
+            Array.from(variedadesSelect.options).forEach(opt => {
+              opt.selected = variedadesIds.includes(Number(opt.value));
+            });
             status.textContent = "Editando cuartel #" + editId;
             status.className = "warn";
             cancelEditBtn.style.display = "";
@@ -175,6 +223,7 @@
           btn.onclick = async () => {
             const id = btn.dataset.id;
             if (!confirm("¿Seguro que deseas eliminar este cuartel?")) return;
+            await supabase.from("cuartel_variedades").delete().eq("cuartel_id", id);
             const { error } = await supabase.from("cuarteles").delete().eq("id", id);
             if (error) {
               status.textContent = "❌ Error al eliminar";
@@ -201,7 +250,6 @@
           status.className = "warn";
           return;
         }
-
         const finca_id = fincaSelect.value;
         const nombre = nombreInput.value;
         const superficie = superficieInput.value ? Number(superficieInput.value) : null;
@@ -209,18 +257,20 @@
         const provincia = provinciaInput.value || null;
         const departamento = departamentoInput.value || null;
         const especie = especieInput.value || null;
-        const variedad = variedadInput.value || null;
+        const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions).map(opt => Number(opt.value)).slice(0,3);
 
+        let cuartelId = editId;
         if (editId) {
           // Editar cuartel
           const { error } = await supabase
             .from("cuarteles")
-            .update({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie, variedad })
+            .update({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
             .eq("id", editId);
           if (error) {
             status.textContent = "❌ Error al editar cuartel";
             status.className = "error";
           } else {
+            await guardarVariedadesCuartel(editId, variedadesSeleccionadas);
             status.textContent = "✅ Cuartel editado";
             status.className = "success";
             form.reset();
@@ -229,13 +279,16 @@
           }
         } else {
           // Crear cuartel
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from("cuarteles")
-            .insert({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie, variedad });
-          if (error) {
+            .insert({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
+            .select();
+          if (error || !data || !data[0]) {
             status.textContent = "❌ Error al guardar cuartel";
             status.className = "error";
           } else {
+            cuartelId = data[0].id;
+            await guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas);
             status.textContent = "✅ Cuartel registrado";
             status.className = "success";
             form.reset();
@@ -268,6 +321,7 @@
         });
 
       await cargarFincas();
+      await cargarVariedades();
       await cargarCuarteles();
     </script>
   </body>
