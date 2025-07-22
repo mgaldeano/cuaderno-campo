@@ -1,61 +1,84 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Iniciar sesión</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
-    <script type="module">
-      import { createClient } from './supabaseClient.js';
-      const supabase = createClient();
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  <script type="module">
+    // 1. Asegúrate de que la ruta a tu cliente Supabase es correcta.
+    import { createClient } from './supabaseClient.js';
+    const supabase = createClient();
 
-      const form = document.querySelector("form");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = form.email.value;
-        const password = form.password.value;
+    const form = document.querySelector("form");
+    const messageElement = document.querySelector("#message");
 
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        if (mode === "register") {
-          const { error } = await supabase.auth.signUp({ email, password });
-          if (error) return alert("❌ Registro fallido: " + error.message);
-        } else {
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) return alert("❌ Error de login: " + error.message);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      // Limpiamos mensajes anteriores
+      messageElement.textContent = ""; 
+      
+      const email = form.email.value;
+      const password = form.password.value;
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      if (mode === "register") {
+        // --- Registro de usuario ---
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          messageElement.textContent = "❌ Registro fallido: " + error.message;
+          return; // Detenemos la ejecución si hay un error
         }
+        // ¡Éxito! Informamos al usuario y redirigimos.
+        // Nota: Supabase puede requerir confirmación por email. Si es así, el usuario no podrá iniciar sesión hasta confirmarlo.
+        alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
         window.location.href = "index.html";
+
+      } else {
+        // --- Inicio de sesión ---
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          messageElement.textContent = "❌ Error de login: " + error.message;
+          return; // Detenemos la ejecución si hay un error
+        }
+        // ¡Éxito! Redirigimos al usuario.
+        window.location.href = "index.html";
+      }
+    });
+
+    // --- Inicio de sesión con Google ---
+    document.querySelector("#google").addEventListener("click", async () => {
+      messageElement.textContent = ""; // Limpiamos mensajes anteriores
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          // Asegúrate que esta URL está en la lista de URLs de redirección en tu config de Supabase
+          redirectTo: `${location.origin}/index.html` 
+        }
       });
 
-      document.querySelector("#google").addEventListener("click", async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: { redirectTo: `${location.origin}/index.html` }
-        });
-        if (error) alert("Google login error: " + error.message);
-      });
-    </script>
-  </head>
-  <body>
-    <main class="container">
-      <hgroup>
-        <h2>Acceso</h2>
-        <h3>Ingresar o registrarse</h3>
-      </hgroup>
-      <form>
-        <fieldset>
-          <label>
-            <input type="radio" name="mode" value="login" checked /> Iniciar sesión
-          </label>
-          <label>
-            <input type="radio" name="mode" value="register" /> Registrarse
-          </label>
-        </fieldset>
-        <input type="email" name="email" placeholder="Email" required />
-        <input type="password" name="password" placeholder="Contraseña" required />
-        <button type="submit">Continuar</button>
-      </form>
-      <hr />
-      <button id="google" role="button">Continuar con Google</button>
-    </main>
-  </body>
-</html>
+      if (error) {
+        messageElement.textContent = "❌ Error con Google: " + error.message;
+      }
+    });
+  </script>
+</head>
+<body>
+  <main class="container">
+    <hgroup>
+      <h2>Acceso</h2>
+      <h3>Ingresar o registrarse</h3>
+    </hgroup>
+    <form>
+      <fieldset>
+        <label>
+          <input type="radio" name="mode" value="login" checked /> Iniciar sesión
+        </label>
+        <label>
+          <input type="radio" name="mode" value="register" /> Registrarse
+        </label>
+      </fieldset>
+      <input type="email" name="email" placeholder="Email" autocomplete="email" required />
+      <input type="password" name="password" placeholder="Contraseña" autocomplete="current-password" required />
