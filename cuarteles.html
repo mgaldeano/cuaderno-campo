@@ -5,149 +5,270 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cuarteles</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <style>
+      .btn-small {
+        font-size: 0.7em;
+        padding: 0.1em 0.4em;
+        margin: 0 0.1em;
+        vertical-align: middle;
+      }
+      .cuartel-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5em;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #eee;
+        padding: 0.5em 0;
+      }
+      .cuartel-info {
+        flex: 1;
+        min-width: 180px;
+      }
+      .cuartel-actions {
+        display: flex;
+        gap: 0.2em;
+        align-items: center;
+      }
+      .info-secundaria {
+        font-size: 0.85em;
+        color: #666;
+        display: block;
+        margin-left: 1em;
+      }
+      #status.success { color: green; }
+      #status.error { color: red; }
+      #status.warn { color: orange; }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+    <main class="container">
+      <hgroup>
+        <h2>Cuarteles</h2>
+      </hgroup>
+      <form id="cuartel-form">
+        <fieldset>
+          <legend>Datos principales</legend>
+          <select name="finca_id" id="finca_id" required>
+            <option value="">Seleccionar finca...</option>
+          </select>
+          <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del cuartel" required />
+          <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
+        </fieldset>
+        <fieldset>
+          <legend>Datos secundarios</legend>
+          <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro Viñedo" />
+          <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
+          <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
+          <input type="text" name="especie" id="especie" placeholder="Especie" />
+          <input type="text" name="variedad" id="variedad" placeholder="Variedad" />
+        </fieldset>
+        <button type="submit">Guardar Cuartel</button>
+        <button type="button" id="cancelEdit" style="display:none;">Cancelar</button>
+      </form>
+      <p id="status"></p>
+
+      <h3>Cuarteles registrados</h3>
+      <ul id="cuarteles-list"></ul>
+    </main>
     <script type="module">
       import { supabase } from "./supabaseClient.js";
 
-      async function verificarSesion() {
-        const { data, error } = await supabase.auth.getSession();
-        if (!data.session) window.location.href = "login.html";
-      }
+      const form = document.getElementById("cuartel-form");
+      const status = document.getElementById("status");
+      const lista = document.getElementById("cuarteles-list");
+      const fincaSelect = document.getElementById("finca_id");
+      const nombreInput = document.getElementById("nombre_cuartel");
+      const superficieInput = document.getElementById("superficie_cuartel");
+      const nroViñedoInput = document.getElementById("nro_viñedo");
+      const provinciaInput = document.getElementById("provincia");
+      const departamentoInput = document.getElementById("departamento");
+      const especieInput = document.getElementById("especie");
+      const variedadInput = document.getElementById("variedad");
+      const cancelEditBtn = document.getElementById("cancelEdit");
 
-      async function cerrarSesion() {
-        await supabase.auth.signOut();
-        window.location.href = "login.html";
-      }
+      let editId = null;
+      let fincasMap = {};
+
+      // Obtener usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
 
       async function cargarFincas() {
-        const { data: user } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("fincas")
           .select("id, nombre_finca")
-          .eq("usuario_id", user.user.id);
+          .eq("usuario_id", userId);
 
-        const select = document.getElementById("finca_id");
-        select.innerHTML = '<option value="">Seleccionar...</option>';
-
+        fincaSelect.innerHTML = '<option value="">Seleccionar finca...</option>';
+        fincasMap = {};
         if (error || !data) {
-          alert("❌ Error cargando fincas");
+          status.textContent = "❌ Error cargando fincas";
+          status.className = "error";
           return;
         }
-
-        data.forEach((f) => {
+        data.forEach(f => {
+          fincasMap[f.id] = f.nombre_finca;
           const opt = document.createElement("option");
           opt.value = f.id;
           opt.textContent = f.nombre_finca;
-          select.appendChild(opt);
+          fincaSelect.appendChild(opt);
         });
-      }
-
-      async function registrarCuartel(e) {
-        e.preventDefault();
-        const form = e.target;
-
-        const payload = {
-          nombre: form.nombre.value,
-          finca_id: form.finca_id.value,
-          superficie: form.superficie.value || null,
-          nro_viñedo: form.nro_viñedo.value || null,
-          Provincia: form.provincia.value || null,
-          Departamento: form.departamento.value || null,
-          especie: form.especie.value || null,
-          variedad: form.variedad.value || null
-        };
-
-        const { error } = await supabase.from("cuarteles").insert(payload);
-        if (error) alert("❌ Error al guardar cuartel\n" + error.message);
-        else {
-          alert("✅ Cuartel guardado!");
-          form.reset();
-          cargarCuarteles();
-        }
       }
 
       async function cargarCuarteles() {
-        const { data: user } = await supabase.auth.getUser();
-        const { data: fincas } = await supabase
-          .from("fincas")
-          .select("id")
-          .eq("usuario_id", user.user.id);
-
-        const fincaIds = fincas.map((f) => f.id);
         const { data, error } = await supabase
           .from("cuarteles")
           .select("*")
-          .in("finca_id", fincaIds);
-
-        const tabla = document.getElementById("tabla");
-        tabla.innerHTML = "";
+          .in("finca_id", Object.keys(fincasMap));
 
         if (error) {
-          tabla.innerHTML = "<tr><td colspan='8'>❌ Error cargando cuarteles</td></tr>";
+          status.textContent = "❌ Error cargando cuarteles";
+          status.className = "error";
           return;
         }
-
-        data.forEach((c) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${c.nombre}</td>
-            <td>${c.nro_viñedo || '-'}</td>
-            <td>${c.superficie || '-'}</td>
-            <td>${c.Provincia || '-'}</td>
-            <td>${c.Departamento || '-'}</td>
-            <td>${c.especie || '-'}</td>
-            <td>${c.variedad || '-'}</td>
+        lista.innerHTML = "";
+        data.forEach(c => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span class="cuartel-info">
+              <strong>${c.nombre}</strong>
+              <small class="info-secundaria">Finca: ${fincasMap[c.finca_id] || '-'}</small>
+              ${c.superficie ? `<small class="info-secundaria">Superficie: ${c.superficie} ha</small>` : ""}
+              ${c.nro_viñedo ? `<small class="info-secundaria">Viñedo: ${c.nro_viñedo}</small>` : ""}
+              ${c.provincia ? `<small class="info-secundaria">Provincia: ${c.provincia}</small>` : ""}
+              ${c.departamento ? `<small class="info-secundaria">Departamento: ${c.departamento}</small>` : ""}
+              ${c.especie ? `<small class="info-secundaria">Especie: ${c.especie}</small>` : ""}
+              ${c.variedad ? `<small class="info-secundaria">Variedad: ${c.variedad}</small>` : ""}
+            </span>
+            <span class="cuartel-actions">
+              <button data-id="${c.id}" class="edit btn-small">Editar</button>
+              <button data-id="${c.id}" class="delete btn-small">Eliminar</button>
+            </span>
           `;
-          tabla.appendChild(tr);
+          li.classList.add("cuartel-item");
+          lista.appendChild(li);
+        });
+
+        // Editar cuartel
+        lista.querySelectorAll(".edit").forEach(btn => {
+          btn.onclick = () => {
+            editId = btn.dataset.id;
+            const cuartel = data.find(c => c.id == editId);
+            fincaSelect.value = cuartel.finca_id;
+            nombreInput.value = cuartel.nombre;
+            superficieInput.value = cuartel.superficie || "";
+            nroViñedoInput.value = cuartel.nro_viñedo || "";
+            provinciaInput.value = cuartel.provincia || "";
+            departamentoInput.value = cuartel.departamento || "";
+            especieInput.value = cuartel.especie || "";
+            variedadInput.value = cuartel.variedad || "";
+            status.textContent = "Editando cuartel #" + editId;
+            status.className = "warn";
+            cancelEditBtn.style.display = "";
+          };
+        });
+
+        // Eliminar cuartel
+        lista.querySelectorAll(".delete").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("¿Seguro que deseas eliminar este cuartel?")) return;
+            const { error } = await supabase.from("cuarteles").delete().eq("id", id);
+            if (error) {
+              status.textContent = "❌ Error al eliminar";
+              status.className = "error";
+            } else {
+              status.textContent = "✅ Cuartel eliminado";
+              status.className = "success";
+            }
+            cargarCuarteles();
+          };
         });
       }
 
-      document.addEventListener("DOMContentLoaded", async () => {
-        await verificarSesion();
-        await cargarFincas();
-        await cargarCuarteles();
-        document.querySelector("form").addEventListener("submit", registrarCuartel);
-        document.querySelector("#logout").addEventListener("click", cerrarSesion);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        // Validaciones
+        if (!fincaSelect.value || !nombreInput.value) {
+          status.textContent = "⚠️ Debe completar finca y nombre";
+          status.className = "warn";
+          return;
+        }
+        if (superficieInput.value && Number(superficieInput.value) <= 0) {
+          status.textContent = "⚠️ La superficie debe ser positiva";
+          status.className = "warn";
+          return;
+        }
+
+        const finca_id = fincaSelect.value;
+        const nombre = nombreInput.value;
+        const superficie = superficieInput.value ? Number(superficieInput.value) : null;
+        const nro_viñedo = nroViñedoInput.value || null;
+        const provincia = provinciaInput.value || null;
+        const departamento = departamentoInput.value || null;
+        const especie = especieInput.value || null;
+        const variedad = variedadInput.value || null;
+
+        if (editId) {
+          // Editar cuartel
+          const { error } = await supabase
+            .from("cuarteles")
+            .update({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie, variedad })
+            .eq("id", editId);
+          if (error) {
+            status.textContent = "❌ Error al editar cuartel";
+            status.className = "error";
+          } else {
+            status.textContent = "✅ Cuartel editado";
+            status.className = "success";
+            form.reset();
+            editId = null;
+            cancelEditBtn.style.display = "none";
+          }
+        } else {
+          // Crear cuartel
+          const { error } = await supabase
+            .from("cuarteles")
+            .insert({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie, variedad });
+          if (error) {
+            status.textContent = "❌ Error al guardar cuartel";
+            status.className = "error";
+          } else {
+            status.textContent = "✅ Cuartel registrado";
+            status.className = "success";
+            form.reset();
+          }
+        }
+        cargarCuarteles();
       });
+
+      cancelEditBtn.addEventListener("click", () => {
+        form.reset();
+        editId = null;
+        status.textContent = "";
+        status.className = "";
+        cancelEditBtn.style.display = "none";
+      });
+
+      // Cargar header y manejar logout
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header').innerHTML = html;
+          const logoutBtn = document.querySelector("#logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              await supabase.auth.signOut();
+              window.location.href = "login.html";
+            });
+          }
+        });
+
+      await cargarFincas();
+      await cargarCuarteles();
     </script>
-  </head>
-  <body>
-    <nav class="container-fluid">
-      <ul><li><strong>Cuaderno de Campo</strong></li></ul>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="#" id="logout">Cerrar sesión</a></li>
-      </ul>
-    </nav>
-
-    <main class="container">
-      <hgroup>
-        <h2>Registrar Cuartel</h2>
-        <h3>Formulario completo con finca y datos técnicos</h3>
-      </hgroup>
-
-      <form>
-        <label>Nombre del Cuartel <input type="text" name="nombre" required /></label>
-        <label>Finca asociada
-          <select name="finca_id" id="finca_id" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </label>
-        <label>Superficie (ha) <input type="number" step="0.01" name="superficie" /></label>
-        <label>Nro Viñedo <input type="text" name="nro_viñedo" /></label>
-        <label>Provincia <input type="text" name="provincia" /></label>
-        <label>Departamento <input type="text" name="departamento" /></label>
-        <label>Especie <input type="text" name="especie" /></label>
-        <label>Variedad <input type="text" name="variedad" /></label>
-        <button type="submit">Guardar Cuartel</button>
-      </form>
-
-      <h3>Cuarteles registrados</h3>
-      <table>
-        <thead>
-          <tr><th>Nombre</th><th>Viñedo</th><th>Superficie</th><th>Provincia</th><th>Departamento</th><th>Especie</th><th>Variedad</th></tr>
-        </thead>
-        <tbody id="tabla"></tbody>
-      </table>
-    </main>
   </body>
 </html>
