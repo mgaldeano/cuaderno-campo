@@ -6,13 +6,13 @@
   <title>Iniciar sesión</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <script type="module">
-    // 1. Asegúrate de que la ruta a tu cliente Supabase es correcta.
     import { supabase } from './supabaseClient.js';
 
     const form = document.querySelector("form");
     const messageElement = document.querySelector("#message");
     const rolFieldset = document.getElementById("rol-fieldset");
 
+    // Mostrar el selector de rol solo al registrar
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener("change", () => {
         rolFieldset.style.display = radio.value === "register" ? "" : "none";
@@ -24,10 +24,13 @@
       messageElement.textContent = "";
       const email = form.email.value;
       const password = form.password.value;
+      const nombre = form.nombre.value || "";
+      const cuit = form.cuit.value || null;
+      const telefono = form.telefono.value || null;
       const mode = document.querySelector('input[name="mode"]:checked').value;
 
       if (mode === "register") {
-        const rol = form.rol.value; // obtiene el rol seleccionado
+        const rol = form.rol.value;
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           messageElement.textContent = "❌ Registro fallido: " + error.message;
@@ -35,13 +38,19 @@
         }
         const user = data.user;
         if (user) {
-          // Insertar en la tabla usuarios con el rol
-          await supabase.from("usuarios").insert({
+          // Insertar en la tabla usuarios con todos los campos
+          const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email: user.email,
-            nombre: "",
-            rol: rol
+            nombre,
+            cuit,
+            telefono,
+            rol
           });
+          if (dbError) {
+            messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
+            return;
+          }
         }
         alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
         window.location.href = "index.html";
@@ -50,25 +59,21 @@
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           messageElement.textContent = "❌ Error de login: " + error.message;
-          return; // Detenemos la ejecución si hay un error
+          return;
         }
-        // ¡Éxito! Redirigimos al usuario.
         window.location.href = "index.html";
       }
     });
 
     // --- Inicio de sesión con Google ---
     document.querySelector("#google").addEventListener("click", async () => {
-      messageElement.textContent = ""; // Limpiamos mensajes anteriores
-      
+      messageElement.textContent = "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // Asegúrate que esta URL está en la lista de URLs de redirección en tu config de Supabase
-          redirectTo: `${location.origin}/index.html` 
+          redirectTo: `${location.origin}/index.html`
         }
       });
-
       if (error) {
         messageElement.textContent = "❌ Error con Google: " + error.message;
       }
@@ -97,6 +102,9 @@
         <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
         <label><input type="radio" name="rol" value="operador" /> Operario</label>
       </fieldset>
+      <input type="text" name="nombre" placeholder="Nombre completo" />
+      <input type="text" name="cuit" placeholder="CUIT" />
+      <input type="text" name="telefono" placeholder="Teléfono" />
       <p id="message" style="color: red;"></p>
       <button type="submit">Continuar</button>
     </form>
