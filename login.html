@@ -12,14 +12,19 @@
     const messageElement = document.querySelector("#message");
     const rolFieldset = document.getElementById("rol-fieldset");
     const orgSelect = document.getElementById("organizacion_id");
+    const registroExtra = document.getElementById("registro-extra");
 
     // Mostrar el selector de rol y organización solo al registrar
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener("change", () => {
         const show = radio.value === "register";
-        rolFieldset.style.display = show ? "" : "none";
-        orgSelect.style.display = show ? "" : "none";
+        registroExtra.style.display = show ? "" : "none";
       });
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      registroExtra.style.display = mode === "register" ? "" : "none";
     });
 
     // Poblar el select de organizaciones
@@ -122,17 +127,19 @@
       </fieldset>
       <input type="email" name="email" placeholder="Email" autocomplete="email" required />
       <input type="password" name="password" placeholder="Contraseña" autocomplete="current-password" required />
-      <fieldset id="rol-fieldset" style="display:none;">
-        <legend>Tipo de usuario</legend>
-        <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
-        <label><input type="radio" name="rol" value="operador" /> Operario</label>
-      </fieldset>
-      <select name="organizacion_id" id="organizacion_id" required style="display:none;">
-        <option value="">Selecciona una organización</option>
-      </select>
-      <input type="text" name="nombre" placeholder="Nombre completo" />
-      <input type="text" name="cuit" placeholder="CUIT" />
-      <input type="text" name="telefono" placeholder="Teléfono" />
+      <div id="registro-extra" style="display:none;">
+        <fieldset id="rol-fieldset">
+          <legend>Tipo de usuario</legend>
+          <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
+          <label><input type="radio" name="rol" value="operador" /> Operario</label>
+        </fieldset>
+        <select name="organizacion_id" id="organizacion_id" required>
+          <option value="">Selecciona una organización</option>
+        </select>
+        <input type="text" name="nombre" placeholder="Nombre completo" />
+        <input type="text" name="cuit" placeholder="CUIT" />
+        <input type="text" name="telefono" placeholder="Teléfono" />
+      </div>
       <p id="message" style="color: red;"></p>
       <button type="submit">Continuar</button>
     </form>
