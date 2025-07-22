@@ -7,9 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
     <style>
       .btn-small {
-        font-size: 0.8em;
-        padding: 0.2em 0.6em;
-        margin: 0 0.2em;
+        font-size: 0.7em;
+        padding: 0.1em 0.4em;
+        margin: 0 0.1em;
+        vertical-align: middle;
+      }
+      .finca-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        flex-wrap: wrap;
+      }
+      .finca-info {
+        flex: 1;
       }
     </style>
   </head>
@@ -70,12 +80,15 @@
         data.forEach(f => {
           const li = document.createElement("li");
           li.innerHTML = `
-            #${f.id}: ${f.nombre_finca}
-            ${f.direccion ? `<br>Dirección: ${f.direccion}` : ""}
-            ${f.superficie ? `<br>Superficie: ${f.superficie} ha` : ""}
+            <span class="finca-info">
+              #${f.id}: ${f.nombre_finca}
+              ${f.direccion ? `<br>Dirección: ${f.direccion}` : ""}
+              ${f.superficie ? `<br>Superficie: ${f.superficie} ha` : ""}
+            </span>
             <button data-id="${f.id}" class="edit btn-small">Editar</button>
             <button data-id="${f.id}" class="delete btn-small">Eliminar</button>
           `;
+          li.classList.add("finca-item");
           lista.appendChild(li);
         });
 
