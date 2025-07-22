@@ -38,10 +38,53 @@
         tabla.innerHTML = "";
         data.forEach(u => {
           const row = document.createElement("tr");
-          row.innerHTML = `<td>${u.id}</td><td>${u.nombre}</td><td>${u.rol}</td>`;
+          row.innerHTML = `
+            <td>${u.id}</td>
+            <td>
+              <input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" />
+            </td>
+            <td>
+              <select data-id="${u.id}" class="edit-rol">
+                <option value="productor" ${u.rol === "productor" ? "selected" : ""}>Productor</option>
+                <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operario</option>
+                <option value="superadmin" ${u.rol === "superadmin" ? "selected" : ""}>Superadmin</option>
+              </select>
+            </td>
+            <td>
+              <button data-id="${u.id}" class="guardar-usuario">Guardar</button>
+            </td>
+          `;
           tabla.appendChild(row);
         });
       }
+
+      // Solo permitir edición si el usuario es superadmin
+      async function verificarSuperadmin() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          window.location.href = "login.html";
+          return false;
+        }
+        const { data, error } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+        if (error || !data || data.rol !== "superadmin") {
+          status.textContent = "Acceso solo para superadministradores";
+          tabla.innerHTML = "";
+          return false;
+        }
+        return true;
+      }
+
+      tabla.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("guardar-usuario")) {
+          const id = e.target.dataset.id;
+          const nombre = tabla.querySelector(`.edit-nombre[data-id="${id}"]`).value;
+          const rol = tabla.querySelector(`.edit-rol[data-id="${id}"]`).value;
+          const { error } = await supabase.from("usuarios").update({ nombre, rol }).eq("id", id);
+          if (error) status.textContent = "❌ Error al guardar";
+          else status.textContent = "✅ Usuario actualizado";
+          cargarUsuarios();
+        }
+      });
 
       // Cargar header y manejar logout
       fetch('header.html')
@@ -58,7 +101,10 @@
           }
         });
 
-      cargarUsuarios();
+      // Al cargar la página, verifica el rol y carga usuarios si corresponde
+      if (await verificarSuperadmin()) {
+        cargarUsuarios();
+      }
     </script>
   </body>
 </html>
