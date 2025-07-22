@@ -28,6 +28,12 @@
         gap: 0.2em;
         align-items: center;
       }
+      .info-secundaria {
+        font-size: 0.85em;
+        color: #666;
+        display: block;
+        margin-left: 1em;
+      }
     </style>
   </head>
   <body>
@@ -80,8 +86,8 @@
           li.innerHTML = `
             <span class="finca-info">
               #${f.id}: ${f.nombre_finca}
-              ${f.direccion ? `<br>Dirección: ${f.direccion}` : ""}
-              ${f.superficie ? `<br>Superficie: ${f.superficie} ha` : ""}
+              ${f.direccion ? `<small class="info-secundaria">Dirección: ${f.direccion}</small>` : ""}
+              ${f.superficie ? `<small class="info-secundaria">Superficie: ${f.superficie} ha</small>` : ""}
             </span>
             <span class="finca-actions">
               <button data-id="${f.id}" class="edit btn-small">Editar</button>
