@@ -11,13 +11,33 @@
     const form = document.querySelector("form");
     const messageElement = document.querySelector("#message");
     const rolFieldset = document.getElementById("rol-fieldset");
+    const orgSelect = document.getElementById("organizacion_id");
 
-    // Mostrar el selector de rol solo al registrar
+    // Mostrar el selector de rol y organización solo al registrar
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener("change", () => {
-        rolFieldset.style.display = radio.value === "register" ? "" : "none";
+        const show = radio.value === "register";
+        rolFieldset.style.display = show ? "" : "none";
+        orgSelect.style.display = show ? "" : "none";
       });
     });
+
+    // Poblar el select de organizaciones
+    async function cargarOrganizaciones() {
+      const { data, error } = await supabase.from("organizaciones").select("id, nombre");
+      if (error) {
+        orgSelect.innerHTML = '<option value="">Error cargando organizaciones</option>';
+        return;
+      }
+      orgSelect.innerHTML = '<option value="">Selecciona una organización</option>';
+      data.forEach(org => {
+        const option = document.createElement("option");
+        option.value = org.id;
+        option.textContent = org.nombre;
+        orgSelect.appendChild(option);
+      });
+    }
+    cargarOrganizaciones();
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -27,13 +47,18 @@
       const nombre = form.nombre.value || "";
       const cuit = form.cuit.value || null;
       const telefono = form.telefono.value || null;
+      const organizacion_id = form.organizacion_id.value;
       const mode = document.querySelector('input[name="mode"]:checked').value;
 
       if (mode === "register") {
         const rol = form.rol.value;
+        if (!organizacion_id) {
+          messageElement.textContent = "⚠️ Debes seleccionar una organización";
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          messageElement.textContent = "❌ Registro fallido_: " + error.message;
+          messageElement.textContent = "❌ Registro fallido: " + error.message;
           return;
         }
         const user = data.user;
@@ -41,7 +66,11 @@
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email: user.email,
-            rol
+            nombre,
+            cuit,
+            telefono,
+            rol,
+            organizacion_id
           });
           if (dbError) {
             messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
@@ -98,6 +127,9 @@
         <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
         <label><input type="radio" name="rol" value="operador" /> Operario</label>
       </fieldset>
+      <select name="organizacion_id" id="organizacion_id" required style="display:none;">
+        <option value="">Selecciona una organización</option>
+      </select>
       <input type="text" name="nombre" placeholder="Nombre completo" />
       <input type="text" name="cuit" placeholder="CUIT" />
       <input type="text" name="telefono" placeholder="Teléfono" />
