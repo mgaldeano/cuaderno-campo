@@ -33,7 +33,7 @@
         const rol = form.rol.value;
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          messageElement.textContent = "❌ Registro fallido: " + error.message;
+          messageElement.textContent = "❌ Registro fallido_: " + error.message;
           return;
         }
         const user = data.user;
@@ -113,3 +113,4 @@
   </main>
 </body>
 </html>
+<!-- Comentario de verificación: Esta es la versión actual de -->
