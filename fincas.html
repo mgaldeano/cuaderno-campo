@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fincas | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <style>
+      .btn-small {
+        font-size: 0.8em;
+        padding: 0.2em 0.6em;
+        margin: 0 0.2em;
+      }
+    </style>
   </head>
   <body>
     <nav class="container-fluid">
@@ -66,8 +73,8 @@
             #${f.id}: ${f.nombre_finca}
             ${f.direccion ? `<br>Dirección: ${f.direccion}` : ""}
             ${f.superficie ? `<br>Superficie: ${f.superficie} ha` : ""}
-            <button data-id="${f.id}" class="edit">Editar</button>
-            <button data-id="${f.id}" class="delete">Eliminar</button>
+            <button data-id="${f.id}" class="edit btn-small">Editar</button>
+            <button data-id="${f.id}" class="delete btn-small">Eliminar</button>
           `;
           lista.appendChild(li);
         });
