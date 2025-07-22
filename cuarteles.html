@@ -266,7 +266,10 @@
         const provincia = provinciaInput.value || null;
         const departamento = departamentoInput.value || null;
         const especie = especieInput.value || null;
-        const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions).map(opt => Number(opt.value)).slice(0,3);
+        const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions)
+          .map(opt => opt.value)
+          .filter(id => id) // filtra vacíos
+          .slice(0, 3);
         console.log("Variedades seleccionadas:", variedadesSeleccionadas);
 
         let cuartelId = editId;
