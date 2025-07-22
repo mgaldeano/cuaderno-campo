@@ -50,21 +50,29 @@
       <form id="cuartel-form">
         <fieldset>
           <legend>Datos principales</legend>
+          <label for="finca_id">Finca</label>
           <select name="finca_id" id="finca_id" required>
             <option value="">Seleccionar finca...</option>
           </select>
+          <label for="nombre_cuartel">Nombre del cuartel</label>
           <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del cuartel" required />
+          <label for="superficie_cuartel">Superficie (ha)</label>
           <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
         </fieldset>
         <fieldset>
           <legend>Datos secundarios</legend>
+          <label for="nro_viñedo">Nro Viñedo</label>
           <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro Viñedo" />
+          <label for="provincia">Provincia</label>
           <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
+          <label for="departamento">Departamento</label>
           <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
+          <label for="especie">Especie</label>
           <input type="text" name="especie" id="especie" placeholder="Especie" />
         </fieldset>
         <fieldset>
           <legend>Variedades</legend>
+          <label for="variedades_cuartel">Variedades</label>
           <select id="variedades_cuartel" multiple size="3">
             <!-- Opciones generadas dinámicamente -->
           </select>
@@ -155,7 +163,8 @@
       async function guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas) {
         await supabase.from("cuartel_variedades").delete().eq("cuartel_id", cuartelId);
         for (const variedadId of variedadesSeleccionadas) {
-          await supabase.from("cuartel_variedades").insert({ cuartel_id: cuartelId, variedad_id: variedadId });
+          const { error } = await supabase.from("cuartel_variedades").insert({ cuartel_id: cuartelId, variedad_id: variedadId });
+          if (error) console.error("Error insertando variedad:", variedadId, error);
         }
       }
 
@@ -258,6 +267,7 @@
         const departamento = departamentoInput.value || null;
         const especie = especieInput.value || null;
         const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions).map(opt => Number(opt.value)).slice(0,3);
+        console.log("Variedades seleccionadas:", variedadesSeleccionadas);
 
         let cuartelId = editId;
         if (editId) {
