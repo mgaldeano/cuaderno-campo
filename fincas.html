@@ -31,16 +31,8 @@
     </style>
   </head>
   <body>
-    <nav class="container-fluid">
-      <ul><li><strong>Cuaderno de Campo</strong></li></ul>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="cuarteles.html">Cuarteles</a></li>
-        <li><a href="tareas.html" role="button">Tareas</a></li>
-      </ul>
-    </nav>
-
-    <main class="container">
+  <div id="header"></div>
+  <main class="container">
       <hgroup>
         <h2>Fincas</h2>
       </hgroup>
@@ -55,7 +47,6 @@
       <h3>Fincas registradas</h3>
       <ul id="fincas-list"></ul>
     </main>
-
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
       const supabase = createClient(
@@ -154,8 +145,22 @@
       });
 
       cargarFincas();
-    </script>
 
+      // Al final del script:
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header').innerHTML = html;
+          const logoutBtn = document.querySelector("#logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              await supabase.auth.signOut();
+              window.location.href = "login.html";
+            });
+          }
+        });
+    </script>
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
   </body>
 </html>
