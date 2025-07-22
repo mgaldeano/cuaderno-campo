@@ -1,71 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Inicio | Cuaderno de Campo</title>
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
-  </head>
-  <body>
-    <nav class="container-fluid">
-      <ul><li><strong>Cuaderno de Campo</strong></li></ul>
-      <ul>
-        <li><a href="usuarios.html">Usuarios</a></li>
-        <li><a href="fincas.html">Fincas</a></li>
-        <li><a href="cuarteles.html">Cuarteles</a></li>
-        <li><a href="tareas.html">Tareas</a></li>
-        <li><a href="#" id="logoutBtn" role="button">Cerrar sesión</a></li>
-      </ul>
-    </nav>
-
-    <div id="header"></div>
-
-    <main class="container">
-      <hgroup>
-        <h2>Bienvenido</h2>
-        <h3>Gestión de tareas para productores vitícolas</h3>
-      </hgroup>
-      <p>Desde aquí podés acceder a las secciones principales del sistema.</p>
-      <ul>
-        <li><a href="fincas.html">📍 Gestionar Fincas</a></li>
-        <li><a href="cuarteles.html">🌱 Gestionar Cuarteles</a></li>
-        <li><a href="tareas.html">📝 Registrar Tareas</a></li>
-        <li><a href="reportes.html">📊 Ver Reportes</a></li>
-        <li><a href="usuarios.html">👤 Usuarios</a></li>
-      </ul>
-    </main>
-
-    <footer class="container">
-      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
-    </footer>
-
-    <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-      
-      const supabase = createClient(
-        "https://djvdjulfeuqohpnatdmt.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw" 
-      );
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = "login.html";
-      }
-
-      // Cargar el header y agregar el handler de logout
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header').innerHTML = html;
-          const logoutBtn = document.querySelector("#logoutBtn");
-          if (logoutBtn) {
-            logoutBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              await supabase.auth.signOut();
-              window.location.href = "login.html";
-            });
-          }
-        });
-    </script>
-  </body>
-</html>
+<nav class="container-fluid">
+  <ul><li><strong>Cuaderno de Campo</strong></li></ul>
+  <ul>
+    <li><a href="usuarios.html">Usuarios</a></li>
+    <li><a href="fincas.html">Fincas</a></li>
+    <li><a href="cuarteles.html">Cuarteles</a></li>
+    <li><a href="tareas.html">Tareas</a></li>
+    <li><a href="#" id="logoutBtn" role="button">Cerrar sesión</a></li>
+  </ul>
+</nav>
