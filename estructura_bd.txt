@@ -1,0 +1,78 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.cuartel_variedades (
+  cuartel_id bigint NOT NULL,
+  variedad_id uuid NOT NULL,
+  CONSTRAINT cuartel_variedades_pkey PRIMARY KEY (cuartel_id, variedad_id),
+  CONSTRAINT cuartel_variedades_cuartel_id_fkey FOREIGN KEY (cuartel_id) REFERENCES public.cuarteles(id),
+  CONSTRAINT cuartel_variedades_variedad_id_fkey FOREIGN KEY (variedad_id) REFERENCES public.variedades(id)
+);
+CREATE TABLE public.cuarteles (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  finca_id bigint,
+  numero integer NOT NULL,
+  superficie numeric,
+  nro_viñedo text,
+  provincia text,
+  departamento text,
+  created_at timestamp with time zone DEFAULT now(),
+  nombre text NOT NULL,
+  especie text,
+  variedad text,
+  CONSTRAINT cuarteles_pkey PRIMARY KEY (id),
+  CONSTRAINT cuarteles_finca_id_fkey FOREIGN KEY (finca_id) REFERENCES public.fincas(id)
+);
+CREATE TABLE public.fincas (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  nombre_finca text NOT NULL,
+  usuario_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT fincas_pkey PRIMARY KEY (id),
+  CONSTRAINT fincas_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id)
+);
+CREATE TABLE public.organizaciones (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nombre text NOT NULL,
+  logo_url text,
+  color_base text,
+  CONSTRAINT organizaciones_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.tareas (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  tipo_tarea_old text,
+  fecha date,
+  cuartel_id bigint,
+  duracion integer,
+  cant_agua integer,
+  obs text,
+  created_at timestamp with time zone DEFAULT now(),
+  tipo_tarea_id integer,
+  CONSTRAINT tareas_pkey PRIMARY KEY (id),
+  CONSTRAINT tareas_cuartel_id_fkey FOREIGN KEY (cuartel_id) REFERENCES public.cuarteles(id),
+  CONSTRAINT fk_tipo_tarea FOREIGN KEY (tipo_tarea_id) REFERENCES public.tipos_tarea(id)
+);
+CREATE TABLE public.tipos_tarea (
+  id integer NOT NULL DEFAULT nextval('tipos_tarea_id_seq'::regclass),
+  nombre text NOT NULL UNIQUE,
+  requiere_duracion boolean DEFAULT false,
+  requiere_agua boolean DEFAULT false,
+  requiere_obs boolean DEFAULT true,
+  CONSTRAINT tipos_tarea_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.usuarios (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nombre text,
+  cuit text,
+  telefono text,
+  rol text CHECK (rol = ANY (ARRAY['productor'::text, 'operador'::text, 'superadmin'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  organizacion_id uuid,
+  CONSTRAINT usuarios_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_usuario_organizacion FOREIGN KEY (organizacion_id) REFERENCES public.organizaciones(id)
+);
+CREATE TABLE public.variedades (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nombre text NOT NULL,
+  CONSTRAINT variedades_pkey PRIMARY KEY (id)
+);
