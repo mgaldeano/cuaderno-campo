@@ -14,12 +14,19 @@
       }
       .finca-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        justify-content: space-between;
         gap: 0.5em;
         flex-wrap: wrap;
       }
       .finca-info {
         flex: 1;
+        min-width: 180px;
+      }
+      .finca-actions {
+        display: flex;
+        gap: 0.2em;
+        align-items: center;
       }
     </style>
   </head>
@@ -85,8 +92,10 @@
               ${f.direccion ? `<br>Dirección: ${f.direccion}` : ""}
               ${f.superficie ? `<br>Superficie: ${f.superficie} ha` : ""}
             </span>
-            <button data-id="${f.id}" class="edit btn-small">Editar</button>
-            <button data-id="${f.id}" class="delete btn-small">Eliminar</button>
+            <span class="finca-actions">
+              <button data-id="${f.id}" class="edit btn-small">Editar</button>
+              <button data-id="${f.id}" class="delete btn-small">Eliminar</button>
+            </span>
           `;
           li.classList.add("finca-item");
           lista.appendChild(li);
@@ -108,6 +117,7 @@
         lista.querySelectorAll(".delete").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
+            if (!confirm("¿Seguro que deseas eliminar esta finca?")) return;
             const { error } = await supabase.from("fincas").delete().eq("id", id);
             if (error) status.textContent = "❌ Error al eliminar";
             else status.textContent = "✅ Finca eliminada";
