@@ -76,3 +76,44 @@ CREATE TABLE public.variedades (
   nombre text NOT NULL,
   CONSTRAINT variedades_pkey PRIMARY KEY (id)
 );
+
+--------------------------------------------------
+DOCUMENTACIÓN Y POLÍTICAS DE SEGURIDAD (RLS)
+--------------------------------------------------
+
+# Descripción de tablas y relaciones
+
+- usuarios: Usuarios del sistema, pueden ser productores, operadores o superadmins. Relación con organizaciones.
+- organizaciones: Agrupa usuarios bajo una entidad común.
+- fincas: Cada finca pertenece a un usuario (usuario_id). Relación con usuarios.
+- cuarteles: Subdivisiones de una finca. Relación con fincas.
+- cuartel_variedades: Relación muchos a muchos entre cuarteles y variedades.
+- variedades: Tipos de cultivos o especies.
+- tareas: Actividades realizadas en los cuarteles. Relación con cuarteles y tipos_tarea.
+- tipos_tarea: Catálogo de tipos de tareas posibles.
+
+# Ejemplo de Row Level Security (RLS) para la tabla 'fincas'
+
+ALTER TABLE public.fincas ENABLE ROW LEVEL SECURITY;
+
+-- Permitir solo al dueño ver sus fincas
+CREATE POLICY "Solo dueño puede ver sus fincas"
+  ON public.fincas
+  FOR SELECT
+  USING (usuario_id = auth.uid());
+
+-- Permitir solo al dueño insertar fincas
+CREATE POLICY "Solo dueño puede insertar fincas"
+  ON public.fincas
+  FOR INSERT
+  WITH CHECK (usuario_id = auth.uid());
+
+-- Permitir solo al dueño actualizar o borrar sus fincas
+CREATE POLICY "Solo dueño puede modificar o borrar sus fincas"
+  ON public.fincas
+  FOR UPDATE, DELETE
+  USING (usuario_id = auth.uid());
+
+# Repite este patrón para otras tablas que deban estar protegidas por usuario/productor.
+
+--------------------------------------------------
