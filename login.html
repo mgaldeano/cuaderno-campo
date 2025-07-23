@@ -74,6 +74,16 @@
             messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
             return;
           }
+          // Log de los datos antes del insert
+          console.log({
+            id: user.id,
+            email: form.email.value,
+            nombre: form.nombre.value,
+            cuit: form.cuit.value,
+            telefono: form.telefono.value,
+            rol,
+            organizacion_id
+          });
           // Insertar usuario si no existe
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
