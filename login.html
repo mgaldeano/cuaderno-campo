@@ -86,6 +86,16 @@
         }
         const user = data.user;
         if (user) {
+          // Ahora sí puedes loguear el id
+          console.log({
+            id: user.id,
+            email,
+            nombre,
+            cuit,
+            telefono,
+            rol,
+            organizacion_id
+          });
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email,
