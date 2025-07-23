@@ -68,8 +68,6 @@
       const organizacion_id = form.elements["organizacion_id"].value;
       const rol = form.elements["rol"].value;
 
-      console.log({ id: user.id, email, nombre, cuit, telefono, rol, organizacion_id });
-
       if (mode === "register") {
         if (!organizacion_id) {
           messageElement.textContent = "⚠️ Debes seleccionar una organización";
