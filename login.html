@@ -70,7 +70,7 @@
         if (user) {
           // Verificar si el usuario ya existe en la tabla
           const { data: existe } = await supabase.from("usuarios").select("id").eq("id", user.id).single();
-          if (existe !== null) {
+          if (existe && existe.id) {
             messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
             return;
           }
@@ -88,7 +88,6 @@
             messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
             return;
           }
-          // Solo aquí muestra el mensaje de éxito y redirige
           alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
           window.location.href = "index.html";
         }
