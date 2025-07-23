@@ -87,20 +87,22 @@
         }
         const user = data.user;
         if (user) {
-          // Actualiza los datos adicionales del usuario creado por el trigger
-          const { error: updateError } = await supabase.from("usuarios").update({
-            nombre,
-            cuit,
-            telefono,
-            rol,
-            organizacion_id
-          }).eq("id", user.id);
-          if (updateError) {
-            messageElement.textContent = "❌ Error actualizando datos: " + updateError.message;
-            return;
-          }
-          alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
-          window.location.href = "index.html";
+          // Espera 500ms antes de actualizar los datos extra
+          setTimeout(async () => {
+            const { error: updateError } = await supabase.from("usuarios").update({
+              nombre,
+              cuit,
+              telefono,
+              rol,
+              organizacion_id
+            }).eq("id", user.id);
+            if (updateError) {
+              messageElement.textContent = "❌ Error actualizando datos: " + updateError.message;
+              return;
+            }
+            alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
+            window.location.href = "index.html";
+          }, 500);
         }
       } else {
         // --- Inicio de sesión ---
