@@ -77,7 +77,7 @@
           // Insertar usuario si no existe
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
-            email: form.email.value || null,
+            email: user.email,
             nombre: form.nombre.value || null,
             cuit: form.cuit.value || null,
             telefono: form.telefono.value || null,
