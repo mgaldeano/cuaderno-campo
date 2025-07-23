@@ -16,7 +16,7 @@
       <p id="status"></p>
       <table>
         <thead>
-          <tr><th>ID</th><th>Nombre</th><th>Rol</th></tr>
+          <tr><th>ID</th><th>Nombre</th><th>Email</th><th>CUIT</th><th>Teléfono</th><th>Rol</th></tr>
         </thead>
         <tbody id="usuarios-list"></tbody>
       </table>
@@ -32,57 +32,71 @@
       const tabla = document.querySelector("#usuarios-list");
       const status = document.querySelector("#status");
 
-      async function cargarUsuarios() {
+      async function verificarUsuarioActual() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          window.location.href = "login.html";
+          return null;
+        }
+        const { data, error } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+        if (error || !data) {
+          status.textContent = "Acceso solo para usuarios registrados";
+          tabla.innerHTML = "";
+          return null;
+        }
+        return { id: user.id, rol: data.rol };
+      }
+
+      async function cargarUsuarios(usuarioActual) {
         const { data, error } = await supabase.from("usuarios").select("*");
         if (error) return (status.textContent = "❌ Error cargando usuarios");
         tabla.innerHTML = "";
         data.forEach(u => {
+          const esSuperadmin = usuarioActual.rol === "superadmin";
+          const esPropio = usuarioActual.id === u.id;
+          const puedeEditar = esSuperadmin || esPropio;
+          const puedeEditarRol = esSuperadmin;
+
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${u.id}</td>
+            <td><input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" ${puedeEditar ? "" : "disabled"} /></td>
+            <td><input type="email" value="${u.email ?? ''}" data-id="${u.id}" class="edit-email" ${puedeEditar ? "" : "disabled"} /></td>
+            <td><input type="text" value="${u.cuit ?? ''}" data-id="${u.id}" class="edit-cuit" ${puedeEditar ? "" : "disabled"} /></td>
+            <td><input type="text" value="${u.telefono ?? ''}" data-id="${u.id}" class="edit-telefono" ${puedeEditar ? "" : "disabled"} /></td>
             <td>
-              <input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" />
-            </td>
-            <td>
-              <select data-id="${u.id}" class="edit-rol">
+              <select data-id="${u.id}" class="edit-rol" ${puedeEditarRol ? "" : "disabled"}>
                 <option value="productor" ${u.rol === "productor" ? "selected" : ""}>Productor</option>
                 <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operario</option>
                 <option value="superadmin" ${u.rol === "superadmin" ? "selected" : ""}>Superadmin</option>
               </select>
             </td>
             <td>
-              <button data-id="${u.id}" class="guardar-usuario">Guardar</button>
+              <button data-id="${u.id}" class="guardar-usuario" ${puedeEditar ? "" : "disabled"}>Guardar</button>
             </td>
           `;
           tabla.appendChild(row);
         });
       }
 
-      // Solo permitir edición si el usuario es superadmin
-      async function verificarSuperadmin() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          window.location.href = "login.html";
-          return false;
-        }
-        const { data, error } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-        if (error || !data || data.rol !== "superadmin") {
-          status.textContent = "Acceso solo para superadministradores";
-          tabla.innerHTML = "";
-          return false;
-        }
-        return true;
-      }
-
       tabla.addEventListener("click", async (e) => {
         if (e.target.classList.contains("guardar-usuario")) {
           const id = e.target.dataset.id;
           const nombre = tabla.querySelector(`.edit-nombre[data-id="${id}"]`).value;
-          const rol = tabla.querySelector(`.edit-rol[data-id="${id}"]`).value;
-          const { error } = await supabase.from("usuarios").update({ nombre, rol }).eq("id", id);
+          const email = tabla.querySelector(`.edit-email[data-id="${id}"]`).value;
+          const cuit = tabla.querySelector(`.edit-cuit[data-id="${id}"]`).value;
+          const telefono = tabla.querySelector(`.edit-telefono[data-id="${id}"]`).value;
+          let updateData = { nombre, email, cuit, telefono };
+          // Solo superadmin puede editar el rol
+          const usuarioActual = await verificarUsuarioActual();
+          if (usuarioActual && usuarioActual.rol === "superadmin") {
+            const rol = tabla.querySelector(`.edit-rol[data-id="${id}"]`).value;
+            updateData.rol = rol;
+          }
+          const { error } = await supabase.from("usuarios").update(updateData).eq("id", id);
           if (error) status.textContent = "❌ Error al guardar";
           else status.textContent = "✅ Usuario actualizado";
-          cargarUsuarios();
+          cargarUsuarios(usuarioActual);
         }
       });
 
@@ -101,9 +115,10 @@
           }
         });
 
-      // Al cargar la página, verifica el rol y carga usuarios si corresponde
-      if (await verificarSuperadmin()) {
-        cargarUsuarios();
+      // Al cargar la página, verifica el usuario y carga usuarios si corresponde
+      const usuarioActual = await verificarUsuarioActual();
+      if (usuarioActual) {
+        cargarUsuarios(usuarioActual);
       }
     </script>
   </body>
