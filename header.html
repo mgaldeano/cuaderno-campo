@@ -19,6 +19,7 @@
   );
 
   console.log("Cuaderno de Campo - Header v1.0.0 cargado");
+  console.log("HEADER TEST - ¿Se ejecuta este script?");
 
   supabase.auth.getUser().then(({ data: { user } }) => {
     console.log("Usuario logueado:", user);
