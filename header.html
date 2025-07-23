@@ -11,33 +11,41 @@
   </ul>
   <div id="header-info" style="font-size:0.9em; color:#555; background:#f6f6f6; border-radius:8px; padding:4px 12px; display:inline-flex; align-items:center; margin-left:1em;"></div>
 </nav>
-<script>
-  // ...después de verificar usuarioActual...
-  async function mostrarHeaderInfo(usuarioActual) {
-    const { data: usuario } = await supabase.from("usuarios").select("nombre, organizacion_id").eq("id", usuarioActual.id).single();
-    console.log("usuario:", usuario);
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  const supabase = createClient(
+    "https://djvdjulfeuqohpnatdmt.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+  );
+
+  async function mostrarHeaderInfo(user) {
+    if (!user) return;
+    const { data: usuario } = await supabase.from("usuarios").select("nombre, organizacion_id").eq("id", user.id).single();
     let nombre = usuario?.nombre ?? "Usuario";
     let organizacion = "";
     let logoUrl = "";
 
     if (usuario?.organizacion_id) {
       const { data: org } = await supabase.from("organizaciones").select("nombre, logo_url").eq("id", usuario.organizacion_id).single();
-      console.log("organizacion:", org);
       organizacion = org?.nombre ?? "";
       logoUrl = org?.logo_url ?? "";
     }
 
+    // Logo por defecto si no hay logo
+    if (!logoUrl || logoUrl.trim() === "") {
+      logoUrl = "http://galdeano.com.ar/gallery_gen/logo.png";
+    }
+
     const headerInfo = document.getElementById("header-info");
     headerInfo.innerHTML = `
-      ${logoUrl && logoUrl.trim() !== "" ? `<img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">` : ""}
+      <img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">
       <span>${nombre}${organizacion ? " • " + organizacion : ""}</span>
     `;
   }
 
-  // Llama a la función después de verificar usuarioActual
-  if (usuarioActual) {
-    cargarUsuarios(usuarioActual);
-    mostrarHeaderInfo(usuarioActual);
-  }
-  console.log("usuarioActual:", usuarioActual);
+  // Obtener usuario logueado y mostrar info en el header
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    mostrarHeaderInfo(user);
+  });
 </script>
+
