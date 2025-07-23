@@ -19,12 +19,14 @@
       radio.addEventListener("change", () => {
         const show = radio.value === "register";
         registroExtra.style.display = show ? "" : "none";
+        orgSelect.required = show; // Solo requerido en registro
       });
     });
 
     window.addEventListener("DOMContentLoaded", () => {
       const mode = document.querySelector('input[name="mode"]:checked').value;
       registroExtra.style.display = mode === "register" ? "" : "none";
+      orgSelect.required = mode === "register"; // Solo requerido en registro
     });
 
     // Poblar el select de organizaciones
@@ -150,7 +152,7 @@
           <label><input type="radio" name="rol" value="productor" checked /> Productor</label>
           <label><input type="radio" name="rol" value="operador" /> Operario</label>
         </fieldset>
-        <select name="organizacion_id" id="organizacion_id" required>
+        <select name="organizacion_id" id="organizacion_id">
           <option value="">Selecciona una organización</option>
         </select>
         <input type="text" name="nombre" placeholder="Nombre completo" />
