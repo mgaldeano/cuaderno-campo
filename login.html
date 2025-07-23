@@ -84,6 +84,12 @@
         }
         const user = data.user;
         if (user) {
+          // Verificar si el usuario ya está registrado en la base de datos
+          const { data: existe } = await supabase.from("usuarios").select("id").eq("id", user.id).single();
+          if (existe && existe.id) {
+            messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
+            return;
+          }
           // Ahora sí puedes loguear el id
           console.log({
             id: user.id,
