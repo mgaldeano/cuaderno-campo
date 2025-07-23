@@ -87,23 +87,16 @@
         }
         const user = data.user;
         if (user) {
-          // Insertar usuario en la tabla
-          const { error: dbError } = await supabase.from("usuarios").insert({
-            id: user.id,
-            email,
+          // Actualiza los datos adicionales del usuario creado por el trigger
+          const { error: updateError } = await supabase.from("usuarios").update({
             nombre,
             cuit,
             telefono,
             rol,
             organizacion_id
-          });
-          if (dbError) {
-            // Mensaje específico si el insert falla
-            if (dbError.code === "23505") {
-              messageElement.textContent = "❌ Error: El usuario ya existe en la base de datos, pero no se guardaron los datos asociados. Contacta al soporte.";
-            } else {
-              messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
-            }
+          }).eq("id", user.id);
+          if (updateError) {
+            messageElement.textContent = "❌ Error actualizando datos: " + updateError.message;
             return;
           }
           alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
