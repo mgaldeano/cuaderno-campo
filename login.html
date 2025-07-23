@@ -30,6 +30,7 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       const mode = document.querySelector('input[name="mode"]:checked').value;
+      const password = form.elements["password"].value;
       registroExtra.style.display = mode === "register" ? "" : "none";
       orgSelect.required = mode === "register";
       rolFieldset.querySelectorAll('input').forEach(input => input.required = mode === "register");
@@ -58,14 +59,16 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       messageElement.textContent = "";
+      const mode = document.querySelector('input[name="mode"]:checked').value;
       const email = form.elements["email"].value;
+      const password = form.elements["password"].value;
       const nombre = form.elements["nombre"].value || null;
       const cuit = form.elements["cuit"].value || null;
       const telefono = form.elements["telefono"].value || null;
       const organizacion_id = form.elements["organizacion_id"].value;
       const rol = form.elements["rol"].value;
 
-      console.log({ email, nombre, cuit, telefono, rol, organizacion_id });
+      console.log({ id: user.id, email, nombre, cuit, telefono, rol, organizacion_id });
 
       if (mode === "register") {
         if (!organizacion_id) {
@@ -83,7 +86,6 @@
         }
         const user = data.user;
         if (user) {
-          // Insertar usuario en la tabla
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email,
