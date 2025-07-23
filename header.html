@@ -21,6 +21,8 @@
       .select("nombre, organizacion_id")
       .eq("id", user.id)
       .single();
+    console.log("usuario:", usuario); // <-- Verifica el usuario
+
     if (errorUsuario) {
       console.log("Error usuario:", errorUsuario);
       return;
@@ -35,6 +37,7 @@
         .select("nombre, logo_url")
         .eq("id", usuario.organizacion_id)
         .single();
+      console.log("organizacion:", org); // <-- Verifica la organización
       if (errorOrg) {
         console.log("Error organizacion:", errorOrg);
       }
