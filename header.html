@@ -15,19 +15,21 @@
   // ...después de verificar usuarioActual...
   async function mostrarHeaderInfo(usuarioActual) {
     const { data: usuario } = await supabase.from("usuarios").select("nombre, organizacion_id").eq("id", usuarioActual.id).single();
+    console.log("usuario:", usuario);
     let nombre = usuario?.nombre ?? "Usuario";
     let organizacion = "";
     let logoUrl = "";
 
     if (usuario?.organizacion_id) {
       const { data: org } = await supabase.from("organizaciones").select("nombre, logo_url").eq("id", usuario.organizacion_id).single();
+      console.log("organizacion:", org);
       organizacion = org?.nombre ?? "";
       logoUrl = org?.logo_url ?? "";
     }
 
     const headerInfo = document.getElementById("header-info");
     headerInfo.innerHTML = `
-      ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">` : ""}
+      ${logoUrl && logoUrl.trim() !== "" ? `<img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">` : ""}
       <span>${nombre}${organizacion ? " • " + organizacion : ""}</span>
     `;
   }
@@ -37,4 +39,5 @@
     cargarUsuarios(usuarioActual);
     mostrarHeaderInfo(usuarioActual);
   }
+  console.log("usuarioActual:", usuarioActual);
 </script>
