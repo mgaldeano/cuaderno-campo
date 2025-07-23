@@ -14,14 +14,25 @@
 <script type="module">
   import { supabase } from "./supabaseClient.js";
 
+  console.log("Header script cargado");
+
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    console.log("Usuario logueado:", user);
+    if (user) {
+      mostrarHeaderInfo(user);
+    } else {
+      console.log("No hay usuario logueado");
+    }
+  });
+
   async function mostrarHeaderInfo(user) {
-    if (!user) return;
+    console.log("Ejecutando mostrarHeaderInfo");
     const { data: usuario, error: errorUsuario } = await supabase
       .from("usuarios")
       .select("nombre, organizacion_id")
       .eq("id", user.id)
       .single();
-    console.log("usuario:", usuario); // <-- Verifica el usuario
+    console.log("usuario:", usuario);
 
     if (errorUsuario) {
       console.log("Error usuario:", errorUsuario);
@@ -37,7 +48,7 @@
         .select("nombre, logo_url")
         .eq("id", usuario.organizacion_id)
         .single();
-      console.log("organizacion:", org); // <-- Verifica la organización
+      console.log("organizacion:", org);
       if (errorOrg) {
         console.log("Error organizacion:", errorOrg);
       }
@@ -45,7 +56,6 @@
       logoUrl = org?.logo_url ?? "";
     }
 
-    // Logo por defecto si no hay logo
     if (!logoUrl || logoUrl.trim() === "") {
       logoUrl = "http://galdeano.com.ar/gallery_gen/logo.png";
     }
@@ -56,12 +66,5 @@
       <span>${nombre}${organizacion ? " • " + organizacion : ""}</span>
     `;
   }
-
-  // Obtener usuario logueado y mostrar info en el header
-  supabase.auth.getUser().then(({ data: { user } }) => {
-    if (user) {
-      mostrarHeaderInfo(user);
-    }
-  });
 </script>
 
