@@ -58,16 +58,16 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       messageElement.textContent = "";
-      const email = form.email.value;
-      const password = form.password.value;
-      const nombre = form.nombre.value || null;
-      const cuit = form.cuit.value || null;
-      const telefono = form.telefono.value || null;
-      const organizacion_id = form.organizacion_id.value;
-      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const email = form.elements["email"].value;
+      const nombre = form.elements["nombre"].value || null;
+      const cuit = form.elements["cuit"].value || null;
+      const telefono = form.elements["telefono"].value || null;
+      const organizacion_id = form.elements["organizacion_id"].value;
+      const rol = form.elements["rol"].value;
+
+      console.log({ email, nombre, cuit, telefono, rol, organizacion_id });
 
       if (mode === "register") {
-        const rol = form.rol.value;
         if (!organizacion_id) {
           messageElement.textContent = "⚠️ Debes seleccionar una organización";
           return;
@@ -83,26 +83,19 @@
         }
         const user = data.user;
         if (user) {
-          // Verificar si el usuario ya existe en la tabla
-          const { data: existe } = await supabase.from("usuarios").select("id").eq("id", user.id).single();
-          if (existe && existe.id) {
-            messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
-            return;
-          }
-          // Log para depuración
-          console.log({ id: user.id, email, nombre, cuit, telefono, rol, organizacion_id });
-          // Insertar usuario si no existe
+          // Insertar usuario en la tabla
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
-            email: email || null,
-            nombre: nombre || null,
-            cuit: cuit || null,
-            telefono: telefono || null,
+            email,
+            nombre,
+            cuit,
+            telefono,
             rol,
             organizacion_id
           });
           if (dbError) {
-            messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
+            console.error("Insert error:", dbError);
+            messageElement.textContent = "❌ Error guardando usuario: " + dbError.message + ". Si el problema persiste, contacta al soporte.";
             return;
           }
           alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
