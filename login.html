@@ -14,19 +14,28 @@
     const orgSelect = document.getElementById("organizacion_id");
     const registroExtra = document.getElementById("registro-extra");
 
-    // Mostrar el selector de rol y organización solo al registrar
+    // Mostrar/ocultar campos extra y requeridos solo en registro
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener("change", () => {
         const show = radio.value === "register";
         registroExtra.style.display = show ? "" : "none";
-        orgSelect.required = show; // Solo requerido en registro
+        orgSelect.required = show;
+        // Solo mostrar campos extra en registro
+        rolFieldset.querySelectorAll('input').forEach(input => input.required = show);
+        form.nombre.required = show;
+        form.cuit.required = false; // Opcional
+        form.telefono.required = false; // Opcional
       });
     });
 
     window.addEventListener("DOMContentLoaded", () => {
       const mode = document.querySelector('input[name="mode"]:checked').value;
       registroExtra.style.display = mode === "register" ? "" : "none";
-      orgSelect.required = mode === "register"; // Solo requerido en registro
+      orgSelect.required = mode === "register";
+      rolFieldset.querySelectorAll('input').forEach(input => input.required = mode === "register");
+      form.nombre.required = mode === "register";
+      form.cuit.required = false;
+      form.telefono.required = false;
     });
 
     // Poblar el select de organizaciones
@@ -63,6 +72,10 @@
           messageElement.textContent = "⚠️ Debes seleccionar una organización";
           return;
         }
+        if (!nombre) {
+          messageElement.textContent = "⚠️ Debes ingresar el nombre";
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           messageElement.textContent = "❌ Registro fallido: " + error.message;
@@ -76,23 +89,15 @@
             messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
             return;
           }
-          // Log de los datos antes del insert
-          console.log({
-            id: user.id,
-            email: form.email.value,
-            nombre: form.nombre.value,
-            cuit: form.cuit.value,
-            telefono: form.telefono.value,
-            rol,
-            organizacion_id
-          });
+          // Log para depuración
+          console.log({ id: user.id, email, nombre, cuit, telefono, rol, organizacion_id });
           // Insertar usuario si no existe
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
-            email: form.email.value || null,
-            nombre: form.nombre.value || null,
-            cuit: form.cuit.value || null,
-            telefono: form.telefono.value || null,
+            email: email || null,
+            nombre: nombre || null,
+            cuit: cuit || null,
+            telefono: telefono || null,
             rol,
             organizacion_id
           });
