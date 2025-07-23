@@ -48,7 +48,14 @@
       }
 
       async function cargarUsuarios(usuarioActual) {
-        const { data, error } = await supabase.from("usuarios").select("*");
+        let data, error;
+        if (usuarioActual.rol === "superadmin") {
+          // Superadmin ve todos
+          ({ data, error } = await supabase.from("usuarios").select("*"));
+        } else {
+          // Usuario común solo ve su propio registro
+          ({ data, error } = await supabase.from("usuarios").select("*").eq("id", usuarioActual.id));
+        }
         if (error) return (status.textContent = "❌ Error cargando usuarios");
         tabla.innerHTML = "";
         data.forEach(u => {
@@ -56,7 +63,6 @@
           const esPropio = usuarioActual.id === u.id;
           const puedeEditar = esSuperadmin || esPropio;
           const puedeEditarRol = esSuperadmin;
-
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${u.id}</td>
