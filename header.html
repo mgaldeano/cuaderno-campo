@@ -1,5 +1,7 @@
 <nav class="container-fluid">
-  <ul><li><strong>Cuaderno de Campo</strong></li></ul>
+  <ul>
+    <li><strong>Cuaderno de Campo</strong></li>
+  </ul>
   <ul>
     <li><a href="usuarios.html">Usuarios</a></li>
     <li><a href="fincas.html">Fincas</a></li>
@@ -7,4 +9,32 @@
     <li><a href="tareas.html">Tareas</a></li>
     <li><a href="#" id="logoutBtn" role="button">Cerrar sesión</a></li>
   </ul>
+  <div id="header-info" style="font-size:0.9em; color:#555; background:#f6f6f6; border-radius:8px; padding:4px 12px; display:inline-flex; align-items:center; margin-left:1em;"></div>
 </nav>
+<script>
+  // ...después de verificar usuarioActual...
+  async function mostrarHeaderInfo(usuarioActual) {
+    const { data: usuario } = await supabase.from("usuarios").select("nombre, organizacion_id").eq("id", usuarioActual.id).single();
+    let nombre = usuario?.nombre ?? "Usuario";
+    let organizacion = "";
+    let logoUrl = "";
+
+    if (usuario?.organizacion_id) {
+      const { data: org } = await supabase.from("organizaciones").select("nombre, logo_url").eq("id", usuario.organizacion_id).single();
+      organizacion = org?.nombre ?? "";
+      logoUrl = org?.logo_url ?? "";
+    }
+
+    const headerInfo = document.getElementById("header-info");
+    headerInfo.innerHTML = `
+      ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">` : ""}
+      <span>${nombre}${organizacion ? " • " + organizacion : ""}</span>
+    `;
+  }
+
+  // Llama a la función después de verificar usuarioActual
+  if (usuarioActual) {
+    cargarUsuarios(usuarioActual);
+    mostrarHeaderInfo(usuarioActual);
+  }
+</script>
