@@ -77,6 +77,9 @@
           messageElement.textContent = "⚠️ Debes ingresar el nombre";
           return;
         }
+
+        // Verificar si el email ya existe en Auth
+        // (Supabase lo hace automáticamente, pero puedes mostrar un mensaje más claro)
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           messageElement.textContent = "❌ Registro fallido: " + error.message;
@@ -84,22 +87,7 @@
         }
         const user = data.user;
         if (user) {
-          // Verificar si el usuario ya está registrado en la base de datos
-          const { data: existe } = await supabase.from("usuarios").select("id").eq("id", user.id).single();
-          if (existe && existe.id) {
-            messageElement.textContent = "⚠️ El usuario ya está registrado en la base de datos.";
-            return;
-          }
-          // Ahora sí puedes loguear el id
-          console.log({
-            id: user.id,
-            email,
-            nombre,
-            cuit,
-            telefono,
-            rol,
-            organizacion_id
-          });
+          // Insertar usuario en la tabla
           const { error: dbError } = await supabase.from("usuarios").insert({
             id: user.id,
             email,
@@ -110,8 +98,12 @@
             organizacion_id
           });
           if (dbError) {
-            console.error("Insert error:", dbError);
-            messageElement.textContent = "❌ Error guardando usuario: " + dbError.message + ". Si el problema persiste, contacta al soporte.";
+            // Mensaje específico si el insert falla
+            if (dbError.code === "23505") {
+              messageElement.textContent = "❌ Error: El usuario ya existe en la base de datos, pero no se guardaron los datos asociados. Contacta al soporte.";
+            } else {
+              messageElement.textContent = "❌ Error guardando usuario: " + dbError.message;
+            }
             return;
           }
           alert("✅ ¡Registro exitoso! Revisa tu email para confirmar la cuenta si es necesario.");
