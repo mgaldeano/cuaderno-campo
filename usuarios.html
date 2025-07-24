@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
   </head>
   <body>
+    <!-- Ejemplo para index.html, fincas.html, cuarteles.html, tareas.html -->
     <div id="header-container"></div>
     <main class="container">
       <hgroup>
@@ -111,12 +112,14 @@
         .then(res => res.text())
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
-          import('./header.js'); // <-- Esto ejecuta el JS del header
+          import('./header.js');
+          // Manejo de logout (opcional, si no lo tienes en header.js)
           const logoutBtn = document.querySelector("#logoutBtn");
           if (logoutBtn) {
             logoutBtn.addEventListener("click", async (e) => {
               e.preventDefault();
-              await supabase.auth.signOut();
+              // Si tienes supabase en el scope global, puedes usarlo aquí
+              // await supabase.auth.signOut();
               window.location.href = "login.html";
             });
           }
