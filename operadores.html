@@ -148,7 +148,7 @@
         };
         const { error } = await supabase.from("aplicadores_operarios").insert([nuevo]);
         if (error) {
-          status.textContent = "❌ Error al agregar";
+          status.textContent = "❌ Error al agregar: " + error.message;
         } else {
           status.textContent = "✅ Operador agregado";
           form.reset();
