@@ -26,11 +26,17 @@
         <label for="nombre">Nombre</label>
         <input type="text" id="nombre" name="nombre" required />
 
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" name="apellido" required />
+
         <label for="cuit">CUIT</label>
         <input type="text" id="cuit" name="cuit" />
 
         <label for="telefono">Teléfono</label>
         <input type="text" id="telefono" name="telefono" />
+
+        <label for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" />
 
         <label for="rol">Rol</label>
         <select id="rol" name="rol" required>
@@ -47,8 +53,10 @@
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>Apellido</th>
             <th>CUIT</th>
             <th>Teléfono</th>
+            <th>Dirección</th>
             <th>Rol</th>
             <th>Acciones</th>
           </tr>
@@ -87,7 +95,7 @@
         if (!userId) return;
         const { data, error } = await supabase
           .from("aplicadores_operarios")
-          .select("id, nombre, cuit, telefono, rol")
+          .select("id, nombre, apellido, cuit, telefono, direccion, rol")
           .eq("usuario_id", userId)
           .order("nombre", { ascending: true });
         if (error) {
@@ -98,8 +106,10 @@
           operadoresList.innerHTML += `
             <tr data-id="${op.id}">
               <td><span class="view">${op.nombre}</span><input class="edit" type="text" value="${op.nombre}" style="display:none;width:100%"></td>
+              <td><span class="view">${op.apellido}</span><input class="edit" type="text" value="${op.apellido}" style="display:none;width:100%"></td>
               <td><span class="view">${op.cuit || ""}</span><input class="edit" type="text" value="${op.cuit || ""}" style="display:none;width:100%"></td>
               <td><span class="view">${op.telefono || ""}</span><input class="edit" type="text" value="${op.telefono || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${op.direccion || ""}</span><input class="edit" type="text" value="${op.direccion || ""}" style="display:none;width:100%"></td>
               <td>
                 <span class="view">${op.rol}</span>
                 <select class="edit" style="display:none;width:100%">
@@ -129,8 +139,10 @@
         }
         const nuevo = {
           nombre: form.nombre.value,
+          apellido: form.apellido.value,
           cuit: form.cuit.value,
           telefono: form.telefono.value,
+          direccion: form.direccion.value,
           rol: form.rol.value,
           usuario_id: userId
         };
@@ -171,12 +183,14 @@
         // Guardar
         if (e.target.classList.contains("guardar")) {
           const nombre = tr.querySelector('input[type="text"]:nth-child(2)').value;
+          const apellido = tr.querySelector('input[type="text"]:nth-child(3)').value;
           const cuit = tr.querySelector('input[type="text"]:nth-child(4)').value;
           const telefono = tr.querySelector('input[type="text"]:nth-child(6)').value;
+          const direccion = tr.querySelector('input[type="text"]:nth-child(8)').value;
           const rol = tr.querySelector('select.edit').value;
           status.textContent = "Actualizando...";
           const { error } = await supabase.from("aplicadores_operarios")
-            .update({ nombre, cuit, telefono, rol })
+            .update({ nombre, apellido, cuit, telefono, direccion, rol })
             .eq("id", id);
           if (error) {
             status.textContent = "❌ Error al actualizar";
