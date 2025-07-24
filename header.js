@@ -55,8 +55,25 @@ async function mostrarHeaderInfo(user) {
   }
 
   const headerInfo = document.getElementById("header-info");
+  // Tamaño de fuente general del header
+  headerInfo.style.fontSize = "0.8em";
+  // Color de texto principal
+  headerInfo.style.color = "#444";
+  // Fondo suave, similar al fondo de la página (PicoCSS)
+  headerInfo.style.background = "#f8f9fa";
+  // Bordes redondeados del rectángulo
+  headerInfo.style.borderRadius = "6px";
+  // Espaciado interno reducido
+  headerInfo.style.padding = "2px 8px";
+  // Mostrar elementos en línea y centrados verticalmente
+  headerInfo.style.display = "inline-flex";
+  headerInfo.style.alignItems = "center";
+  // Espacio entre logo, organización y nombre
+  headerInfo.style.gap = "8px";
+
   headerInfo.innerHTML = `
-    <img src="${logoUrl}" alt="Logo" style="height:24px; margin-right:8px; border-radius:4px;">
-    <span>${nombre}${organizacion ? " • " + organizacion : ""}</span>
+    <img src="${logoUrl}" alt="Logo" style="height:20px; margin-right:6px; border-radius:3px;"> <!-- Logo de la organización -->
+    <span style="font-weight:500; font-size:0.85em; color:#666;">${organizacion}</span> <!-- Nombre de la organización -->
+    <span style="margin-left:10px; font-size:0.8em; color:#888;">${nombre}</span> <!-- Nombre del usuario -->
   `;
 }

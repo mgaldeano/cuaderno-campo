@@ -59,6 +59,26 @@
     </script>
   </head>
   <body>
+    <div id="header-container"></div>
+    <script type="module">
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+          // Manejo de logout (opcional, si no lo tienes en header.js)
+          const logoutBtn = document.querySelector("#logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              // Si tienes supabase en el scope global, puedes usarlo aquí
+              // await supabase.auth.signOut();
+              window.location.href = "login.html";
+            });
+          }
+        });
+    </script>
+
     <nav class="container-fluid">
       <ul><li><strong>Cuaderno de Campo</strong></li></ul>
       <ul>
