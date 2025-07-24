@@ -34,10 +34,10 @@
         </select>
 
         <label for="variedad">Variedad</label>
-        <input type="text" id="variedad" name="variedad" placeholder="Variedad" required />
+        <input type="text" id="variedad" name="variedad" readonly />
 
         <label for="especie">Especie</label>
-        <input type="text" id="especie" name="especie" placeholder="Especie" required />
+        <input type="text" id="especie" name="especie" readonly />
 
         <label for="labores">Labores realizadas y objetivo</label>
         <textarea id="labores" name="labores" rows="2" required></textarea>
@@ -61,6 +61,12 @@
 
         <label for="observaciones">Observaciones</label>
         <textarea id="observaciones" name="observaciones" rows="2"></textarea>
+
+        <label for="labor">Labor</label>
+        <input type="text" id="labor" name="labor" value="Riego" readonly />
+
+        <label for="objetivo">Objetivo</label>
+        <input type="text" id="objetivo" name="objetivo" placeholder="Objetivo del riego" required />
 
         <button type="submit">Registrar riego</button>
       </form>
@@ -140,6 +146,25 @@
         });
       });
 
+      // Después de cargar los cuarteles...
+      cuartelSelect.addEventListener("change", async () => {
+        const cuartelId = cuartelSelect.value;
+        if (!cuartelId) return;
+        // Traer especie y variedad del cuartel seleccionado
+        const { data, error } = await supabase
+          .from("cuarteles")
+          .select("especie, variedad")
+          .eq("id", cuartelId)
+          .single();
+        if (!error && data) {
+          document.getElementById("especie").value = data.especie || "";
+          document.getElementById("variedad").value = data.variedad || "";
+          // Proponer objetivo sugerido
+          const objetivoInput = document.getElementById("objetivo");
+          objetivoInput.value = `Riego para ${data.variedad || "el cultivo"}`;
+        }
+      });
+
       // Guardar registro de riego
       document.getElementById("riego-form").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -156,7 +181,9 @@
           maquinaria: form.maquinaria.value,
           horas_riego: form.horas_riego.value,
           volumen_agua: form.volumen_agua.value,
-          observaciones: form.observaciones.value
+          observaciones: form.observaciones.value,
+          labor: "Riego",
+          objetivo: form.objetivo.value,
         };
         const { error } = await supabase.from("riegos").insert([registro]);
         if (error) {
