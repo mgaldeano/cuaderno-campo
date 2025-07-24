@@ -37,7 +37,7 @@
     </style>
   </head>
   <body>
-  <div id="header"></div>
+  <div id="header-container"></div>
   <main class="container">
       <hgroup>
         <h2>Fincas</h2>
@@ -151,21 +151,6 @@
       });
 
       cargarFincas();
-
-      // Al final del script:
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header').innerHTML = html;
-          const logoutBtn = document.querySelector("#logoutBtn");
-          if (logoutBtn) {
-            logoutBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              await supabase.auth.signOut();
-              window.location.href = "login.html";
-            });
-          }
-        });
     </script>
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
   </body>

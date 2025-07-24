@@ -42,7 +42,7 @@
     </style>
   </head>
   <body>
-    <div id="header"></div>
+    <div id="header-container"></div>
     <main class="container">
       <hgroup>
         <h2>Cuarteles</h2>
@@ -322,7 +322,8 @@
       fetch('header.html')
         .then(res => res.text())
         .then(html => {
-          document.getElementById('header').innerHTML = html;
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js'); // <-- Esto ejecuta el JS del header
           const logoutBtn = document.querySelector("#logoutBtn");
           if (logoutBtn) {
             logoutBtn.addEventListener("click", async (e) => {
