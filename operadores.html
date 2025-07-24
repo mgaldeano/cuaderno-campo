@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Operadores | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="header-container"></div>
+    <script type="module">
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+        });
+    </script>
+
+    <main class="container">
+      <hgroup>
+        <h2>Gestión de Operadores</h2>
+        <h3>Agregue, edite o elimine sus operarios y aplicadores</h3>
+      </hgroup>
+      <form id="operador-form">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" required />
+
+        <label for="cuit">CUIT</label>
+        <input type="text" id="cuit" name="cuit" />
+
+        <label for="telefono">Teléfono</label>
+        <input type="text" id="telefono" name="telefono" />
+
+        <label for="rol">Rol</label>
+        <select id="rol" name="rol" required>
+          <option value="operario">Operario</option>
+          <option value="aplicador">Aplicador</option>
+        </select>
+
+        <button type="submit">Agregar operador</button>
+      </form>
+
+      <hr />
+      <h3>Lista de operadores</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>CUIT</th>
+            <th>Teléfono</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="operadores-list"></tbody>
+      </table>
+      <p id="status"></p>
+    </main>
+
+    <footer class="container">
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
+    </footer>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+      );
+
+      const operadorForm = document.getElementById("operador-form");
+      const operadoresList = document.getElementById("operadores-list");
+      const status = document.getElementById("status");
+
+      // Obtener usuario logueado
+      let userId = null;
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user.id;
+        cargarOperadores();
+      })();
+
+      // Cargar operadores del usuario
+      async function cargarOperadores() {
+        operadoresList.innerHTML = "";
+        if (!userId) return;
+        const { data, error } = await supabase
+          .from("aplicadores_operarios")
+          .select("id, nombre, cuit, telefono, rol")
+          .eq("usuario_id", userId)
+          .order("nombre", { ascending: true });
+        if (error) {
+          status.textContent = "Error al cargar operadores";
+          return;
+        }
+        for (const op of data) {
+          operadoresList.innerHTML += `
+            <tr>
+              <td>${op.nombre}</td>
+              <td>${op.cuit || ""}</td>
+              <td>${op.telefono || ""}</td>
+              <td>${op.rol}</td>
+              <td>
+                <button data-id="${op.id}" class="editar">Editar</button>
+                <button data-id="${op.id}" class="eliminar">Eliminar</button>
+              </td>
+            </tr>
+          `;
+        }
+      }
+
+      // Agregar operador
+      operadorForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.textContent = "Agregando...";
+        const form = e.target;
+        if (!userId) {
+          status.textContent = "Usuario no identificado";
+          return;
+        }
+        const nuevo = {
+          nombre: form.nombre.value,
+          cuit: form.cuit.value,
+          telefono: form.telefono.value,
+          rol: form.rol.value,
+          usuario_id: userId
+        };
+        const { error } = await supabase.from("aplicadores_operarios").insert([nuevo]);
+        if (error) {
+          status.textContent = "❌ Error al agregar";
+        } else {
+          status.textContent = "✅ Operador agregado";
+          form.reset();
+          cargarOperadores();
+        }
+      });
+
+      // Eliminar operador
+      operadoresList.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("eliminar")) {
+          const id = e.target.dataset.id;
+          if (confirm("¿Eliminar este operador?")) {
+            const { error } = await supabase.from("aplicadores_operarios").delete().eq("id", id);
+            if (error) status.textContent = "❌ Error al eliminar";
+            else {
+              status.textContent = "✅ Operador eliminado";
+              cargarOperadores();
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
