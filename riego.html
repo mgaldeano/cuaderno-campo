@@ -86,6 +86,7 @@
 
       async function cargarFincas() {
         const { data, error } = await supabase.from("fincas").select("id, nombre");
+        console.log("Fincas:", data, error);
         if (error) {
           status.textContent = "Error al cargar fincas";
           return;
@@ -110,6 +111,7 @@
           .from("cuarteles")
           .select("id, nombre")
           .eq("finca_id", fincaId);
+        console.log("Cuarteles:", cuarteles, cuartelesError);
         if (cuartelesError) {
           status.textContent = "Error al cargar cuarteles";
           return;
