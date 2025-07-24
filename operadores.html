@@ -81,7 +81,7 @@
         cargarOperadores();
       })();
 
-      // Cargar operadores del usuario
+      // Cargar operadores del usuario (con edición inline)
       async function cargarOperadores() {
         operadoresList.innerHTML = "";
         if (!userId) return;
@@ -96,14 +96,22 @@
         }
         for (const op of data) {
           operadoresList.innerHTML += `
-            <tr>
-              <td>${op.nombre}</td>
-              <td>${op.cuit || ""}</td>
-              <td>${op.telefono || ""}</td>
-              <td>${op.rol}</td>
+            <tr data-id="${op.id}">
+              <td><span class="view">${op.nombre}</span><input class="edit" type="text" value="${op.nombre}" style="display:none;width:100%"></td>
+              <td><span class="view">${op.cuit || ""}</span><input class="edit" type="text" value="${op.cuit || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${op.telefono || ""}</span><input class="edit" type="text" value="${op.telefono || ""}" style="display:none;width:100%"></td>
               <td>
-                <button data-id="${op.id}" class="editar">Editar</button>
-                <button data-id="${op.id}" class="eliminar">Eliminar</button>
+                <span class="view">${op.rol}</span>
+                <select class="edit" style="display:none;width:100%">
+                  <option value="operario" ${op.rol === "operario" ? "selected" : ""}>Operario</option>
+                  <option value="aplicador" ${op.rol === "aplicador" ? "selected" : ""}>Aplicador</option>
+                </select>
+              </td>
+              <td>
+                <button class="editar" data-id="${op.id}">Editar</button>
+                <button class="guardar" data-id="${op.id}" style="display:none">Guardar</button>
+                <button class="cancelar" data-id="${op.id}" style="display:none">Cancelar</button>
+                <button class="eliminar" data-id="${op.id}">Eliminar</button>
               </td>
             </tr>
           `;
@@ -136,10 +144,50 @@
         }
       });
 
-      // Eliminar operador
+      // Manejar edición inline
       operadoresList.addEventListener("click", async (e) => {
+        const tr = e.target.closest("tr");
+        if (!tr) return;
+        const id = tr.dataset.id;
+
+        // Editar
+        if (e.target.classList.contains("editar")) {
+          tr.querySelectorAll(".view").forEach(el => el.style.display = "none");
+          tr.querySelectorAll(".edit").forEach(el => el.style.display = "");
+          tr.querySelector(".editar").style.display = "none";
+          tr.querySelector(".guardar").style.display = "";
+          tr.querySelector(".cancelar").style.display = "";
+        }
+
+        // Cancelar
+        if (e.target.classList.contains("cancelar")) {
+          tr.querySelectorAll(".view").forEach(el => el.style.display = "");
+          tr.querySelectorAll(".edit").forEach(el => el.style.display = "none");
+          tr.querySelector(".editar").style.display = "";
+          tr.querySelector(".guardar").style.display = "none";
+          tr.querySelector(".cancelar").style.display = "none";
+        }
+
+        // Guardar
+        if (e.target.classList.contains("guardar")) {
+          const nombre = tr.querySelector('input[type="text"]:nth-child(2)').value;
+          const cuit = tr.querySelector('input[type="text"]:nth-child(4)').value;
+          const telefono = tr.querySelector('input[type="text"]:nth-child(6)').value;
+          const rol = tr.querySelector('select.edit').value;
+          status.textContent = "Actualizando...";
+          const { error } = await supabase.from("aplicadores_operarios")
+            .update({ nombre, cuit, telefono, rol })
+            .eq("id", id);
+          if (error) {
+            status.textContent = "❌ Error al actualizar";
+          } else {
+            status.textContent = "✅ Operador actualizado";
+            cargarOperadores();
+          }
+        }
+
+        // Eliminar (ya estaba implementado)
         if (e.target.classList.contains("eliminar")) {
-          const id = e.target.dataset.id;
           if (confirm("¿Eliminar este operador?")) {
             const { error } = await supabase.from("aplicadores_operarios").delete().eq("id", id);
             if (error) status.textContent = "❌ Error al eliminar";
