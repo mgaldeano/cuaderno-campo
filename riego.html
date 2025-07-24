@@ -84,15 +84,15 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
       );
 
-      // Cargar fincas al iniciar
+      // Elementos del DOM
       const fincaSelect = document.getElementById("finca");
       const cuartelSelect = document.getElementById("cuartel");
       const status = document.getElementById("status");
       const operadorSelect = document.getElementById("operador");
 
+      // Cargar fincas al iniciar
       async function cargarFincas() {
         const { data, error } = await supabase.from("fincas").select("id, nombre_finca");
-        console.log("Fincas:", data, error);
         if (error) {
           status.textContent = "Error al cargar fincas";
           return;
@@ -105,11 +105,10 @@
         });
       }
 
-      // Cargar cuarteles y operarios según finca seleccionada
+      // Cargar cuarteles según finca seleccionada
       fincaSelect.addEventListener("change", async () => {
         const fincaId = fincaSelect.value;
         cuartelSelect.innerHTML = '<option value="">Seleccione un cuartel...</option>';
-        operadorSelect.innerHTML = '<option value="">Seleccione un operario...</option>';
         if (!fincaId) return;
 
         // Cargar cuarteles
@@ -117,7 +116,6 @@
           .from("cuarteles")
           .select("id, nombre")
           .eq("finca_id", fincaId);
-        console.log("Cuarteles:", cuarteles, cuartelesError);
         if (cuartelesError) {
           status.textContent = "Error al cargar cuarteles";
           return;
@@ -128,41 +126,36 @@
           option.textContent = cuartel.nombre;
           cuartelSelect.appendChild(option);
         });
-
-        // Cargar operarios
-        const { data: operarios, error: operariosError } = await supabase
-          .from("aplicadores_operarios")
-          .select("id, nombre")
-          .eq("finca_id", fincaId);
-        if (operariosError) {
-          status.textContent = "Error al cargar operarios";
-          return;
-        }
-        operarios.forEach(op => {
-          const option = document.createElement("option");
-          option.value = op.id;
-          option.textContent = op.nombre;
-          operadorSelect.appendChild(option);
-        });
       });
 
-      // Después de cargar los cuarteles...
+      // Al cambiar cuartel, cargar especie y variedades asociadas
       cuartelSelect.addEventListener("change", async () => {
         const cuartelId = cuartelSelect.value;
         if (!cuartelId) return;
-        // Traer especie y variedad del cuartel seleccionado
-        const { data, error } = await supabase
+
+        // Traer especie del cuartel
+        const { data: cuartel, error: errorCuartel } = await supabase
           .from("cuarteles")
-          .select("especie, variedad")
+          .select("especie")
           .eq("id", cuartelId)
           .single();
-        if (!error && data) {
-          document.getElementById("especie").value = data.especie || "";
-          document.getElementById("variedad").value = data.variedad || "";
-          // Proponer objetivo sugerido
-          const objetivoInput = document.getElementById("objetivo");
-          objetivoInput.value = `Riego para ${data.variedad || "el cultivo"}`;
+        document.getElementById("especie").value = cuartel?.especie || "";
+
+        // Traer variedades asociadas al cuartel (relación muchos a muchos)
+        const { data: variedades, error: errorVar } = await supabase
+          .from("cuartel_variedades")
+          .select("variedades(nombre)")
+          .eq("cuartel_id", cuartelId);
+
+        if (!errorVar && variedades && variedades.length > 0) {
+          document.getElementById("variedad").value = variedades.map(v => v.variedades.nombre).join(", ");
+        } else {
+          document.getElementById("variedad").value = "";
         }
+
+        // Proponer objetivo sugerido
+        const objetivoInput = document.getElementById("objetivo");
+        objetivoInput.value = `Riego para ${document.getElementById("variedad").value || "el cultivo"}`;
       });
 
       // Guardar registro de riego
