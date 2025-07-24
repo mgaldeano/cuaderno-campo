@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
   </head>
   <body>
-    <div id="header"></div>
+    <div id="header-container"></div>
 
     <main class="container">
       <hgroup>
@@ -44,7 +44,7 @@
       fetch('header.html')
         .then(res => res.text())
         .then(html => {
-          document.getElementById('header').innerHTML = html;
+          document.getElementById('header-container').innerHTML = html;
           const logoutBtn = document.querySelector("#logoutBtn");
           if (logoutBtn) {
             logoutBtn.addEventListener("click", async (e) => {
