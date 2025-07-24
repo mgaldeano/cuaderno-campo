@@ -56,7 +56,7 @@ async function mostrarHeaderInfo(user) {
 
   const headerInfo = document.getElementById("header-info");
   // Tamaño de fuente general del header
-  headerInfo.style.fontSize = "0.7em";
+  headerInfo.style.fontSize = "0.75em";
   // Color de texto principal
   headerInfo.style.color = "#444";
   // Fondo suave, similar al fondo de la página (PicoCSS)
@@ -72,8 +72,8 @@ async function mostrarHeaderInfo(user) {
   headerInfo.style.gap = "12px";
 
   headerInfo.innerHTML = `
-    <img src="${logoUrl}" alt="Logo" style="height:20px; margin-right:6px; border-radius:3px;"> <!-- Logo de la organización -->
-    <span style="font-weight:500; font-size:0.85em; color:#666;">${organizacion}</span> <!-- Nombre de la organización -->
-    <span style="margin-left:10px; font-size:0.8em; color:#888;">${nombre}</span> <!-- Nombre del usuario -->
-  `;
+  <img src="${logoUrl}" alt="Logo" style="height:16px; margin-right:6px; border-radius:3px;"> <!-- Logo de la organización -->
+  <span style="font-weight:500; font-size:0.85em; color:#666;">${organizacion}</span> <!-- Nombre de la organización -->
+  <span style="margin-left:10px; font-size:0.8em; color:#888;">${nombre}</span> <!-- Nombre del usuario -->
+`;
 }
