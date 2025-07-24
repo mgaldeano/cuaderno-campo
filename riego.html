@@ -85,7 +85,7 @@
       const operadorSelect = document.getElementById("operador");
 
       async function cargarFincas() {
-        const { data, error } = await supabase.from("fincas").select("id, nombre");
+        const { data, error } = await supabase.from("fincas").select("id, nombre_finca");
         console.log("Fincas:", data, error);
         if (error) {
           status.textContent = "Error al cargar fincas";
@@ -94,7 +94,7 @@
         data.forEach(finca => {
           const option = document.createElement("option");
           option.value = finca.id;
-          option.textContent = finca.nombre;
+          option.textContent = finca.nombre_finca;
           fincaSelect.appendChild(option);
         });
       }
