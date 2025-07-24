@@ -56,11 +56,11 @@ async function mostrarHeaderInfo(user) {
 
   const headerInfo = document.getElementById("header-info");
   // Tamaño de fuente general del header
-  headerInfo.style.fontSize = "0.8em";
+  headerInfo.style.fontSize = "0.7em";
   // Color de texto principal
   headerInfo.style.color = "#444";
   // Fondo suave, similar al fondo de la página (PicoCSS)
-  headerInfo.style.background = "#f8f9fa";
+  headerInfo.style.background = "#26313bff";
   // Bordes redondeados del rectángulo
   headerInfo.style.borderRadius = "6px";
   // Espaciado interno reducido
@@ -69,7 +69,7 @@ async function mostrarHeaderInfo(user) {
   headerInfo.style.display = "inline-flex";
   headerInfo.style.alignItems = "center";
   // Espacio entre logo, organización y nombre
-  headerInfo.style.gap = "8px";
+  headerInfo.style.gap = "12px";
 
   headerInfo.innerHTML = `
     <img src="${logoUrl}" alt="Logo" style="height:20px; margin-right:6px; border-radius:3px;"> <!-- Logo de la organización -->
