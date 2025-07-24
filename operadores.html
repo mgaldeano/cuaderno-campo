@@ -182,12 +182,13 @@
 
         // Guardar
         if (e.target.classList.contains("guardar")) {
-          const nombre = tr.querySelector('input[type="text"]:nth-child(2)').value;
-          const apellido = tr.querySelector('input[type="text"]:nth-child(3)').value;
-          const cuit = tr.querySelector('input[type="text"]:nth-child(4)').value;
-          const telefono = tr.querySelector('input[type="text"]:nth-child(6)').value;
-          const direccion = tr.querySelector('input[type="text"]:nth-child(8)').value;
-          const rol = tr.querySelector('select.edit').value;
+          const edits = tr.querySelectorAll('.edit');
+          const nombre = edits[0].value;
+          const apellido = edits[1].value;
+          const cuit = edits[2].value;
+          const telefono = edits[3].value;
+          const direccion = edits[4].value;
+          const rol = edits[5].value;
           status.textContent = "Actualizando...";
           const { error } = await supabase.from("aplicadores_operarios")
             .update({ nombre, apellido, cuit, telefono, direccion, rol })
