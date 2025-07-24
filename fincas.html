@@ -150,6 +150,22 @@
         cargarFincas();
       });
 
+      // Cargar header y manejar logout
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js'); // Ejecuta el JS del header
+          const logoutBtn = document.querySelector("#logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              await supabase.auth.signOut();
+              window.location.href = "login.html";
+            });
+          }
+        });
+
       cargarFincas();
     </script>
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
