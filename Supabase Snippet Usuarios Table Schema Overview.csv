@@ -1,0 +1,71 @@
+table_name,column_name,data_type,is_nullable
+aplicadores_operarios,id,uuid,NO
+aplicadores_operarios,nombre,text,NO
+aplicadores_operarios,cuit,text,YES
+aplicadores_operarios,telefono,text,YES
+aplicadores_operarios,rol,text,YES
+aplicadores_operarios,finca_id,bigint,YES
+aplicadores_operarios,usuario_id,uuid,YES
+aplicadores_operarios,created_at,timestamp with time zone,YES
+cuartel_variedades,cuartel_id,bigint,NO
+cuartel_variedades,variedad_id,uuid,NO
+cuarteles,id,bigint,NO
+cuarteles,finca_id,bigint,YES
+cuarteles,superficie,numeric,YES
+cuarteles,nro_viñedo,text,YES
+cuarteles,provincia,text,YES
+cuarteles,departamento,text,YES
+cuarteles,created_at,timestamp with time zone,YES
+cuarteles,nombre,text,NO
+cuarteles,especie,text,YES
+cuarteles,variedad,text,YES
+fincas,id,bigint,NO
+fincas,nombre_finca,text,NO
+fincas,usuario_id,uuid,YES
+fincas,created_at,timestamp with time zone,YES
+fincas,direccion,text,YES
+fincas,superficie,numeric,YES
+operario_finca,operario_id,uuid,NO
+operario_finca,finca_id,bigint,NO
+operario_finca,estado,text,NO
+organizaciones,id,uuid,NO
+organizaciones,nombre,text,NO
+organizaciones,logo_url,text,YES
+organizaciones,color_base,text,YES
+riegos,id,bigint,NO
+riegos,finca_id,bigint,YES
+riegos,cuartel_id,bigint,YES
+riegos,variedad,text,YES
+riegos,especie,text,YES
+riegos,labores,text,YES
+riegos,operador_id,uuid,YES
+riegos,fecha,date,YES
+riegos,maquinaria,text,YES
+riegos,horas_riego,numeric,YES
+riegos,volumen_agua,numeric,YES
+riegos,observaciones,text,YES
+riegos,created_at,timestamp with time zone,YES
+tareas,id,bigint,NO
+tareas,tipo_tarea_old,text,YES
+tareas,fecha,date,YES
+tareas,cuartel_id,bigint,YES
+tareas,duracion,integer,YES
+tareas,cant_agua,integer,YES
+tareas,obs,text,YES
+tareas,created_at,timestamp with time zone,YES
+tareas,tipo_tarea_id,integer,YES
+tipos_tarea,id,integer,NO
+tipos_tarea,nombre,text,NO
+tipos_tarea,requiere_duracion,boolean,YES
+tipos_tarea,requiere_agua,boolean,YES
+tipos_tarea,requiere_obs,boolean,YES
+usuarios,id,uuid,NO
+usuarios,nombre,text,YES
+usuarios,cuit,text,YES
+usuarios,telefono,text,YES
+usuarios,rol,text,YES
+usuarios,created_at,timestamp with time zone,YES
+usuarios,organizacion_id,uuid,YES
+usuarios,email,text,YES
+variedades,id,uuid,NO
+variedades,nombre,text,NO
