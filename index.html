@@ -44,6 +44,7 @@
         .then(res => res.text())
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
           const logoutBtn = document.querySelector("#logoutBtn");
           if (logoutBtn) {
             logoutBtn.addEventListener("click", async (e) => {
