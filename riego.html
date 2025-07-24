@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Registrar Riego | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="header-container"></div>
+    <script type="module">
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+        });
+    </script>
+
+    <main class="container">
+      <hgroup>
+        <h2>Registrar Riego</h2>
+        <h3>Complete los datos del riego realizado</h3>
+      </hgroup>
+      <form id="riego-form">
+        <label for="finca">Finca</label>
+        <select id="finca" name="finca" required>
+          <option value="">Seleccione una finca...</option>
+        </select>
+
+        <label for="cuartel">Cuartel</label>
+        <select id="cuartel" name="cuartel" required>
+          <option value="">Seleccione un cuartel...</option>
+        </select>
+
+        <label for="variedad">Variedad</label>
+        <input type="text" id="variedad" name="variedad" placeholder="Variedad" required />
+
+        <label for="especie">Especie</label>
+        <input type="text" id="especie" name="especie" placeholder="Especie" required />
+
+        <label for="labores">Labores realizadas y objetivo</label>
+        <textarea id="labores" name="labores" rows="2" required></textarea>
+
+        <label for="operador">Operador responsable</label>
+        <select id="operador" name="operador" required>
+          <option value="">Seleccione un operario...</option>
+        </select>
+
+        <label for="fecha">Fecha de realización</label>
+        <input type="date" id="fecha" name="fecha" required />
+
+        <label for="maquinaria">Maquinaria utilizada</label>
+        <input type="text" id="maquinaria" name="maquinaria" placeholder="(Opcional)" />
+
+        <label for="horas_riego">Horas de riego</label>
+        <input type="number" id="horas_riego" name="horas_riego" min="0" step="0.1" placeholder="Cantidad de horas" />
+
+        <label for="volumen_agua">Volumen de agua (m³)</label>
+        <input type="number" id="volumen_agua" name="volumen_agua" min="0" step="0.1" placeholder="Volumen aplicado" />
+
+        <label for="observaciones">Observaciones</label>
+        <textarea id="observaciones" name="observaciones" rows="2"></textarea>
+
+        <button type="submit">Registrar riego</button>
+      </form>
+      <p id="status"></p>
+    </main>
+
+    <footer class="container">
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
+    </footer>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+      );
+
+      // Cargar fincas al iniciar
+      const fincaSelect = document.getElementById("finca");
+      const cuartelSelect = document.getElementById("cuartel");
+      const status = document.getElementById("status");
+      const operadorSelect = document.getElementById("operador");
+
+      async function cargarFincas() {
+        const { data, error } = await supabase.from("fincas").select("id, nombre");
+        if (error) {
+          status.textContent = "Error al cargar fincas";
+          return;
+        }
+        data.forEach(finca => {
+          const option = document.createElement("option");
+          option.value = finca.id;
+          option.textContent = finca.nombre;
+          fincaSelect.appendChild(option);
+        });
+      }
+
+      // Cargar cuarteles y operarios según finca seleccionada
+      fincaSelect.addEventListener("change", async () => {
+        const fincaId = fincaSelect.value;
+        cuartelSelect.innerHTML = '<option value="">Seleccione un cuartel...</option>';
+        operadorSelect.innerHTML = '<option value="">Seleccione un operario...</option>';
+        if (!fincaId) return;
+
+        // Cargar cuarteles
+        const { data: cuarteles, error: cuartelesError } = await supabase
+          .from("cuarteles")
+          .select("id, nombre")
+          .eq("finca_id", fincaId);
+        if (cuartelesError) {
+          status.textContent = "Error al cargar cuarteles";
+          return;
+        }
+        cuarteles.forEach(cuartel => {
+          const option = document.createElement("option");
+          option.value = cuartel.id;
+          option.textContent = cuartel.nombre;
+          cuartelSelect.appendChild(option);
+        });
+
+        // Cargar operarios
+        const { data: operarios, error: operariosError } = await supabase
+          .from("aplicadores_operarios")
+          .select("id, nombre")
+          .eq("finca_id", fincaId);
+        if (operariosError) {
+          status.textContent = "Error al cargar operarios";
+          return;
+        }
+        operarios.forEach(op => {
+          const option = document.createElement("option");
+          option.value = op.id;
+          option.textContent = op.nombre;
+          operadorSelect.appendChild(option);
+        });
+      });
+
+      // Guardar registro de riego
+      document.getElementById("riego-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.textContent = "Guardando...";
+        const form = e.target;
+        const registro = {
+          finca_id: form.finca.value,
+          cuartel_id: form.cuartel.value,
+          variedad: form.variedad.value,
+          especie: form.especie.value,
+          labores: form.labores.value,
+          operador_id: form.operador.value,
+          fecha: form.fecha.value,
+          maquinaria: form.maquinaria.value,
+          horas_riego: form.horas_riego.value,
+          volumen_agua: form.volumen_agua.value,
+          observaciones: form.observaciones.value
+        };
+        const { error } = await supabase.from("riegos").insert([registro]);
+        if (error) {
+          status.textContent = "❌ Error al guardar";
+        } else {
+          status.textContent = "✅ Riego registrado correctamente";
+          form.reset();
+          cuartelSelect.innerHTML = '<option value="">Seleccione un cuartel...</option>';
+          operadorSelect.innerHTML = '<option value="">Seleccione un operario...</option>';
+        }
+      });
+
+      // Inicializar
+      cargarFincas();
+    </script>
+  </body>
+</html>

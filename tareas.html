@@ -5,79 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tareas | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
-    <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-      const supabase = createClient(
-        "https://djvdjulfeuqohpnatdmt.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
-      );
-
-      const form = document.querySelector("form");
-      const cuartelSelect = document.querySelector("#cuartel_id");
-      const tipoSelect = document.querySelector("#tipo_tarea");
-      const lista = document.querySelector("#tareas-list");
-      const status = document.querySelector("#status");
-
-      async function cargarTipos() {
-        const { data, error } = await supabase.from("tipos_tarea").select("*");
-        if (!error && data) {
-          data.forEach(t => {
-            const opt = document.createElement("option");
-            opt.value = t.nombre;
-            opt.textContent = t.nombre;
-            tipoSelect.appendChild(opt);
-          });
-        }
-      }
-
-      async function cargarCuarteles() {
-        const { data, error } = await supabase.from("cuarteles").select("id, nombre_cuartel");
-        if (!error && data) {
-          data.forEach(c => {
-            const opt = document.createElement("option");
-            opt.value = c.id;
-            opt.textContent = c.nombre_cuartel;
-            cuartelSelect.appendChild(opt);
-          });
-        }
-      }
-
-      async function cargarTareas() {
-        const { data, error } = await supabase.from("tareas").select("*").order("fecha", { ascending: false });
-        if (!error && data) {
-          lista.innerHTML = "";
-          data.forEach(t => {
-            const li = document.createElement("li");
-            li.textContent = `${t.fecha} - ${t.tipo_tarea} - Cuartel ${t.cuartel_id}`;
-            lista.appendChild(li);
-          });
-        }
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const payload = {
-          tipo_tarea: tipoSelect.value,
-          fecha: document.querySelector("#fecha").value,
-          cuartel_id: parseInt(cuartelSelect.value),
-          duracion: parseInt(document.querySelector("#duracion").value),
-          cant_agua: parseInt(document.querySelector("#cant_agua").value || 0),
-          obs: document.querySelector("#obs").value,
-        };
-        const { error } = await supabase.from("tareas").insert(payload);
-        if (error) {
-          status.textContent = "❌ Error al guardar tarea";
-        } else {
-          status.textContent = "✅ Tarea registrada";
-          form.reset();
-          cargarTareas();
-        }
-      });
-
-      cargarCuarteles();
-      cargarTipos();
-      cargarTareas();
-    </script>
   </head>
   <body>
     <div id="header-container"></div>
@@ -87,43 +14,25 @@
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
           import('./header.js');
-          // Manejo de logout (opcional, si no lo tienes en header.js)
-          const logoutBtn = document.querySelector("#logoutBtn");
-          if (logoutBtn) {
-            logoutBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              // Si tienes supabase en el scope global, puedes usarlo aquí
-              // await supabase.auth.signOut();
-              window.location.href = "login.html";
-            });
-          }
         });
     </script>
 
     <main class="container">
       <hgroup>
-        <h2>Registrar Tarea</h2>
-        <h3>Asociada a un cuartel</h3>
+        <h2>¿Qué tarea desea registrar?</h2>
+        <h3>Seleccione el tipo de tarea a cargar</h3>
       </hgroup>
-      <form>
-        <select id="tipo_tarea" required>
-          <option value="">Seleccionar tipo de tarea</option>
-        </select>
-        <input type="date" id="fecha" required />
-        <select id="cuartel_id" required>
-          <option value="">Seleccionar cuartel</option>
-        </select>
-        <input type="number" id="duracion" placeholder="Duración (min)" />
-        <input type="number" id="cant_agua" placeholder="Cantidad de agua (lts)" />
-        <textarea id="obs" placeholder="Observaciones"></textarea>
-        <button type="submit">Guardar</button>
-      </form>
-      <p id="status"></p>
-
-      <h3>Tareas registradas</h3>
-      <ul id="tareas-list"></ul>
+      <ul>
+        <li><a href="riego.html">Registrar Riego</a></li>
+        <li><a href="labores-suelo.html">Registrar Labores de Suelo</a></li>
+        <li><a href="aplicacion-agroquimicos.html">Registrar Aplicación de Agroquímicos</a></li>
+        <li><a href="fertilizacion.html">Registrar Fertilización</a></li>
+        <!-- Agrega aquí más tareas futuras -->
+      </ul>
     </main>
 
-    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
+    <footer class="container">
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
+    </footer>
   </body>
 </html>
