@@ -8,20 +8,6 @@
   </head>
   <body>
     <div id="header-container"></div>
-    <script type="module">
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
-    }
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
-        });
-    </script>
 
     <main class="container">
       <hgroup>
@@ -81,6 +67,22 @@
     <script type="module">
       import { supabase } from "./supabaseClient.js";
 
+      // Validar login y obtener user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "login.html";
+        throw new Error("No autorizado");
+      }
+
+      // Cargar header y lógica de logout
+      await fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+        });
+
+      // --- Lógica principal de la página ---
       const status = document.getElementById("status");
       const fincasDiv = document.getElementById("fincas-checkboxes");
       const cuartelesDiv = document.getElementById("cuarteles-checkboxes");
@@ -161,7 +163,6 @@
       }
 
       // Cargar operarios del usuario logueado
-      // user ya está definido globalmente arriba
       const userId = user.id;
       let operariosGlobal = [];
       async function cargarOperarios() {
