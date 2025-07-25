@@ -18,6 +18,12 @@
   <body>
     <div id="header-container"></div>
     <script type="module">
+    import { supabase } from "./supabaseClient.js";
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "login.html";
+      throw new Error("No autorizado");
+    }
       fetch('header.html')
         .then(res => res.text())
         .then(html => {
