@@ -176,7 +176,8 @@
         };
         const { error } = await supabase.from("riegos").insert([registro]);
         if (error) {
-          status.textContent = "❌ Error al guardar";
+          status.textContent = "❌ Error al guardar: " + error.message;
+          console.error(error);
         } else {
           status.textContent = "✅ Riego registrado correctamente";
           form.reset();
