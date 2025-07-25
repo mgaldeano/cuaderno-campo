@@ -77,3 +77,22 @@ async function mostrarHeaderInfo(user) {
   <span style="margin-left:10px; font-size:0.8em; color:#888;">${nombre}</span> <!-- Nombre del usuario -->
 `;
 }
+
+// Manejo universal de cierre de sesión
+// Esto asegura que el botón funcione en todas las páginas que incluyan header.js
+// y que solo se agregue un listener por carga
+
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+      } catch (err) {
+        alert('Error al cerrar sesión');
+      }
+    });
+  }
+});
