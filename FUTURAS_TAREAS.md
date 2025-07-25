@@ -1,3 +1,4 @@
+* Mejorar experiencia móvil y responsive: revisar tablas, formularios y botones para una visualización y uso óptimos en celulares. Tener en cuenta si se hacen otros cambios visuales o de flujo.
 # Futuras tareas y mejoras - Cuaderno de Campo
 
 ## 1. Roles y permisos
