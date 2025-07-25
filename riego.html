@@ -75,12 +75,27 @@
       }
 
       // Cargar header y lógica de logout
+      // Asegurarse de que header.js se importe solo después de que el header esté en el DOM
       await fetch('header.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
         });
+      // Esperar a que #logoutBtn exista antes de importar header.js
+      function waitForLogoutBtn() {
+        return new Promise(resolve => {
+          const check = () => {
+            if (document.getElementById('logoutBtn')) {
+              resolve();
+            } else {
+              setTimeout(check, 30);
+            }
+          };
+          check();
+        });
+      }
+      await waitForLogoutBtn();
+      await import('./header.js');
 
       // --- Lógica principal de la página ---
       const status = document.getElementById("status");
