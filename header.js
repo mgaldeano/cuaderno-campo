@@ -78,17 +78,27 @@ async function mostrarHeaderInfo(user) {
 // Esto asegura que el botón funcione en todas las páginas que incluyan header.js
 // y que solo se agregue un listener por carga
 
-document.addEventListener('DOMContentLoaded', () => {
+function setLogoutListener() {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
+    // Eliminar listeners previos si existen
+    logoutBtn.replaceWith(logoutBtn.cloneNode(true));
+    const newLogoutBtn = document.getElementById('logoutBtn');
+    newLogoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       try {
         await supabase.auth.signOut();
-        window.location.href = 'login.html';
       } catch (err) {
-        alert('Error al cerrar sesión');
+        // Ignorar error, siempre redirigir
+      } finally {
+        window.location.href = 'login.html';
       }
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setLogoutListener);
+} else {
+  setLogoutListener();
+}
