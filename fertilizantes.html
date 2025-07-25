@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestionar Fertilizantes</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="header-container"></div>
+  <main class="container">
+    <h2>Fertilizantes</h2>
+    <input type="search" id="searchInput" placeholder="Buscar por producto, fórmula o nutriente..." />
+    <button id="addBtn">➕ Nuevo fertilizante</button>
+    <div style="overflow-x:auto;">
+      <table id="fertilizantesTable">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Fórmula</th>
+            <th>N</th>
+            <th>P</th>
+            <th>K</th>
+            <th>Ca</th>
+            <th>Mg</th>
+            <th>S</th>
+            <th>Fe</th>
+            <th>Mn</th>
+            <th>Zn</th>
+            <th>Cu</th>
+            <th>Bo</th>
+            <th>Mo</th>
+            <th>Cl</th>
+            <th>pH</th>
+            <th>Otro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://djvdjulfeuqohpnatdmt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+    );
+
+    // Cargar header
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+        import('./header.js');
+      });
+
+    // ABM lógica
+    const table = document.getElementById('fertilizantesTable').querySelector('tbody');
+    const searchInput = document.getElementById('searchInput');
+    const addBtn = document.getElementById('addBtn');
+
+    let fertilizantes = [];
+    let editingId = null;
+
+    async function fetchFertilizantes() {
+      const { data, error } = await supabase.from('fertilizantes').select('*').order('producto');
+      if (!error) {
+        fertilizantes = data;
+        renderTable();
+      }
+    }
+
+    function renderTable() {
+      const filtro = searchInput.value.toLowerCase();
+      table.innerHTML = '';
+      fertilizantes.filter(f =>
+        f.producto?.toLowerCase().includes(filtro) ||
+        f.formula?.toLowerCase().includes(filtro) ||
+        [f.n,f.p,f.k,f.ca,f.mg,f.s,f.fe,f.mn,f.zn,f.cu,f.bo,f.mo,f.cl,f.ph,f.otro].some(x => (x+'').toLowerCase().includes(filtro))
+      ).forEach(f => {
+        const tr = document.createElement('tr');
+        if (editingId === f.id) {
+          tr.innerHTML = `
+            <td><input value="${f.producto||''}" data-field="producto"></td>
+            <td><input value="${f.formula||''}" data-field="formula"></td>
+            <td><input value="${f.n||''}" data-field="n"></td>
+            <td><input value="${f.p||''}" data-field="p"></td>
+            <td><input value="${f.k||''}" data-field="k"></td>
+            <td><input value="${f.ca||''}" data-field="ca"></td>
+            <td><input value="${f.mg||''}" data-field="mg"></td>
+            <td><input value="${f.s||''}" data-field="s"></td>
+            <td><input value="${f.fe||''}" data-field="fe"></td>
+            <td><input value="${f.mn||''}" data-field="mn"></td>
+            <td><input value="${f.zn||''}" data-field="zn"></td>
+            <td><input value="${f.cu||''}" data-field="cu"></td>
+            <td><input value="${f.bo||''}" data-field="bo"></td>
+            <td><input value="${f.mo||''}" data-field="mo"></td>
+            <td><input value="${f.cl||''}" data-field="cl"></td>
+            <td><input value="${f.ph||''}" data-field="ph"></td>
+            <td><input value="${f.otro||''}" data-field="otro"></td>
+            <td>
+              <button data-action="save">💾</button>
+              <button data-action="cancel">✖️</button>
+            </td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td>${f.producto||''}</td>
+            <td>${f.formula||''}</td>
+            <td>${f.n||''}</td>
+            <td>${f.p||''}</td>
+            <td>${f.k||''}</td>
+            <td>${f.ca||''}</td>
+            <td>${f.mg||''}</td>
+            <td>${f.s||''}</td>
+            <td>${f.fe||''}</td>
+            <td>${f.mn||''}</td>
+            <td>${f.zn||''}</td>
+            <td>${f.cu||''}</td>
+            <td>${f.bo||''}</td>
+            <td>${f.mo||''}</td>
+            <td>${f.cl||''}</td>
+            <td>${f.ph||''}</td>
+            <td>${f.otro||''}</td>
+            <td>
+              <button data-action="edit">✏️</button>
+              <button data-action="delete">🗑️</button>
+            </td>
+          `;
+        }
+        tr.dataset.id = f.id;
+        table.appendChild(tr);
+      });
+    }
+
+    table.addEventListener('click', async e => {
+      const tr = e.target.closest('tr');
+      const id = tr?.dataset.id;
+      const action = e.target.dataset.action;
+      if (!id) return;
+      if (action === 'edit') {
+        editingId = id;
+        renderTable();
+      } else if (action === 'cancel') {
+        editingId = null;
+        renderTable();
+      } else if (action === 'save') {
+        const inputs = tr.querySelectorAll('input');
+        const update = {};
+        inputs.forEach(inp => update[inp.dataset.field] = inp.value);
+        await supabase.from('fertilizantes').update(update).eq('id', id);
+        editingId = null;
+        fetchFertilizantes();
+      } else if (action === 'delete') {
+        if (confirm('¿Eliminar este fertilizante?')) {
+          await supabase.from('fertilizantes').delete().eq('id', id);
+          fetchFertilizantes();
+        }
+      }
+    });
+
+    addBtn.addEventListener('click', () => {
+      const nuevo = {
+        id: 'nuevo-'+Math.random(), producto:'', formula:'', n:'', p:'', k:'', ca:'', mg:'', s:'', fe:'', mn:'', zn:'', cu:'', bo:'', mo:'', cl:'', ph:'', otro:''
+      };
+      fertilizantes.unshift(nuevo);
+      editingId = nuevo.id;
+      renderTable();
+    });
+
+    table.addEventListener('click', async e => {
+      const tr = e.target.closest('tr');
+      if (!tr || !tr.dataset.id?.startsWith('nuevo-')) return;
+      if (e.target.dataset.action === 'save') {
+        const inputs = tr.querySelectorAll('input');
+        const nuevo = {};
+        inputs.forEach(inp => nuevo[inp.dataset.field] = inp.value);
+        await supabase.from('fertilizantes').insert([nuevo]);
+        editingId = null;
+        fetchFertilizantes();
+      } else if (e.target.dataset.action === 'cancel') {
+        fertilizantes.shift();
+        editingId = null;
+        renderTable();
+      }
+    });
+
+    searchInput.addEventListener('input', renderTable);
+    fetchFertilizantes();
+  </script>
+</body>
+</html>
