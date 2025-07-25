@@ -226,7 +226,7 @@
           // Fecha
           filas[0].querySelector('.fecha-celda').addEventListener('change', e => {
             const val = e.target.value;
-            filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.fecha-celda').value) fila.querySelector('.fecha-celda').value = val; });
+            filas.forEach((fila, idx) => { if(idx>0) fila.querySelector('.fecha-celda').value = val; });
           });
           // Horas
           filas[0].querySelector('.horas-celda').addEventListener('change', e => {
