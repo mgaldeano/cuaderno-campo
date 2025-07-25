@@ -133,10 +133,23 @@
         });
       });
 
+
+      // Función para proponer objetivo sugerido
+      function proponerObjetivo() {
+        const variedad = document.getElementById("variedad").value;
+        const objetivoInput = document.getElementById("objetivo");
+        objetivoInput.value = `Riego para ${variedad || "el cultivo"}`;
+      }
+
       // Al cambiar cuartel, cargar especie y variedades asociadas
       cuartelSelect.addEventListener("change", async () => {
         const cuartelId = cuartelSelect.value;
-        if (!cuartelId) return;
+        if (!cuartelId) {
+          document.getElementById("especie").value = "";
+          document.getElementById("variedad").value = "";
+          proponerObjetivo();
+          return;
+        }
 
         // Traer especie del cuartel
         const { data: cuartel, error: errorCuartel } = await supabase
@@ -158,10 +171,15 @@
           document.getElementById("variedad").value = "";
         }
 
-        // Proponer objetivo sugerido
-        const objetivoInput = document.getElementById("objetivo");
-        objetivoInput.value = `Riego para ${document.getElementById("variedad").value || "el cultivo"}`;
+        proponerObjetivo();
       });
+
+      // Proponer objetivo al cargar fincas/cuarteres
+      fincaSelect.addEventListener("change", proponerObjetivo);
+      cuartelSelect.addEventListener("change", proponerObjetivo);
+
+      // Proponer objetivo al cargar el formulario
+      window.addEventListener('DOMContentLoaded', proponerObjetivo);
 
       // Guardar registro de riego
       document.getElementById("riego-form").addEventListener("submit", async (e) => {
