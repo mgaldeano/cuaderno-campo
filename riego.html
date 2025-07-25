@@ -33,11 +33,19 @@
         <select id="finca" name="finca" required>
           <option value="">Seleccione una finca...</option>
         </select>
+        <div style="display:flex; gap:0.5em; align-items:center;"></div>
+          <button type="button" id="fincaSelectAll" style="font-size:0.9em;">Seleccionar todos</button>
+          <button type="button" id="fincaDeselectAll" style="font-size:0.9em;">Deseleccionar todo</button>
+        </div>
 
         <label for="cuartel">Cuartel</label>
         <select id="cuartel" name="cuartel" required>
           <option value="">Seleccione un cuartel...</option>
         </select>
+        <div style="display:flex; gap:0.5em; align-items:center;">
+          <button type="button" id="cuartelSelectAll" style="font-size:0.9em;">Seleccionar todos</button>
+          <button type="button" id="cuartelDeselectAll" style="font-size:0.9em;">Deseleccionar todo</button>
+        </div>
 
         <label for="variedad">Variedad</label>
         <input type="text" id="variedad" name="variedad" readonly />
