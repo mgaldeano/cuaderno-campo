@@ -6,9 +6,7 @@
     <title>Reportes | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
     <script type="module">
-      import { createClient } from "./supabaseClient.js";
-
-      const supabase = createClient();
+      import { supabase } from "./supabaseClient.js";
       const contenedor = document.querySelector("#reporte-tareas");
 
       async function cargarReporte() {
