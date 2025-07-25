@@ -19,316 +19,326 @@
 
     <main class="container">
       <hgroup>
-        <h1>Registro de Riego</h1>
-        <p>Complete los datos para registrar un riego.</p>
+        <h2>Registrar Riego</h2>
+        <h3>Complete los datos del riego realizado</h3>
       </hgroup>
+
       <form id="riego-form">
-        <div id="status" style="margin-bottom:1em;color:#b00;font-weight:bold;"></div>
-        <fieldset>
-          <legend>Fincas</legend>
-          <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
-            <button type="button" id="fincaSelectAll">Seleccionar todas</button>
-            <button type="button" id="fincaDeselectAll">Deseleccionar todas</button>
+        <div style="display:flex; gap:1em; align-items:center; margin-bottom:0.5em;">
+          <div style="display:flex; flex-direction:column; min-width:6em;">
+            <label for="labor" style="margin-bottom:0.1em;">Labor</label>
+            <input type="text" id="labor" name="labor" value="Riego" readonly style="width:6em; min-width:0; max-width:100%; padding:0.2em 0.5em; font-size:1em;" />
           </div>
-          <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:0.7em;"></div>
-        </fieldset>
-        <fieldset>
-          <legend>Cuarteles</legend>
-          <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
-            <button type="button" id="cuartelSelectAll">Seleccionar todos</button>
-            <button type="button" id="cuartelDeselectAll">Deseleccionar todos</button>
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <label for="objetivo" style="margin-bottom:0.1em;">Objetivo</label>
+            <input type="text" id="objetivo" name="objetivo" placeholder="Objetivo del riego" required value="Reposición de agua en el suelo para el cultivo" style="width:100%; min-width:0; max-width:100%; padding:0.2em 0.5em; font-size:1em;" />
           </div>
-          <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:0.7em;"></div>
-        </fieldset>
-        <fieldset>
-          <legend>Datos de Riego</legend>
-          <div id="tabla-cuarteles"></div>
-          <div style="margin-top:1em; display:flex; gap:1em; flex-wrap:wrap;">
-            <label>Maquinaria:
-              <input type="text" id="maquinaria" name="maquinaria" style="width:12em;" />
-            </label>
-            <label>Objetivo:
-              <input type="text" id="objetivo" name="objetivo" style="width:18em;" />
-            </label>
-          </div>
-        </fieldset>
-        <div style="margin-top:1.5em;">
-          <button type="submit">Guardar Riego</button>
-          <button type="reset" style="margin-left:1em;">Limpiar</button>
         </div>
+
+        <label>Fincas</label>
+        <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
+        <div style="display:flex; gap:0.2em; align-items:center; margin-bottom:0.5em;">
+          <button type="button" id="fincaSelectAll" style="font-size:0.95em; min-width:1.1em; width:1.1em; height:1.5em; padding:0; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="fincaDeselectAll" style="font-size:0.95em; min-width:1.1em; width:1.1em; height:1.5em; padding:0; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <span style="font-size:0.9em; color:#666;">Fincas</span>
+        </div>
+
+        <label>Cuarteles</label>
+        <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
+        <div style="display:flex; gap:0.2em; align-items:center; margin-bottom:0.5em;">
+          <button type="button" id="cuartelSelectAll" style="font-size:0.95em; min-width:1.1em; width:1.1em; height:1.5em; padding:0; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="cuartelDeselectAll" style="font-size:0.95em; min-width:1.1em; width:1.1em; height:1.5em; padding:0; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <span style="font-size:0.9em; color:#666;">Cuarteles</span>
+        </div>
+
+        <div id="tabla-cuarteles"></div>
+
+        <label for="maquinaria">Maquinaria utilizada</label>
+        <input type="text" id="maquinaria" name="maquinaria" placeholder="(Opcional)" />
+
+        <button type="submit">Registrar riego</button>
       </form>
+      <p id="status"></p>
     </main>
-      <!-- Botón de ayuda flotante -->
-      <button id="ayuda-riego-btn" title="Ayuda" style="position:fixed; bottom:2em; right:2em; z-index:1000; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:50%; width:2.5em; height:2.5em; font-size:1.5em; box-shadow:0 2px 8px #0002; cursor:pointer;">?</button>
-      <div id="ayuda-riego-modal" style="display:none; position:fixed; bottom:5em; right:2em; z-index:1001; background:#fff; color:#222; border:1px solid #8ab; border-radius:8px; box-shadow:0 2px 16px #0003; padding:1em 1.2em; max-width:320px; font-size:1em;">
-        <div id="ayuda-riego-contenido" style="white-space:pre-line;"></div>
-        <button id="cerrar-ayuda-riego" style="margin-top:0.7em; float:right; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:4px; padding:0.2em 0.8em; font-size:1em;">Cerrar</button>
-      </div>
+
+    <footer class="container">
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
+    </footer>
+
+    <!-- Botón de ayuda flotante -->
+    <button id="ayuda-riego-btn" title="Ayuda" style="position:fixed; bottom:2em; right:2em; z-index:1000; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:50%; width:2.5em; height:2.5em; font-size:1.5em; box-shadow:0 2px 8px #0002; cursor:pointer;">?</button>
+    <div id="ayuda-riego-modal" style="display:none; position:fixed; bottom:5em; right:2em; z-index:1001; background:#fff; color:#222; border:1px solid #8ab; border-radius:8px; box-shadow:0 2px 16px #0003; padding:1em 1.2em; max-width:320px; font-size:1em;">
+      <div id="ayuda-riego-contenido" style="white-space:pre-line;"></div>
+      <button id="cerrar-ayuda-riego" style="margin-top:0.7em; float:right; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:4px; padding:0.2em 0.8em; font-size:1em;">Cerrar</button>
+    </div>
+
     <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-const supabase = createClient(
-  "https://djvdjulfeuqohpnatdmt.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
-);
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const supabase = createClient(
+        "https://djvdjulfeuqohpnatdmt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+      );
 
-const status = document.getElementById("status");
-const fincasDiv = document.getElementById("fincas-checkboxes");
-const cuartelesDiv = document.getElementById("cuarteles-checkboxes");
-const tablaCuartelesDiv = document.getElementById("tabla-cuarteles");
+      const status = document.getElementById("status");
+      const fincasDiv = document.getElementById("fincas-checkboxes");
+      const cuartelesDiv = document.getElementById("cuarteles-checkboxes");
+      const tablaCuartelesDiv = document.getElementById("tabla-cuarteles");
 
-// Cargar fincas al iniciar
-async function cargarFincas() {
-  fincasDiv.innerHTML = '';
-  const { data, error } = await supabase.from("fincas").select("id, nombre_finca");
-  if (error) {
-    status.textContent = "Error al cargar fincas";
-    return;
-  }
-  data.forEach(finca => {
-    const label = document.createElement("label");
-    label.style.display = "flex";
-    label.style.alignItems = "center";
-    label.style.gap = "0.3em";
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = finca.id;
-    checkbox.className = "finca-checkbox";
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(finca.nombre_finca));
-    fincasDiv.appendChild(label);
-    // Corregir: actualizar cuarteles al seleccionar/deseleccionar finca
-    checkbox.addEventListener('change', mostrarCuartelesSeleccionados);
-  });
-}
-
-// Botones seleccionar/deseleccionar todos
-document.getElementById("fincaSelectAll").onclick = () => {
-  fincasDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = true);
-  mostrarCuartelesSeleccionados();
-};
-document.getElementById("fincaDeselectAll").onclick = () => {
-  fincasDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
-  mostrarCuartelesSeleccionados();
-};
-document.getElementById("cuartelSelectAll").onclick = () => {
-  cuartelesDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = true);
-  mostrarTablaCuarteles();
-};
-document.getElementById("cuartelDeselectAll").onclick = () => {
-  cuartelesDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
-  mostrarTablaCuarteles();
-};
-
-// Mostrar cuarteles según fincas seleccionadas
-async function mostrarCuartelesSeleccionados() {
-  cuartelesDiv.innerHTML = '';
-  tablaCuartelesDiv.innerHTML = '';
-  const fincasSeleccionadas = Array.from(document.querySelectorAll('.finca-checkbox:checked')).map(cb => cb.value);
-  if (fincasSeleccionadas.length === 0) return;
-  const { data: cuarteles, error } = await supabase
-    .from("cuarteles")
-    .select("id, nombre, finca_id")
-    .in("finca_id", fincasSeleccionadas);
-  if (error) {
-    status.textContent = "Error al cargar cuarteles";
-    return;
-  }
-  cuarteles.forEach(cuartel => {
-    const label = document.createElement("label");
-    label.style.display = "flex";
-    label.style.alignItems = "center";
-    label.style.gap = "0.3em";
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = cuartel.id;
-    checkbox.className = "cuartel-checkbox";
-    checkbox.dataset.fincaId = cuartel.finca_id;
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(cuartel.nombre));
-    cuartelesDiv.appendChild(label);
-  });
-  mostrarTablaCuarteles();
-}
-
-// Cargar operarios del usuario logueado
-const { data: { user } } = await supabase.auth.getUser();
-const userId = user.id;
-let operariosGlobal = [];
-async function cargarOperarios() {
-  const { data: operarios, error } = await supabase
-    .from("aplicadores_operarios")
-    .select("id, nombre")
-    .eq("usuario_id", userId);
-  if (error) {
-    status.textContent = "Error al cargar operarios";
-    return [];
-  }
-  operariosGlobal = operarios;
-  return operarios;
-}
-
-// Al cambiar cuarteles seleccionados, mostrar tabla editable
-cuartelesDiv.addEventListener("change", async () => {
-  await mostrarTablaCuarteles();
-});
-
-async function mostrarTablaCuarteles() {
-  tablaCuartelesDiv.innerHTML = "";
-  const cuartelesSeleccionados = Array.from(document.querySelectorAll('.cuartel-checkbox:checked')).map(cb => cb.value);
-  if (cuartelesSeleccionados.length === 0) return;
-  // Traer info de cuarteles
-  const { data: cuarteles, error } = await supabase
-    .from("cuarteles")
-    .select("id, nombre, especie, finca_id")
-    .in("id", cuartelesSeleccionados);
-  if (error) {
-    status.textContent = "Error al cargar info de cuarteles";
-    return;
-  }
-  // Traer variedades asociadas a cada cuartel
-  const variedadesPorCuartel = {};
-  for (const cuartel of cuarteles) {
-    const { data: variedades, error: errorVar } = await supabase
-      .from("cuartel_variedades")
-      .select("variedades(nombre)")
-      .eq("cuartel_id", cuartel.id);
-    variedadesPorCuartel[cuartel.id] = (!errorVar && variedades && variedades.length > 0)
-      ? variedades.map(v => v.variedades.nombre).join(", ") : "";
-  }
-  // Crear tabla
-  let html = `<table style='font-size:0.95em;'><thead><tr>
-    <th>Cuartel</th><th>Fecha</th><th>Horas</th><th>Volumen (m³)</th><th>Regador</th><th>Obs.</th><th>Variedad</th><th>Especie</th></tr></thead><tbody>`;
-  // Obtener valores por defecto (primero seleccionado)
-  let operadorDefault = operariosGlobal[0]?.id || "";
-  let fechaDefault = new Date().toISOString().slice(0,10);
-  let horasDefault = "";
-  let volumenDefault = "";
-  cuarteles.forEach((cuartel, idx) => {
-    html += `<tr>
-      <td>${cuartel.nombre}</td>
-      <td><input type='date' class='fecha-celda' value='${fechaDefault}' style='width:8em;'/></td>
-      <td><input type='number' class='horas-celda' min='0' step='0.1' value='${horasDefault}' style='width:5em;'/></td>
-      <td><input type='number' class='volumen-celda' min='0' step='0.1' value='${volumenDefault}' style='width:7em;'/></td>
-      <td><select class='operador-celda' title='Regador'>${operariosGlobal.map(op => `<option value='${op.id}' ${op.id===operadorDefault?"selected":''}>${op.nombre}</option>`).join("")}</select></td>
-      <td><input type='text' class='obs-celda' style='width:10em;'/></td>
-      <td><input type='text' value='${variedadesPorCuartel[cuartel.id]}' readonly style='width:7em;'/></td>
-      <td><input type='text' value='${cuartel.especie || ""}' readonly style='width:6em;'/></td>
-      <td style='display:none'><input type='hidden' class='cuartel-id' value='${cuartel.id}'/></td>
-      <td style='display:none'><input type='hidden' class='finca-id' value='${cuartel.finca_id}'/></td>
-    </tr>`;
-  });
-  html += `</tbody></table>`;
-  tablaCuartelesDiv.innerHTML = html;
-
-  // Lógica de autocompletado: al cambiar el primer regador/fecha/horas/volumen, propagar a los demás
-  const filas = tablaCuartelesDiv.querySelectorAll('tbody tr');
-  if (filas.length > 1) {
-    // Regador
-    filas[0].querySelector('.operador-celda').addEventListener('change', e => {
-      const val = e.target.value;
-      filas.forEach((fila, idx) => { if(idx>0) fila.querySelector('.operador-celda').value = val; });
-    });
-    // Fecha
-    filas[0].querySelector('.fecha-celda').addEventListener('change', e => {
-      const val = e.target.value;
-      filas.forEach((fila, idx) => { if(idx>0) fila.querySelector('.fecha-celda').value = val; });
-    });
-    // Horas
-    filas[0].querySelector('.horas-celda').addEventListener('change', e => {
-      const val = e.target.value;
-      filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.horas-celda').value) fila.querySelector('.horas-celda').value = val; });
-    });
-    // Volumen
-    filas[0].querySelector('.volumen-celda').addEventListener('change', e => {
-      const val = e.target.value;
-      filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.volumen-celda').value) fila.querySelector('.volumen-celda').value = val; });
-    });
-  }
-}
-
-// Proponer objetivo al cargar el formulario o tras resetear
-function proponerObjetivo() {
-  const objetivoInput = document.getElementById("objetivo");
-  if (objetivoInput) {
-    objetivoInput.value = "Reposición de agua en el suelo para el cultivo";
-  }
-}
-window.addEventListener('DOMContentLoaded', proponerObjetivo);
-// También tras resetear el formulario
-document.getElementById("riego-form").addEventListener("reset", proponerObjetivo);
-
-// Guardar registro de riego
-document.getElementById("riego-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  status.textContent = "Guardando...";
-  const filas = tablaCuartelesDiv.querySelectorAll('tbody tr');
-  if (filas.length === 0) {
-    status.textContent = "Seleccione al menos un cuartel.";
-    return;
-  }
-  const registros = [];
-  for (const fila of filas) {
-    registros.push({
-      finca_id: fila.querySelector('.finca-id').value,
-      cuartel_id: fila.querySelector('.cuartel-id').value,
-      variedad: fila.querySelector('td:nth-child(7) input').value,
-      especie: fila.querySelector('td:nth-child(8) input').value,
-      operador_id: fila.querySelector('.operador-celda').value,
-      fecha: fila.querySelector('.fecha-celda').value,
-      maquinaria: document.getElementById('maquinaria')?.value || '',
-      horas_riego: fila.querySelector('.horas-celda').value,
-      volumen_agua: fila.querySelector('.volumen-celda').value,
-      observaciones: fila.querySelector('.obs-celda').value,
-      labor: "Riego",
-      objetivo: document.getElementById('objetivo').value,
-    });
-  }
-  const { error } = await supabase.from("riegos").insert(registros);
-  if (error) {
-    status.textContent = "❌ Error al guardar: " + error.message;
-    console.error(error);
-  } else {
-    status.textContent = `✅ Riego registrado para ${registros.length} cuartel(es)`;
-    document.getElementById("riego-form").reset();
-    cuartelesDiv.innerHTML = '';
-    tablaCuartelesDiv.innerHTML = '';
-    // Asegurar que el objetivo propuesto se reponga tras reset
-    proponerObjetivo();
-  }
-});
-
-// Inicializar
-await cargarFincas();
-await cargarOperarios();
-mostrarCuartelesSeleccionados();
-
-// Ayuda general flotante (carga dinámica desde archivo txt externo solo la primera vez)
-const ayudaBtn = document.getElementById('ayuda-riego-btn');
-const ayudaModal = document.getElementById('ayuda-riego-modal');
-const cerrarAyuda = document.getElementById('cerrar-ayuda-riego');
-const ayudaContenido = document.getElementById('ayuda-riego-contenido');
-let ayudaCargada = false;
-if (ayudaBtn && ayudaModal && cerrarAyuda && ayudaContenido) {
-  ayudaBtn.onclick = async () => {
-    if (!ayudaCargada) {
-      try {
-        const res = await fetch('ayuda_riego.txt');
-        ayudaContenido.textContent = await res.text();
-        ayudaCargada = true;
-      } catch (e) {
-        ayudaContenido.textContent = 'No se pudo cargar la ayuda.';
-        ayudaCargada = true;
+      // Cargar fincas al iniciar
+      async function cargarFincas() {
+        fincasDiv.innerHTML = '';
+        const { data, error } = await supabase.from("fincas").select("id, nombre_finca");
+        if (error) {
+          status.textContent = "Error al cargar fincas";
+          return;
+        }
+        data.forEach(finca => {
+          const label = document.createElement("label");
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "0.3em";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = finca.id;
+          checkbox.className = "finca-checkbox";
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(finca.nombre_finca));
+          fincasDiv.appendChild(label);
+          // Corregir: actualizar cuarteles al seleccionar/deseleccionar finca
+          checkbox.addEventListener('change', mostrarCuartelesSeleccionados);
+        });
       }
-    }
-    ayudaModal.style.display = 'block';
-  };
-  cerrarAyuda.onclick = () => { ayudaModal.style.display = 'none'; };
-  window.addEventListener('click', e => {
-    if (ayudaModal.style.display === 'block' && !ayudaModal.contains(e.target) && e.target !== ayudaBtn) {
-      ayudaModal.style.display = 'none';
-    }
-  });
-}
+
+      // Botones seleccionar/deseleccionar todos
+      document.getElementById("fincaSelectAll").onclick = () => {
+        fincasDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = true);
+        mostrarCuartelesSeleccionados();
+      };
+      document.getElementById("fincaDeselectAll").onclick = () => {
+        fincasDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+        mostrarCuartelesSeleccionados();
+      };
+      document.getElementById("cuartelSelectAll").onclick = () => {
+        cuartelesDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = true);
+        mostrarTablaCuarteles();
+      };
+      document.getElementById("cuartelDeselectAll").onclick = () => {
+        cuartelesDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+        mostrarTablaCuarteles();
+      };
+
+      // Mostrar cuarteles según fincas seleccionadas
+      async function mostrarCuartelesSeleccionados() {
+        cuartelesDiv.innerHTML = '';
+        tablaCuartelesDiv.innerHTML = '';
+        const fincasSeleccionadas = Array.from(document.querySelectorAll('.finca-checkbox:checked')).map(cb => cb.value);
+        if (fincasSeleccionadas.length === 0) return;
+        const { data: cuarteles, error } = await supabase
+          .from("cuarteles")
+          .select("id, nombre, finca_id")
+          .in("finca_id", fincasSeleccionadas);
+        if (error) {
+          status.textContent = "Error al cargar cuarteles";
+          return;
+        }
+        cuarteles.forEach(cuartel => {
+          const label = document.createElement("label");
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "0.3em";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = cuartel.id;
+          checkbox.className = "cuartel-checkbox";
+          checkbox.dataset.fincaId = cuartel.finca_id;
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(cuartel.nombre));
+          cuartelesDiv.appendChild(label);
+        });
+        mostrarTablaCuarteles();
+      }
+
+      // Cargar operarios del usuario logueado
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user.id;
+      let operariosGlobal = [];
+      async function cargarOperarios() {
+        const { data: operarios, error } = await supabase
+          .from("aplicadores_operarios")
+          .select("id, nombre")
+          .eq("usuario_id", userId);
+        if (error) {
+          status.textContent = "Error al cargar operarios";
+          return [];
+        }
+        operariosGlobal = operarios;
+        return operarios;
+      }
+
+      // Al cambiar cuarteles seleccionados, mostrar tabla editable
+      cuartelesDiv.addEventListener("change", async () => {
+        await mostrarTablaCuarteles();
+      });
+
+      async function mostrarTablaCuarteles() {
+        tablaCuartelesDiv.innerHTML = "";
+        const cuartelesSeleccionados = Array.from(document.querySelectorAll('.cuartel-checkbox:checked')).map(cb => cb.value);
+        if (cuartelesSeleccionados.length === 0) return;
+        // Traer info de cuarteles
+        const { data: cuarteles, error } = await supabase
+          .from("cuarteles")
+          .select("id, nombre, especie, finca_id")
+          .in("id", cuartelesSeleccionados);
+        if (error) {
+          status.textContent = "Error al cargar info de cuarteles";
+          return;
+        }
+        // Traer variedades asociadas a cada cuartel
+        const variedadesPorCuartel = {};
+        for (const cuartel of cuarteles) {
+          const { data: variedades, error: errorVar } = await supabase
+            .from("cuartel_variedades")
+            .select("variedades(nombre)")
+            .eq("cuartel_id", cuartel.id);
+          variedadesPorCuartel[cuartel.id] = (!errorVar && variedades && variedades.length > 0)
+            ? variedades.map(v => v.variedades.nombre).join(", ") : "";
+        }
+        // Crear tabla
+        let html = `<table style='font-size:0.95em;'><thead><tr>
+          <th>Cuartel</th><th>Fecha</th><th>Horas</th><th>Volumen (m³)</th><th>Regador</th><th>Obs.</th><th>Variedad</th><th>Especie</th></tr></thead><tbody>`;
+        // Obtener valores por defecto (primero seleccionado)
+        let operadorDefault = operariosGlobal[0]?.id || "";
+        let fechaDefault = new Date().toISOString().slice(0,10);
+        let horasDefault = "";
+        let volumenDefault = "";
+        cuarteles.forEach((cuartel, idx) => {
+          html += `<tr>
+            <td>${cuartel.nombre}</td>
+            <td><input type='date' class='fecha-celda' value='${fechaDefault}' style='width:8em;'/></td>
+            <td><input type='number' class='horas-celda' min='0' step='0.1' value='${horasDefault}' style='width:5em;'/></td>
+            <td><input type='number' class='volumen-celda' min='0' step='0.1' value='${volumenDefault}' style='width:7em;'/></td>
+            <td><select class='operador-celda' title='Regador'>${operariosGlobal.map(op => `<option value='${op.id}' ${op.id===operadorDefault?"selected":""}>${op.nombre}</option>`).join("")}</select></td>
+            <td><input type='text' class='obs-celda' style='width:10em;'/></td>
+            <td><input type='text' value='${variedadesPorCuartel[cuartel.id]}' readonly style='width:7em;'/></td>
+            <td><input type='text' value='${cuartel.especie || ""}' readonly style='width:6em;'/></td>
+            <td style='display:none'><input type='hidden' class='cuartel-id' value='${cuartel.id}'/></td>
+            <td style='display:none'><input type='hidden' class='finca-id' value='${cuartel.finca_id}'/></td>
+          </tr>`;
+        });
+        html += `</tbody></table>`;
+        tablaCuartelesDiv.innerHTML = html;
+
+        // Lógica de autocompletado: al cambiar el primer regador/fecha/horas/volumen, propagar a los demás
+        const filas = tablaCuartelesDiv.querySelectorAll('tbody tr');
+        if (filas.length > 1) {
+          // Regador
+          filas[0].querySelector('.operador-celda').addEventListener('change', e => {
+            const val = e.target.value;
+            filas.forEach((fila, idx) => { if(idx>0) fila.querySelector('.operador-celda').value = val; });
+          });
+          // Fecha
+          filas[0].querySelector('.fecha-celda').addEventListener('change', e => {
+            const val = e.target.value;
+            filas.forEach((fila, idx) => { if(idx>0) fila.querySelector('.fecha-celda').value = val; });
+          });
+          // Horas
+          filas[0].querySelector('.horas-celda').addEventListener('change', e => {
+            const val = e.target.value;
+            filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.horas-celda').value) fila.querySelector('.horas-celda').value = val; });
+          });
+          // Volumen
+          filas[0].querySelector('.volumen-celda').addEventListener('change', e => {
+            const val = e.target.value;
+            filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.volumen-celda').value) fila.querySelector('.volumen-celda').value = val; });
+          });
+        }
+      }
+
+      // Proponer objetivo al cargar el formulario o tras resetear
+      function proponerObjetivo() {
+        const objetivoInput = document.getElementById("objetivo");
+        if (objetivoInput) {
+          objetivoInput.value = "Reposición de agua en el suelo para el cultivo";
+        }
+      }
+      window.addEventListener('DOMContentLoaded', proponerObjetivo);
+      // También tras resetear el formulario
+      document.getElementById("riego-form").addEventListener("reset", proponerObjetivo);
+
+      // Guardar registro de riego
+      document.getElementById("riego-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.textContent = "Guardando...";
+        const filas = tablaCuartelesDiv.querySelectorAll('tbody tr');
+        if (filas.length === 0) {
+          status.textContent = "Seleccione al menos un cuartel.";
+          return;
+        }
+        const registros = [];
+        for (const fila of filas) {
+          registros.push({
+            finca_id: fila.querySelector('.finca-id').value,
+            cuartel_id: fila.querySelector('.cuartel-id').value,
+            variedad: fila.querySelector('td:nth-child(7) input').value,
+            especie: fila.querySelector('td:nth-child(8) input').value,
+            operador_id: fila.querySelector('.operador-celda').value,
+            fecha: fila.querySelector('.fecha-celda').value,
+            maquinaria: document.getElementById('maquinaria')?.value || '',
+            horas_riego: fila.querySelector('.horas-celda').value,
+            volumen_agua: fila.querySelector('.volumen-celda').value,
+            observaciones: fila.querySelector('.obs-celda').value,
+            labor: "Riego",
+            objetivo: document.getElementById('objetivo').value,
+          });
+        }
+        const { error } = await supabase.from("riegos").insert(registros);
+        if (error) {
+          status.textContent = "❌ Error al guardar: " + error.message;
+          console.error(error);
+        } else {
+          status.textContent = `✅ Riego registrado para ${registros.length} cuartel(es)`;
+          document.getElementById("riego-form").reset();
+          cuartelesDiv.innerHTML = '';
+          tablaCuartelesDiv.innerHTML = '';
+          // Asegurar que el objetivo propuesto se reponga tras reset
+          proponerObjetivo();
+        }
+      });
+
+      // Inicializar
+      await cargarFincas();
+      await cargarOperarios();
+      mostrarCuartelesSeleccionados();
+
+      // Ayuda general flotante (carga dinámica desde archivo txt externo solo la primera vez)
+      document.addEventListener('DOMContentLoaded', () => {
+        const ayudaBtn = document.getElementById('ayuda-riego-btn');
+        const ayudaModal = document.getElementById('ayuda-riego-modal');
+        const cerrarAyuda = document.getElementById('cerrar-ayuda-riego');
+        const ayudaContenido = document.getElementById('ayuda-riego-contenido');
+        let ayudaCargada = false;
+        if (ayudaBtn && ayudaModal && cerrarAyuda && ayudaContenido) {
+          ayudaBtn.onclick = async () => {
+            if (!ayudaCargada) {
+              try {
+                const res = await fetch('ayuda_riego.txt');
+                ayudaContenido.textContent = await res.text();
+                ayudaCargada = true;
+              } catch (e) {
+                ayudaContenido.textContent = 'No se pudo cargar la ayuda.';
+                ayudaCargada = true;
+              }
+            }
+            ayudaModal.style.display = 'block';
+          };
+          cerrarAyuda.onclick = () => { ayudaModal.style.display = 'none'; };
+          window.addEventListener('click', e => {
+            if (ayudaModal.style.display === 'block' && !ayudaModal.contains(e.target) && e.target !== ayudaBtn) {
+              ayudaModal.style.display = 'none';
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
