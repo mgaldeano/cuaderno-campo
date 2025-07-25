@@ -6,8 +6,7 @@
   <title>Organizaciones</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <script type="module">
-    import { createClientInstance } from './supabaseClient.js';
-    const supabase = createClientInstance();
+    import { supabase } from './supabaseClient.js';
 
     async function registrarOrganizacion(e) {
       e.preventDefault();
