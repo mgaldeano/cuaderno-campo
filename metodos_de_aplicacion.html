@@ -56,18 +56,32 @@
       }
     }
 
+    // Mensaje de estado
+    let statusMsg = document.createElement('div');
+    statusMsg.style.fontSize = '0.95em';
+    statusMsg.style.margin = '0.5em 0 0.5em 0';
+    statusMsg.style.color = '#b22';
+    table.parentElement.insertBefore(statusMsg, table);
+
+    function showStatus(msg, ok=false) {
+      statusMsg.textContent = msg;
+      statusMsg.style.color = ok ? '#185' : '#b22';
+      if (msg) setTimeout(()=>{ statusMsg.textContent = ''; }, 2500);
+    }
+
     function renderTable() {
       const filtro = searchInput.value.toLowerCase();
       table.innerHTML = '';
       metodos.filter(m =>
-        m.nombre?.toLowerCase().includes(filtro) ||
+        (m.nombre||'').toLowerCase().includes(filtro) ||
         (m.descripcion||'').toLowerCase().includes(filtro)
       ).forEach(m => {
         const tr = document.createElement('tr');
-        if (editingId === m.id) {
+        // Comparar IDs como string para evitar bugs
+        if (String(editingId) === String(m.id)) {
           tr.innerHTML = `
-            <td><input value="${m.nombre||''}" data-field="nombre"></td>
-            <td><input value="${m.descripcion||''}" data-field="descripcion"></td>
+            <td><input value="${m.nombre||''}" data-field="nombre" maxlength="60" required></td>
+            <td><input value="${m.descripcion||''}" data-field="descripcion" maxlength="120"></td>
             <td>
               <button data-action="save">💾</button>
               <button data-action="cancel">✖️</button>
@@ -98,29 +112,49 @@
         editingId = id;
         renderTable();
       } else if (action === 'cancel') {
-        // Si es nuevo, lo quitamos del array
         if (id.startsWith('nuevo-')) {
           metodos = metodos.filter(m => m.id !== id);
         }
         editingId = null;
         renderTable();
       } else if (action === 'save') {
+        const btn = tr.querySelector('button[data-action="save"]');
+        btn.disabled = true;
         const inputs = tr.querySelectorAll('input');
         const values = {};
-        inputs.forEach(inp => values[inp.dataset.field] = inp.value);
-        if (id.startsWith('nuevo-')) {
-          // Insertar nuevo
-          await supabase.from('metodos_de_aplicacion').insert([values]);
-        } else {
-          // Actualizar existente
-          await supabase.from('metodos_de_aplicacion').update(values).eq('id', id);
+        inputs.forEach(inp => values[inp.dataset.field] = inp.value.trim());
+        if (!values.nombre) {
+          showStatus('El nombre es obligatorio');
+          btn.disabled = false;
+          return;
+        }
+        try {
+          if (id.startsWith('nuevo-')) {
+            const { error } = await supabase.from('metodos_de_aplicacion').insert([values]);
+            if (error) throw error;
+            showStatus('Método agregado', true);
+          } else {
+            const { error } = await supabase.from('metodos_de_aplicacion').update(values).eq('id', isNaN(Number(id)) ? id : Number(id));
+            if (error) throw error;
+            showStatus('Método actualizado', true);
+          }
+        } catch (err) {
+          showStatus('Error: ' + (err.message || err));
+          btn.disabled = false;
+          return;
         }
         editingId = null;
         fetchMetodos();
       } else if (action === 'delete') {
         if (confirm('¿Eliminar este método?')) {
-          await supabase.from('metodos_de_aplicacion').delete().eq('id', id);
-          fetchMetodos();
+          try {
+            const { error } = await supabase.from('metodos_de_aplicacion').delete().eq('id', isNaN(Number(id)) ? id : Number(id));
+            if (error) throw error;
+            showStatus('Método eliminado', true);
+            fetchMetodos();
+          } catch (err) {
+            showStatus('Error: ' + (err.message || err));
+          }
         }
       }
     });
