@@ -1,0 +1,6 @@
+¿Cómo registrar un riego?
+
+1. Seleccione una o varias fincas y cuarteles.
+2. Complete la fecha, horas, volumen, regador y observaciones.
+3. Puede copiar valores rápidamente usando la primera fila.
+4. Presione 'Registrar riego' para guardar.
