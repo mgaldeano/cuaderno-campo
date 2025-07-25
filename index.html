@@ -55,6 +55,22 @@
             });
           }
         });
+
+      // Agregar link a fitosanitarios solo para ingeniero
+      const ul = document.querySelector("main ul");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: usuario } = await supabase
+          .from("usuarios")
+          .select("rol")
+          .eq("id", user.id)
+          .single();
+        if (usuario?.rol === "ingeniero") {
+          const li = document.createElement("li");
+          li.innerHTML = '<a href="fitosanitarios.html">🧪 Gestionar Fitosanitarios</a>';
+          ul.appendChild(li);
+        }
+      }
     </script>
   </body>
 </html>

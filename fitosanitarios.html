@@ -109,6 +109,12 @@
             <th>Acción</th>
             <th>Dosis marbete</th>
             <th>Unidad</th>
+            <th>Dosis más frecuente 100L</th>
+            <th>TC</th>
+            <th>CT</th>
+            <th>LMR Senasa</th>
+            <th>LMR EU</th>
+            <th>Uso</th>
             <th>Registro para</th>
             <th>Acciones</th>
           </tr>
@@ -142,7 +148,7 @@
       // Cargar fitosanitarios (con filtros)
       async function cargarFitos() {
         fitosList.innerHTML = "";
-        let query = supabase.from("fitosanitarios").select("id,nombre_comercial,principio_activo,formulacion,plaga_o_enfermedad,accion,dosis_marbete,unidad_marbete,registro_para");
+        let query = supabase.from("fitosanitarios").select("id,nombre_comercial,principio_activo,formulacion,plaga_o_enfermedad,accion,dosis_marbete,unidad_marbete,dosis_frecuente_100l,tc_tiempo_carencia,ct,lmr_senasa,lmr_eu,uso,registro_para");
         if (buscaNombre.value) query = query.ilike("nombre_comercial", `%${buscaNombre.value}%`);
         if (buscaPA.value) query = query.ilike("principio_activo", `%${buscaPA.value}%`);
         if (buscaPlaga.value) query = query.ilike("plaga_o_enfermedad", `%${buscaPlaga.value}%`);
@@ -162,6 +168,12 @@
               <td><span class="view">${f.accion || ""}</span><input class="edit" type="text" value="${f.accion || ""}" style="display:none;width:100%"></td>
               <td><span class="view">${f.dosis_marbete || ""}</span><input class="edit" type="text" value="${f.dosis_marbete || ""}" style="display:none;width:100%"></td>
               <td><span class="view">${f.unidad_marbete || ""}</span><input class="edit" type="text" value="${f.unidad_marbete || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.dosis_frecuente_100l || ""}</span><input class="edit" type="text" value="${f.dosis_frecuente_100l || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.tc_tiempo_carencia || ""}</span><input class="edit" type="text" value="${f.tc_tiempo_carencia || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.ct || ""}</span><input class="edit" type="text" value="${f.ct || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.lmr_senasa || ""}</span><input class="edit" type="text" value="${f.lmr_senasa || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.lmr_eu || ""}</span><input class="edit" type="text" value="${f.lmr_eu || ""}" style="display:none;width:100%"></td>
+              <td><span class="view">${f.uso || ""}</span><input class="edit" type="text" value="${f.uso || ""}" style="display:none;width:100%"></td>
               <td><span class="view">${f.registro_para || ""}</span><input class="edit" type="text" value="${f.registro_para || ""}" style="display:none;width:100%"></td>
               <td>
                 <button class="editar fitos-btn" data-id="${f.id}">Editar</button>
@@ -248,10 +260,16 @@
           const accion = edits[4].value;
           const dosis_marbete = edits[5].value;
           const unidad_marbete = edits[6].value;
-          const registro_para = edits[7].value;
+          const dosis_frecuente_100l = edits[7].value;
+          const tc_tiempo_carencia = edits[8].value;
+          const ct = edits[9].value;
+          const lmr_senasa = edits[10].value;
+          const lmr_eu = edits[11].value;
+          const uso = edits[12].value;
+          const registro_para = edits[13].value;
           status.textContent = "Actualizando...";
           const { error } = await supabase.from("fitosanitarios")
-            .update({ nombre_comercial, principio_activo, formulacion, plaga_o_enfermedad, accion, dosis_marbete, unidad_marbete, registro_para })
+            .update({ nombre_comercial, principio_activo, formulacion, plaga_o_enfermedad, accion, dosis_marbete, unidad_marbete, dosis_frecuente_100l, tc_tiempo_carencia, ct, lmr_senasa, lmr_eu, uso, registro_para })
             .eq("id", id);
           if (error) {
             status.textContent = "❌ Error al actualizar";
