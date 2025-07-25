@@ -1,3 +1,8 @@
+## Pendientes próximos pasos (25/07/2025)
+
+1. Asegurar que el help funcione correctamente en todas las páginas (botón flotante y modal).
+2. Idear la lógica de reportes: definir tipos, filtros y estructura de consultas.
+3. Crear los reportes: implementar consultas, filtros y visualización.
 # Cambios recientes (25/07/2025)
 - Ayuda contextual de riego: texto externo mejorado y verificado, con logs de versión para depuración.
 - Ancho de columna 'Regador' ampliado y propagación inmediata al hacer click o change.
