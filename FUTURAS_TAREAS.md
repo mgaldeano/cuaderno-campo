@@ -1,7 +1,7 @@
 # Futuras tareas y mejoras - Cuaderno de Campo
 
 ## 1. Roles y permisos
-- [ ] Crear el rol **ingeniero** en la tabla de usuarios.
+- [x] Crear el rol **ingeniero** en la tabla de usuarios. (Listo)
 - [ ] Permitir que solo el ingeniero pueda generar órdenes de trabajo.
 
 ## 2. Órdenes de trabajo
@@ -23,7 +23,7 @@
 - [ ] Registrar **Fertilización** (vinculada a orden de aplicación).
 
 ## 5. UI y flujo de usuario
-- [ ] Crear página de selección de tipo de tarea (ej: `tareas.html` o `seleccionar-tarea.html`).
+- [x] Crear página de selección de tipo de tarea (ej: `tareas.html` o `seleccionar-tarea.html`).
 - [ ] Cada tipo de tarea debe tener su propio formulario y lógica.
 - [ ] Actualizar el menú/header para que "Tareas" apunte a la nueva página de selección.
 
