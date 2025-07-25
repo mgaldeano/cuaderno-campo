@@ -23,6 +23,12 @@
         <h3>Complete los datos del riego realizado</h3>
       </hgroup>
       <form id="riego-form">
+        <label for="labor">Labor</label>
+        <input type="text" id="labor" name="labor" value="Riego" readonly />
+
+        <label for="objetivo">Objetivo</label>
+        <input type="text" id="objetivo" name="objetivo" placeholder="Objetivo del riego" required />
+
         <label for="finca">Finca</label>
         <select id="finca" name="finca" required>
           <option value="">Seleccione una finca...</option>
@@ -38,7 +44,6 @@
 
         <label for="especie">Especie</label>
         <input type="text" id="especie" name="especie" readonly />
-
 
         <label for="operador">Operador responsable</label>
         <select id="operador" name="operador" required>
@@ -59,12 +64,6 @@
 
         <label for="observaciones">Observaciones</label>
         <textarea id="observaciones" name="observaciones" rows="2"></textarea>
-
-        <label for="labor">Labor</label>
-        <input type="text" id="labor" name="labor" value="Riego" readonly />
-
-        <label for="objetivo">Objetivo</label>
-        <input type="text" id="objetivo" name="objetivo" placeholder="Objetivo del riego" required />
 
         <button type="submit">Registrar riego</button>
       </form>
@@ -166,7 +165,6 @@
           cuartel_id: form.cuartel.value,
           variedad: form.variedad.value,
           especie: form.especie.value,
-          labores: form.labores.value,
           operador_id: form.operador.value,
           fecha: form.fecha.value,
           maquinaria: form.maquinaria.value,
