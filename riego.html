@@ -241,12 +241,16 @@
         }
       }
 
-      // Proponer objetivo al cargar el formulario
+      // Proponer objetivo al cargar el formulario o tras resetear
       function proponerObjetivo() {
         const objetivoInput = document.getElementById("objetivo");
-        objetivoInput.value = "Reposición de agua en el suelo para el cultivo";
+        if (objetivoInput) {
+          objetivoInput.value = "Reposición de agua en el suelo para el cultivo";
+        }
       }
       window.addEventListener('DOMContentLoaded', proponerObjetivo);
+      // También tras resetear el formulario
+      document.getElementById("riego-form").addEventListener("reset", proponerObjetivo);
 
       // Guardar registro de riego
       document.getElementById("riego-form").addEventListener("submit", async (e) => {
@@ -283,6 +287,8 @@
           document.getElementById("riego-form").reset();
           cuartelesDiv.innerHTML = '';
           tablaCuartelesDiv.innerHTML = '';
+          // Asegurar que el objetivo propuesto se reponga tras reset
+          proponerObjetivo();
         }
       });
 
