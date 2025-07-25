@@ -29,19 +29,15 @@
         <label for="objetivo">Objetivo</label>
         <input type="text" id="objetivo" name="objetivo" placeholder="Objetivo del riego" required />
 
-        <label for="finca">Finca</label>
-        <select id="finca" name="finca" required>
-          <option value="">Seleccione una finca...</option>
-        </select>
-        <div style="display:flex; gap:0.5em; align-items:center;"></div>
+        <label>Fincas</label>
+        <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
+        <div style="display:flex; gap:0.5em; align-items:center;">
           <button type="button" id="fincaSelectAll" style="font-size:0.9em;">Seleccionar todos</button>
           <button type="button" id="fincaDeselectAll" style="font-size:0.9em;">Deseleccionar todo</button>
         </div>
 
-        <label for="cuartel">Cuartel</label>
-        <select id="cuartel" name="cuartel" required>
-          <option value="">Seleccione un cuartel...</option>
-        </select>
+        <label>Cuarteles</label>
+        <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
         <div style="display:flex; gap:0.5em; align-items:center;">
           <button type="button" id="cuartelSelectAll" style="font-size:0.9em;">Seleccionar todos</button>
           <button type="button" id="cuartelDeselectAll" style="font-size:0.9em;">Deseleccionar todo</button>
@@ -94,51 +90,97 @@
       const cuartelSelect = document.getElementById("cuartel");
       const status = document.getElementById("status");
       const operadorSelect = document.getElementById("operador");
+      const fincasDiv = document.getElementById("fincas-checkboxes");
+      const cuartelesDiv = document.getElementById("cuarteles-checkboxes");
 
       // Cargar fincas al iniciar
       async function cargarFincas() {
+        fincasDiv.innerHTML = '';
         const { data, error } = await supabase.from("fincas").select("id, nombre_finca");
         if (error) {
           status.textContent = "Error al cargar fincas";
           return;
         }
         data.forEach(finca => {
-          const option = document.createElement("option");
-          option.value = finca.id;
-          option.textContent = finca.nombre_finca;
-          fincaSelect.appendChild(option);
+          const label = document.createElement("label");
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "0.3em";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = finca.id;
+          checkbox.className = "finca-checkbox";
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(finca.nombre_finca));
+          fincasDiv.appendChild(label);
         });
       }
 
-      // Cargar cuarteles según finca seleccionada
-      fincaSelect.addEventListener("change", async () => {
-        const fincaId = fincaSelect.value;
-        cuartelSelect.innerHTML = '<option value="">Seleccione un cuartel...</option>';
-        if (!fincaId) return;
-
-        // Cargar cuarteles
-        const { data: cuarteles, error: cuartelesError } = await supabase
+      // Mostrar cuarteles según fincas seleccionadas
+      async function mostrarCuartelesSeleccionados() {
+        cuartelesDiv.innerHTML = '';
+        const fincasSeleccionadas = Array.from(document.querySelectorAll('.finca-checkbox:checked')).map(cb => cb.value);
+        if (fincasSeleccionadas.length === 0) return;
+        const { data: cuarteles, error } = await supabase
           .from("cuarteles")
-          .select("id, nombre")
-          .eq("finca_id", fincaId);
-        if (cuartelesError) {
+          .select("id, nombre, finca_id")
+          .in("finca_id", fincasSeleccionadas);
+        if (error) {
           status.textContent = "Error al cargar cuarteles";
           return;
         }
         cuarteles.forEach(cuartel => {
-          const option = document.createElement("option");
-          option.value = cuartel.id;
-          option.textContent = cuartel.nombre;
-          cuartelSelect.appendChild(option);
+          const label = document.createElement("label");
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "0.3em";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = cuartel.id;
+          checkbox.className = "cuartel-checkbox";
+          checkbox.dataset.fincaId = cuartel.finca_id;
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(cuartel.nombre));
+          cuartelesDiv.appendChild(label);
         });
-      });
+      }
 
+      // Escuchar cambios en fincas
+      fincasDiv.addEventListener('change', mostrarCuartelesSeleccionados);
+
+      // Al cambiar cuartel, cargar especie y variedades asociadas (solo el primero seleccionado)
+      cuartelesDiv.addEventListener("change", async () => {
+        const cuartelId = document.querySelector('.cuartel-checkbox:checked')?.value;
+        if (!cuartelId) {
+          document.getElementById("especie").value = "";
+          document.getElementById("variedad").value = "";
+          proponerObjetivo();
+          return;
+        }
+        // Traer especie del cuartel
+        const { data: cuartel, error: errorCuartel } = await supabase
+          .from("cuarteles")
+          .select("especie")
+          .eq("id", cuartelId)
+          .single();
+        document.getElementById("especie").value = cuartel?.especie || "";
+        // Traer variedades asociadas al cuartel (relación muchos a muchos)
+        const { data: variedades, error: errorVar } = await supabase
+          .from("cuartel_variedades")
+          .select("variedades(nombre)")
+          .eq("cuartel_id", cuartelId);
+        if (!errorVar && variedades && variedades.length > 0) {
+          document.getElementById("variedad").value = variedades.map(v => v.variedades.nombre).join(", ");
+        } else {
+          document.getElementById("variedad").value = "";
+        }
+        proponerObjetivo();
+      });
 
       // Función para proponer objetivo sugerido
       function proponerObjetivo() {
-        const variedad = document.getElementById("variedad").value;
         const objetivoInput = document.getElementById("objetivo");
-        objetivoInput.value = `Riego para ${variedad || "el cultivo"}`;
+        objetivoInput.value = "Reposición de agua en el suelo para el cultivo";
       }
 
       // Al cambiar cuartel, cargar especie y variedades asociadas
@@ -186,29 +228,38 @@
         e.preventDefault();
         status.textContent = "Guardando...";
         const form = e.target;
-        const registro = {
-          finca_id: form.finca.value,
-          cuartel_id: form.cuartel.value,
-          variedad: form.variedad.value,
-          especie: form.especie.value,
-          operador_id: form.operador.value,
-          fecha: form.fecha.value,
-          maquinaria: form.maquinaria.value,
-          horas_riego: form.horas_riego.value,
-          volumen_agua: form.volumen_agua.value,
-          observaciones: form.observaciones.value,
-          labor: "Riego",
-          objetivo: form.objetivo.value,
-        };
-        const { error } = await supabase.from("riegos").insert([registro]);
+        const cuartelesSeleccionados = Array.from(document.querySelectorAll('.cuartel-checkbox:checked'));
+        if (cuartelesSeleccionados.length === 0) {
+          status.textContent = "Seleccione al menos un cuartel.";
+          return;
+        }
+        const registros = [];
+        for (const cuartelCb of cuartelesSeleccionados) {
+          const fincaId = cuartelCb.dataset.fincaId;
+          registros.push({
+            finca_id: fincaId,
+            cuartel_id: cuartelCb.value,
+            variedad: form.variedad.value,
+            especie: form.especie.value,
+            operador_id: form.operador.value,
+            fecha: form.fecha.value,
+            maquinaria: form.maquinaria.value,
+            horas_riego: form.horas_riego.value,
+            volumen_agua: form.volumen_agua.value,
+            observaciones: form.observaciones.value,
+            labor: "Riego",
+            objetivo: form.objetivo.value,
+          });
+        }
+        const { error } = await supabase.from("riegos").insert(registros);
         if (error) {
           status.textContent = "❌ Error al guardar: " + error.message;
           console.error(error);
         } else {
-          status.textContent = "✅ Riego registrado correctamente";
+          status.textContent = `✅ Riego registrado para ${registros.length} cuartel(es)`;
           form.reset();
-          cuartelSelect.innerHTML = '<option value="">Seleccione un cuartel...</option>';
-          operadorSelect.innerHTML = '<option value="">Seleccione un operario...</option>';
+          cuartelesDiv.innerHTML = '';
+          operadorSelect.innerHTML = '<option value=\"\">Seleccione un operario...</option>';
         }
       });
 
@@ -235,7 +286,8 @@
       }
 
       // Inicializar
-      cargarFincas();
+      await cargarFincas();
+      mostrarCuartelesSeleccionados();
       cargarOperarios();
     </script>
   </body>
