@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ABM Especies</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="header-container"></div>
+  <script type="module">
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+        import('./header.js');
+      });
+  </script>
+  <main class="container">
+    <h2>Gestión de Especies</h2>
+    <form id="form-especie" style="display:flex; gap:1em; flex-wrap:wrap; align-items:end;">
+      <input type="hidden" id="especie-id" />
+      <div>
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" required />
+      </div>
+      <button type="submit" id="guardar">Guardar</button>
+      <button type="button" id="cancelar" style="display:none;">Cancelar</button>
+    </form>
+    <p id="status"></p>
+    <table id="tabla-especies" style="margin-top:1em;"></table>
+  </main>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://djvdjulfeuqohpnatdmt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+    );
+    const form = document.getElementById('form-especie');
+    const status = document.getElementById('status');
+    const tabla = document.getElementById('tabla-especies');
+    const cancelarBtn = document.getElementById('cancelar');
+    async function cargarEspecies() {
+      const { data, error } = await supabase.from('especies').select('*').order('nombre');
+      if (error) { status.textContent = 'Error al cargar especies'; return; }
+      let html = `<thead><tr><th>Nombre</th><th>Acciones</th></tr></thead><tbody>`;
+      data.forEach(e => {
+        html += `<tr>
+          <td>${e.nombre}</td>
+          <td>
+            <button type='button' data-id='${e.id}' class='editar'>✎</button>
+            <button type='button' data-id='${e.id}' class='borrar' style='color:red;'>🗑</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody>';
+      tabla.innerHTML = html;
+      tabla.querySelectorAll('.editar').forEach(btn => btn.onclick = () => editarEspecie(btn.dataset.id));
+      tabla.querySelectorAll('.borrar').forEach(btn => btn.onclick = () => borrarEspecie(btn.dataset.id));
+    }
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const id = document.getElementById('especie-id').value;
+      const nombre = document.getElementById('nombre').value.trim();
+      if (!nombre) { status.textContent = 'Complete el nombre.'; return; }
+      status.textContent = 'Guardando...';
+      if (id) {
+        const { error } = await supabase.from('especies').update({ nombre }).eq('id', id);
+        if (error) { status.textContent = 'Error al actualizar'; return; }
+      } else {
+        const { error } = await supabase.from('especies').insert([{ nombre }]);
+        if (error) { status.textContent = 'Error al crear'; return; }
+      }
+      form.reset();
+      cancelarBtn.style.display = 'none';
+      status.textContent = 'Guardado';
+      cargarEspecies();
+    };
+    async function editarEspecie(id) {
+      const { data, error } = await supabase.from('especies').select('*').eq('id', id).single();
+      if (error) { status.textContent = 'Error al cargar especie'; return; }
+      document.getElementById('especie-id').value = data.id;
+      document.getElementById('nombre').value = data.nombre;
+      cancelarBtn.style.display = '';
+    }
+    async function borrarEspecie(id) {
+      if (!confirm('¿Borrar especie?')) return;
+      const { error } = await supabase.from('especies').delete().eq('id', id);
+      if (error) { status.textContent = 'Error al borrar'; return; }
+      status.textContent = 'Borrado';
+      cargarEspecies();
+    }
+    cancelarBtn.onclick = () => { form.reset(); cancelarBtn.style.display = 'none'; status.textContent = ''; };
+    cargarEspecies();
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ABM Variedades</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="header-container"></div>
+  <script type="module">
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+        import('./header.js');
+      });
+  </script>
+  <main class="container">
+    <h2>Gestión de Variedades</h2>
+    <form id="form-variedad" style="display:flex; gap:1em; flex-wrap:wrap; align-items:end;">
+      <input type="hidden" id="variedad-id" />
+      <div>
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" required />
+      </div>
+      <div>
+        <label for="color">Color</label>
+        <select id="color" required>
+          <option value="">- Seleccione -</option>
+          <option value="tinta">Tinta</option>
+          <option value="blanca">Blanca</option>
+          <option value="rosada">Rosada</option>
+        </select>
+      </div>
+      <div>
+        <label for="tipo_destino">Tipo/Destino</label>
+        <select id="tipo_destino" required>
+          <option value="">- Seleccione -</option>
+          <option value="mostera">Mostera</option>
+          <option value="tinto">Tinto</option>
+          <option value="blanco">Blanco</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <button type="submit" id="guardar">Guardar</button>
+      <button type="button" id="cancelar" style="display:none;">Cancelar</button>
+    </form>
+    <p id="status"></p>
+    <table id="tabla-variedades" style="margin-top:1em;"></table>
+  </main>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://djvdjulfeuqohpnatdmt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+    );
+    const form = document.getElementById('form-variedad');
+    const status = document.getElementById('status');
+    const tabla = document.getElementById('tabla-variedades');
+    const cancelarBtn = document.getElementById('cancelar');
+    async function cargarVariedades() {
+      const { data, error } = await supabase.from('variedades').select('*').order('nombre');
+      if (error) { status.textContent = 'Error al cargar variedades'; return; }
+      let html = `<thead><tr><th>Nombre</th><th>Color</th><th>Tipo/Destino</th><th>Acciones</th></tr></thead><tbody>`;
+      data.forEach(v => {
+        html += `<tr>
+          <td>${v.nombre}</td>
+          <td>${v.color||''}</td>
+          <td>${v.tipo_destino||''}</td>
+          <td>
+            <button type='button' data-id='${v.id}' class='editar'>✎</button>
+            <button type='button' data-id='${v.id}' class='borrar' style='color:red;'>🗑</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody>';
+      tabla.innerHTML = html;
+      tabla.querySelectorAll('.editar').forEach(btn => btn.onclick = () => editarVariedad(btn.dataset.id));
+      tabla.querySelectorAll('.borrar').forEach(btn => btn.onclick = () => borrarVariedad(btn.dataset.id));
+    }
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const id = document.getElementById('variedad-id').value;
+      const nombre = document.getElementById('nombre').value.trim();
+      const color = document.getElementById('color').value;
+      const tipo_destino = document.getElementById('tipo_destino').value;
+      if (!nombre || !color || !tipo_destino) { status.textContent = 'Complete todos los campos.'; return; }
+      status.textContent = 'Guardando...';
+      if (id) {
+        const { error } = await supabase.from('variedades').update({ nombre, color, tipo_destino }).eq('id', id);
+        if (error) { status.textContent = 'Error al actualizar'; return; }
+      } else {
+        const { error } = await supabase.from('variedades').insert([{ nombre, color, tipo_destino }]);
+        if (error) { status.textContent = 'Error al crear'; return; }
+      }
+      form.reset();
+      cancelarBtn.style.display = 'none';
+      status.textContent = 'Guardado';
+      cargarVariedades();
+    };
+    async function editarVariedad(id) {
+      const { data, error } = await supabase.from('variedades').select('*').eq('id', id).single();
+      if (error) { status.textContent = 'Error al cargar variedad'; return; }
+      document.getElementById('variedad-id').value = data.id;
+      document.getElementById('nombre').value = data.nombre;
+      document.getElementById('color').value = data.color||'';
+      document.getElementById('tipo_destino').value = data.tipo_destino||'';
+      cancelarBtn.style.display = '';
+    }
+    async function borrarVariedad(id) {
+      if (!confirm('¿Borrar variedad?')) return;
+      const { error } = await supabase.from('variedades').delete().eq('id', id);
+      if (error) { status.textContent = 'Error al borrar'; return; }
+      status.textContent = 'Borrado';
+      cargarVariedades();
+    }
+    cancelarBtn.onclick = () => { form.reset(); cancelarBtn.style.display = 'none'; status.textContent = ''; };
+    cargarVariedades();
+  </script>
+</body>
+</html>
