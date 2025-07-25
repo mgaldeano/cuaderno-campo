@@ -310,21 +310,23 @@
       await cargarOperarios();
       mostrarCuartelesSeleccionados();
 
-      // Ayuda general flotante (carga dinámica desde archivo txt externo)
+      // Ayuda general flotante (carga dinámica desde archivo txt externo solo la primera vez)
       document.addEventListener('DOMContentLoaded', () => {
         const ayudaBtn = document.getElementById('ayuda-riego-btn');
         const ayudaModal = document.getElementById('ayuda-riego-modal');
         const cerrarAyuda = document.getElementById('cerrar-ayuda-riego');
         const ayudaContenido = document.getElementById('ayuda-riego-contenido');
+        let ayudaCargada = false;
         if (ayudaBtn && ayudaModal && cerrarAyuda && ayudaContenido) {
           ayudaBtn.onclick = async () => {
-            // Cargar ayuda externa solo si está vacía
-            if (!ayudaContenido.innerHTML.trim()) {
+            if (!ayudaCargada) {
               try {
                 const res = await fetch('ayuda_riego.txt');
                 ayudaContenido.textContent = await res.text();
+                ayudaCargada = true;
               } catch (e) {
                 ayudaContenido.textContent = 'No se pudo cargar la ayuda.';
+                ayudaCargada = true;
               }
             }
             ayudaModal.style.display = 'block';
