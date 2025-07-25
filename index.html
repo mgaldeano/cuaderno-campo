@@ -65,10 +65,13 @@
           .select("rol")
           .eq("id", user.id)
           .single();
-        if (usuario?.rol === "ingeniero") {
-          const li = document.createElement("li");
-          li.innerHTML = '<a href="fitosanitarios.html">🧪 Gestionar Fitosanitarios</a>';
-          ul.appendChild(li);
+        if (usuario?.rol === "ingeniero" || usuario?.rol === "superadmin") {
+          const liFito = document.createElement("li");
+          liFito.innerHTML = '<a href="fitosanitarios.html">🧪 Gestionar Fitosanitarios</a>';
+          ul.appendChild(liFito);
+          const liFert = document.createElement("li");
+          liFert.innerHTML = '<a href="fertilizantes.html">🧪 Gestionar Fertilizantes</a>';
+          ul.appendChild(liFert);
         }
       }
     </script>
