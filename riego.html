@@ -19,7 +19,44 @@
 
     <main class="container">
       <hgroup>
+        <h1>Registro de Riego</h1>
+        <p>Complete los datos para registrar un riego.</p>
       </hgroup>
+      <form id="riego-form">
+        <div id="status" style="margin-bottom:1em;color:#b00;font-weight:bold;"></div>
+        <fieldset>
+          <legend>Fincas</legend>
+          <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
+            <button type="button" id="fincaSelectAll">Seleccionar todas</button>
+            <button type="button" id="fincaDeselectAll">Deseleccionar todas</button>
+          </div>
+          <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:0.7em;"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Cuarteles</legend>
+          <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
+            <button type="button" id="cuartelSelectAll">Seleccionar todos</button>
+            <button type="button" id="cuartelDeselectAll">Deseleccionar todos</button>
+          </div>
+          <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:0.7em;"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Datos de Riego</legend>
+          <div id="tabla-cuarteles"></div>
+          <div style="margin-top:1em; display:flex; gap:1em; flex-wrap:wrap;">
+            <label>Maquinaria:
+              <input type="text" id="maquinaria" name="maquinaria" style="width:12em;" />
+            </label>
+            <label>Objetivo:
+              <input type="text" id="objetivo" name="objetivo" style="width:18em;" />
+            </label>
+          </div>
+        </fieldset>
+        <div style="margin-top:1.5em;">
+          <button type="submit">Guardar Riego</button>
+          <button type="reset" style="margin-left:1em;">Limpiar</button>
+        </div>
+      </form>
     </main>
       <!-- Botón de ayuda flotante -->
       <button id="ayuda-riego-btn" title="Ayuda" style="position:fixed; bottom:2em; right:2em; z-index:1000; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:50%; width:2.5em; height:2.5em; font-size:1.5em; box-shadow:0 2px 8px #0002; cursor:pointer;">?</button>
