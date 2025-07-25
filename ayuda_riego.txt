@@ -4,4 +4,8 @@
 2. Complete la fecha, horas, volumen, regador y observaciones.
 3. Puede copiar valores rápidamente usando la primera fila.
 4. Presione 'Registrar riego' para guardar.
-5. Consulte
+5. Consulte la sección de reportes para ver el historial de riegos registrados y verificar los datos ingresados.
+
+Consejos adicionales:
+- Puede editar o eliminar un riego desde la sección de reportes si es necesario.
+- Si tiene dudas sobre algún campo, pase el mouse sobre el ícono de ayuda o consulte con su asesor técnico.
