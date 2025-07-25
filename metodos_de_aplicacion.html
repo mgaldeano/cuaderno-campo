@@ -88,6 +88,7 @@
       });
     }
 
+
     table.addEventListener('click', async e => {
       const tr = e.target.closest('tr');
       const id = tr?.dataset.id;
@@ -97,13 +98,23 @@
         editingId = id;
         renderTable();
       } else if (action === 'cancel') {
+        // Si es nuevo, lo quitamos del array
+        if (id.startsWith('nuevo-')) {
+          metodos = metodos.filter(m => m.id !== id);
+        }
         editingId = null;
         renderTable();
       } else if (action === 'save') {
         const inputs = tr.querySelectorAll('input');
-        const update = {};
-        inputs.forEach(inp => update[inp.dataset.field] = inp.value);
-        await supabase.from('metodos_de_aplicacion').update(update).eq('id', id);
+        const values = {};
+        inputs.forEach(inp => values[inp.dataset.field] = inp.value);
+        if (id.startsWith('nuevo-')) {
+          // Insertar nuevo
+          await supabase.from('metodos_de_aplicacion').insert([values]);
+        } else {
+          // Actualizar existente
+          await supabase.from('metodos_de_aplicacion').update(values).eq('id', id);
+        }
         editingId = null;
         fetchMetodos();
       } else if (action === 'delete') {
@@ -116,28 +127,11 @@
 
     addBtn.addEventListener('click', () => {
       const nuevo = {
-        id: 'nuevo-'+Math.random(), nombre:'', descripcion:''
+        id: 'nuevo-' + Math.random(), nombre: '', descripcion: ''
       };
       metodos.unshift(nuevo);
       editingId = nuevo.id;
       renderTable();
-    });
-
-    table.addEventListener('click', async e => {
-      const tr = e.target.closest('tr');
-      if (!tr || !tr.dataset.id?.startsWith('nuevo-')) return;
-      if (e.target.dataset.action === 'save') {
-        const inputs = tr.querySelectorAll('input');
-        const nuevo = {};
-        inputs.forEach(inp => nuevo[inp.dataset.field] = inp.value);
-        await supabase.from('metodos_de_aplicacion').insert([nuevo]);
-        editingId = null;
-        fetchMetodos();
-      } else if (e.target.dataset.action === 'cancel') {
-        metodos.shift();
-        editingId = null;
-        renderTable();
-      }
     });
 
     searchInput.addEventListener('input', renderTable);
