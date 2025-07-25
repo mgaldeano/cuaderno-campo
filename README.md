@@ -42,10 +42,16 @@ cuaderno-campo/
 3. Crear tabla `usuarios` y relacionarlas con `organizaciones`
 4. Editar `supabaseClient.js` con tu información:
 
+# 📒 Cuaderno de Campo Digital
+
+Aplicación web para cooperativas, productores y técnicos vitícolas. Permite registrar tareas, gestionar fincas, cuarteles y usuarios. Desarrollada con Supabase, HTML + PicoCSS.
+
+### Cambios recientes (25/07/2025)
+- Ayuda contextual de riego ahora se carga desde archivo externo, con logs de versión para depuración y cierre de modal robusto.
+- Mejoras en la UI de riego: columna 'Regador' más ancha, propagación inmediata de selección.
+
 ```js
 const supabase = createClient(
   'https://TUPROYECTO.supabase.co',
-  'TU_ANON_KEY'
-);
 
 

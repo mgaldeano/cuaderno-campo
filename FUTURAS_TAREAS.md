@@ -1,3 +1,8 @@
+# Cambios recientes (25/07/2025)
+- Ayuda contextual de riego: texto externo mejorado y verificado, con logs de versión para depuración.
+- Ancho de columna 'Regador' ampliado y propagación inmediata al hacer click o change.
+- Fix robusto para el cierre del modal de ayuda (delegación de eventos).
+
 * Mejorar experiencia móvil y responsive: revisar tablas, formularios y botones para una visualización y uso óptimos en celulares. Tener en cuenta si se hacen otros cambios visuales o de flujo.
 # Futuras tareas y mejoras - Cuaderno de Campo
 
