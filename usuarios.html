@@ -74,7 +74,9 @@
             <td>
               <select data-id="${u.id}" class="edit-rol" ${puedeEditarRol ? "" : "disabled"}>
                 <option value="productor" ${u.rol === "productor" ? "selected" : ""}>Productor</option>
+                <option value="ingeniero" ${u.rol === "ingeniero" ? "selected" : ""}>Ingeniero</option>
                 <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operario</option>
+                <option value="admin" ${u.rol === "admin" ? "selected" : ""}>Admin</option>
                 <option value="superadmin" ${u.rol === "superadmin" ? "selected" : ""}>Superadmin</option>
               </select>
             </td>
