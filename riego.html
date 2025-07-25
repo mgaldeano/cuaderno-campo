@@ -65,6 +65,17 @@
       <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
     </footer>
 
+    <!-- Botón de ayuda flotante -->
+    <button id="ayuda-riego-btn" title="Ayuda" style="position:fixed; bottom:2em; right:2em; z-index:1000; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:50%; width:2.5em; height:2.5em; font-size:1.5em; box-shadow:0 2px 8px #0002; cursor:pointer;">?</button>
+    <div id="ayuda-riego-modal" style="display:none; position:fixed; bottom:5em; right:2em; z-index:1001; background:#fff; color:#222; border:1px solid #8ab; border-radius:8px; box-shadow:0 2px 16px #0003; padding:1em 1.2em; max-width:320px; font-size:1em;">
+      <b>¿Cómo registrar un riego?</b><br>
+      1. Seleccione una o varias fincas y cuarteles.<br>
+      2. Complete la fecha, horas, volumen, regador y observaciones.<br>
+      3. Puede copiar valores rápidamente usando la primera fila.<br>
+      4. Presione <b>Registrar riego</b> para guardar.<br>
+      <button id="cerrar-ayuda-riego" style="margin-top:0.7em; float:right; background:#e0eaff; color:#234; border:1px solid #8ab; border-radius:4px; padding:0.2em 0.8em; font-size:1em;">Cerrar</button>
+    </div>
+
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
       const supabase = createClient(
@@ -302,6 +313,22 @@
       await cargarFincas();
       await cargarOperarios();
       mostrarCuartelesSeleccionados();
+
+      // Ayuda general flotante
+      document.addEventListener('DOMContentLoaded', () => {
+        const ayudaBtn = document.getElementById('ayuda-riego-btn');
+        const ayudaModal = document.getElementById('ayuda-riego-modal');
+        const cerrarAyuda = document.getElementById('cerrar-ayuda-riego');
+        if (ayudaBtn && ayudaModal && cerrarAyuda) {
+          ayudaBtn.onclick = () => { ayudaModal.style.display = 'block'; };
+          cerrarAyuda.onclick = () => { ayudaModal.style.display = 'none'; };
+          window.addEventListener('click', e => {
+            if (ayudaModal.style.display === 'block' && !ayudaModal.contains(e.target) && e.target !== ayudaBtn) {
+              ayudaModal.style.display = 'none';
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
