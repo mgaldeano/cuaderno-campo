@@ -116,15 +116,7 @@
           document.getElementById('header-container').innerHTML = html;
           import('./header.js');
           // Manejo de logout (opcional, si no lo tienes en header.js)
-          const logoutBtn = document.querySelector("#logoutBtn");
-          if (logoutBtn) {
-            logoutBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              // Si tienes supabase en el scope global, puedes usarlo aquí
-              // await supabase.auth.signOut();
-              window.location.href = "login.html";
-            });
-          }
+          // Eliminar el manejo de logoutBtn ya que se maneja en header.js
         });
 
       // Al cargar la página, verifica el usuario y carga usuarios si corresponde
