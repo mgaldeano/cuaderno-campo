@@ -32,17 +32,17 @@
         <label>Fincas</label>
         <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
         <div style="display:flex; gap:0.3em; align-items:center; margin-bottom:0.5em;">
-          <button type="button" id="fincaSelectAll" style="font-size:0.75em; padding:0.1em 0.5em; background:none; border:1px solid #bbb; color:#444;">✓</button>
-          <button type="button" id="fincaDeselectAll" style="font-size:0.75em; padding:0.1em 0.5em; background:none; border:1px solid #bbb; color:#444;">✗</button>
-          <span style="font-size:0.8em; color:#888;">Fincas</span>
+          <button type="button" id="fincaSelectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="fincaDeselectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <span style="font-size:0.9em; color:#666;">Fincas</span>
         </div>
 
         <label>Cuarteles</label>
         <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
         <div style="display:flex; gap:0.3em; align-items:center; margin-bottom:0.5em;">
-          <button type="button" id="cuartelSelectAll" style="font-size:0.75em; padding:0.1em 0.5em; background:none; border:1px solid #bbb; color:#444;">✓</button>
-          <button type="button" id="cuartelDeselectAll" style="font-size:0.75em; padding:0.1em 0.5em; background:none; border:1px solid #bbb; color:#444;">✗</button>
-          <span style="font-size:0.8em; color:#888;">Cuarteles</span>
+          <button type="button" id="cuartelSelectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="cuartelDeselectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <span style="font-size:0.9em; color:#666;">Cuarteles</span>
         </div>
 
         <div id="tabla-cuarteles"></div>
@@ -91,6 +91,8 @@
           label.appendChild(checkbox);
           label.appendChild(document.createTextNode(finca.nombre_finca));
           fincasDiv.appendChild(label);
+          // Corregir: actualizar cuarteles al seleccionar/deseleccionar finca
+          checkbox.addEventListener('change', mostrarCuartelesSeleccionados);
         });
       }
 
