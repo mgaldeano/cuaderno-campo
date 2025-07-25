@@ -6,6 +6,12 @@
     <title>Reportes | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
     <script type="module">
+    import { supabase } from "./supabaseClient.js";
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "login.html";
+      throw new Error("No autorizado");
+    }
       import { supabase } from "./supabaseClient.js";
       const contenedor = document.querySelector("#reporte-tareas");
 

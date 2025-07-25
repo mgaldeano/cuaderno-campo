@@ -25,6 +25,12 @@
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
     <script type="module">
       import { supabase } from "./supabaseClient.js";
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "login.html";
+        throw new Error("No autorizado");
+      }
+      import { supabase } from "./supabaseClient.js";
 
       const tabla = document.querySelector("#usuarios-list");
       const status = document.querySelector("#status");
