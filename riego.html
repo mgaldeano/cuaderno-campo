@@ -316,24 +316,33 @@
       document.addEventListener('DOMContentLoaded', () => {
         const ayudaBtn = document.getElementById('ayuda-riego-btn');
         const ayudaModal = document.getElementById('ayuda-riego-modal');
-        const cerrarAyuda = document.getElementById('cerrar-ayuda-riego');
         const ayudaContenido = document.getElementById('ayuda-riego-contenido');
         let ayudaCargada = false;
-        if (ayudaBtn && ayudaModal && cerrarAyuda && ayudaContenido) {
+        const AYUDA_VERSION = 'v1.2';
+        if (ayudaBtn && ayudaModal && ayudaContenido) {
           ayudaBtn.onclick = async () => {
+            console.log('Ayuda Riego', AYUDA_VERSION, 'click');
             if (!ayudaCargada) {
               try {
-                const res = await fetch('ayuda_riego.txt');
-                ayudaContenido.textContent = await res.text();
+                const res = await fetch('ayuda_riego.txt?_v=' + AYUDA_VERSION);
+                const txt = await res.text();
+                console.log('Ayuda cargada:', txt.slice(0, 60));
+                ayudaContenido.textContent = txt;
                 ayudaCargada = true;
               } catch (e) {
                 ayudaContenido.textContent = 'No se pudo cargar la ayuda.';
+                console.error('Error cargando ayuda:', e);
                 ayudaCargada = true;
               }
             }
             ayudaModal.style.display = 'block';
           };
-          cerrarAyuda.onclick = () => { ayudaModal.style.display = 'none'; };
+          // Delegación para cerrar el modal
+          ayudaModal.addEventListener('click', e => {
+            if (e.target.id === 'cerrar-ayuda-riego') {
+              ayudaModal.style.display = 'none';
+            }
+          });
           window.addEventListener('click', e => {
             if (ayudaModal.style.display === 'block' && !ayudaModal.contains(e.target) && e.target !== ayudaBtn) {
               ayudaModal.style.display = 'none';
