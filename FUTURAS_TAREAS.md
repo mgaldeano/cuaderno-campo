@@ -10,13 +10,13 @@
 - [ ] Permitir que los operarios registren la ejecución de las órdenes.
 
 ## 3. Tablas auxiliares
-- [ ] Crear tabla `agroquimicos` (nombre comercial, principio activo, lote, tiempo de carencia, etc.).
-- [ ] Crear tabla `fertilizantes` (nombre comercial, tipo, composición, concentración, etc.).
+- [x] Crear tabla `agroquimicos` (nombre comercial, principio activo, lote, tiempo de carencia, etc.). (Listo: implementada como fitosanitarios con ABM)
+- [x] Crear tabla `fertilizantes` (nombre comercial, tipo, composición, concentración, etc.). (Listo: implementada con ABM)
 - [ ] Crear tabla `metodos_de_aplicacion`.
-- [ ] Crear tabla `aplicadores_operarios` relacionada a cada productor.
+- [x] Crear tabla `aplicadores_operarios` relacionada a cada productor. (Listo: implementada como 'operadores' con ABM y relación a usuario)
 
 ## 4. Tareas específicas
-- [ ] Registrar **Riego** (ya existe, revisar y mejorar si es necesario).
+- [x] Registrar **Riego** (ya existe, revisado y actualizado).
 - [ ] Registrar **Labores de Suelo** (nueva tabla o sección).
     - Finca, cuartel, variedad, especie, labores realizadas, objetivo, operador responsable, fecha, maquinaria utilizada.
 - [ ] Registrar **Aplicación de Agroquímicos** (vinculada a orden de aplicación).

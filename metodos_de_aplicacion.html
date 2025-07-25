@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Métodos de Aplicación</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="header-container"></div>
+  <main class="container">
+    <h2>Métodos de Aplicación</h2>
+    <input type="search" id="searchInput" placeholder="Buscar método..." />
+    <button id="addBtn">➕ Nuevo método</button>
+    <div style="overflow-x:auto;">
+      <table id="metodosTable" style="font-size:0.92em;">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://djvdjulfeuqohpnatdmt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdmRqdWxmZXVxb2hwbmF0ZG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNTYyMTEsImV4cCI6MjA2NzkzMjIxMX0.aD_klISxuwoGxMYtPq6XPARva8D32YkKFu7s_Ffq0fw"
+    );
+
+    // Cargar header
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+        import('./header.js');
+      });
+
+    // ABM lógica
+    const table = document.getElementById('metodosTable').querySelector('tbody');
+    const searchInput = document.getElementById('searchInput');
+    const addBtn = document.getElementById('addBtn');
+
+    let metodos = [];
+    let editingId = null;
+
+    async function fetchMetodos() {
+      const { data, error } = await supabase.from('metodos_de_aplicacion').select('*').order('nombre');
+      if (!error) {
+        metodos = data;
+        renderTable();
+      }
+    }
+
+    function renderTable() {
+      const filtro = searchInput.value.toLowerCase();
+      table.innerHTML = '';
+      metodos.filter(m =>
+        m.nombre?.toLowerCase().includes(filtro) ||
+        (m.descripcion||'').toLowerCase().includes(filtro)
+      ).forEach(m => {
+        const tr = document.createElement('tr');
+        if (editingId === m.id) {
+          tr.innerHTML = `
+            <td><input value="${m.nombre||''}" data-field="nombre"></td>
+            <td><input value="${m.descripcion||''}" data-field="descripcion"></td>
+            <td>
+              <button data-action="save">💾</button>
+              <button data-action="cancel">✖️</button>
+            </td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td>${m.nombre||''}</td>
+            <td>${m.descripcion||''}</td>
+            <td>
+              <button data-action="edit">✏️</button>
+              <button data-action="delete">🗑️</button>
+            </td>
+          `;
+        }
+        tr.dataset.id = m.id;
+        table.appendChild(tr);
+      });
+    }
+
+    table.addEventListener('click', async e => {
+      const tr = e.target.closest('tr');
+      const id = tr?.dataset.id;
+      const action = e.target.dataset.action;
+      if (!id) return;
+      if (action === 'edit') {
+        editingId = id;
+        renderTable();
+      } else if (action === 'cancel') {
+        editingId = null;
+        renderTable();
+      } else if (action === 'save') {
+        const inputs = tr.querySelectorAll('input');
+        const update = {};
+        inputs.forEach(inp => update[inp.dataset.field] = inp.value);
+        await supabase.from('metodos_de_aplicacion').update(update).eq('id', id);
+        editingId = null;
+        fetchMetodos();
+      } else if (action === 'delete') {
+        if (confirm('¿Eliminar este método?')) {
+          await supabase.from('metodos_de_aplicacion').delete().eq('id', id);
+          fetchMetodos();
+        }
+      }
+    });
+
+    addBtn.addEventListener('click', () => {
+      const nuevo = {
+        id: 'nuevo-'+Math.random(), nombre:'', descripcion:''
+      };
+      metodos.unshift(nuevo);
+      editingId = nuevo.id;
+      renderTable();
+    });
+
+    table.addEventListener('click', async e => {
+      const tr = e.target.closest('tr');
+      if (!tr || !tr.dataset.id?.startsWith('nuevo-')) return;
+      if (e.target.dataset.action === 'save') {
+        const inputs = tr.querySelectorAll('input');
+        const nuevo = {};
+        inputs.forEach(inp => nuevo[inp.dataset.field] = inp.value);
+        await supabase.from('metodos_de_aplicacion').insert([nuevo]);
+        editingId = null;
+        fetchMetodos();
+      } else if (e.target.dataset.action === 'cancel') {
+        metodos.shift();
+        editingId = null;
+        renderTable();
+      }
+    });
+
+    searchInput.addEventListener('input', renderTable);
+    fetchMetodos();
+  </script>
+</body>
+</html>
