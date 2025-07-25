@@ -32,16 +32,16 @@
         <label>Fincas</label>
         <div id="fincas-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
         <div style="display:flex; gap:0.3em; align-items:center; margin-bottom:0.5em;">
-          <button type="button" id="fincaSelectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
-          <button type="button" id="fincaDeselectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <button type="button" id="fincaSelectAll" style="font-size:1em; min-width:1.5em; height:1.6em; padding:0 0.2em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="fincaDeselectAll" style="font-size:1em; min-width:1.5em; height:1.6em; padding:0 0.2em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
           <span style="font-size:0.9em; color:#666;">Fincas</span>
         </div>
 
         <label>Cuarteles</label>
         <div id="cuarteles-checkboxes" style="display:flex; flex-wrap:wrap; gap:1em; margin-bottom:0.5em;"></div>
         <div style="display:flex; gap:0.3em; align-items:center; margin-bottom:0.5em;">
-          <button type="button" id="cuartelSelectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
-          <button type="button" id="cuartelDeselectAll" style="font-size:1em; min-width:2em; height:1.8em; padding:0 0.5em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
+          <button type="button" id="cuartelSelectAll" style="font-size:1em; min-width:1.5em; height:1.6em; padding:0 0.2em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✓</button>
+          <button type="button" id="cuartelDeselectAll" style="font-size:1em; min-width:1.5em; height:1.6em; padding:0 0.2em; background:#f5f5f5; border:1px solid #bbb; color:#222; border-radius:4px;">✗</button>
           <span style="font-size:0.9em; color:#666;">Cuarteles</span>
         </div>
 
@@ -192,7 +192,7 @@
         }
         // Crear tabla
         let html = `<table style='font-size:0.95em;'><thead><tr>
-          <th>Cuartel</th><th>Variedad</th><th>Especie</th><th>Operador</th><th>Fecha</th><th>Horas</th><th>Volumen (m³)</th><th>Obs.</th></tr></thead><tbody>`;
+          <th>Cuartel</th><th>Fecha</th><th>Horas</th><th>Volumen (m³)</th><th>Operador</th><th>Obs.</th><th>Variedad</th><th>Especie</th></tr></thead><tbody>`;
         // Obtener valores por defecto (primero seleccionado)
         let operadorDefault = operariosGlobal[0]?.id || "";
         let fechaDefault = new Date().toISOString().slice(0,10);
@@ -201,13 +201,13 @@
         cuarteles.forEach((cuartel, idx) => {
           html += `<tr>
             <td>${cuartel.nombre}</td>
-            <td><input type='text' value='${variedadesPorCuartel[cuartel.id]}' readonly style='width:7em;'/></td>
-            <td><input type='text' value='${cuartel.especie || ""}' readonly style='width:6em;'/></td>
-            <td><select class='operador-celda'>${operariosGlobal.map(op => `<option value='${op.id}' ${op.id===operadorDefault?"selected":""}>${op.nombre}</option>`).join("")}</select></td>
             <td><input type='date' class='fecha-celda' value='${fechaDefault}' style='width:8em;'/></td>
             <td><input type='number' class='horas-celda' min='0' step='0.1' value='${horasDefault}' style='width:5em;'/></td>
             <td><input type='number' class='volumen-celda' min='0' step='0.1' value='${volumenDefault}' style='width:7em;'/></td>
+            <td><select class='operador-celda'>${operariosGlobal.map(op => `<option value='${op.id}' ${op.id===operadorDefault?"selected":""}>${op.nombre}</option>`).join("")}</select></td>
             <td><input type='text' class='obs-celda' style='width:10em;'/></td>
+            <td><input type='text' value='${variedadesPorCuartel[cuartel.id]}' readonly style='width:7em;'/></td>
+            <td><input type='text' value='${cuartel.especie || ""}' readonly style='width:6em;'/></td>
             <td style='display:none'><input type='hidden' class='cuartel-id' value='${cuartel.id}'/></td>
             <td style='display:none'><input type='hidden' class='finca-id' value='${cuartel.finca_id}'/></td>
           </tr>`;
@@ -229,12 +229,12 @@
             filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.fecha-celda').value) fila.querySelector('.fecha-celda').value = val; });
           });
           // Horas
-          filas[0].querySelector('.horas-celda').addEventListener('input', e => {
+          filas[0].querySelector('.horas-celda').addEventListener('change', e => {
             const val = e.target.value;
             filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.horas-celda').value) fila.querySelector('.horas-celda').value = val; });
           });
           // Volumen
-          filas[0].querySelector('.volumen-celda').addEventListener('input', e => {
+          filas[0].querySelector('.volumen-celda').addEventListener('change', e => {
             const val = e.target.value;
             filas.forEach((fila, idx) => { if(idx>0 && !fila.querySelector('.volumen-celda').value) fila.querySelector('.volumen-celda').value = val; });
           });
@@ -262,8 +262,8 @@
           registros.push({
             finca_id: fila.querySelector('.finca-id').value,
             cuartel_id: fila.querySelector('.cuartel-id').value,
-            variedad: fila.querySelector('td:nth-child(2) input').value,
-            especie: fila.querySelector('td:nth-child(3) input').value,
+            variedad: fila.querySelector('td:nth-child(7) input').value,
+            especie: fila.querySelector('td:nth-child(8) input').value,
             operador_id: fila.querySelector('.operador-celda').value,
             fecha: fila.querySelector('.fecha-celda').value,
             maquinaria: document.getElementById('maquinaria')?.value || '',
