@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Operadores | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <style>
+    .tabla-operadores-boton {
+      font-size: 0.85em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      line-height: 1.2;
+      margin: 0 1px;
+    }
+  </style>
   </head>
   <body>
     <div id="header-container"></div>
@@ -118,10 +127,10 @@
                 </select>
               </td>
               <td>
-                <button class="editar" data-id="${op.id}">Editar</button>
-                <button class="guardar" data-id="${op.id}" style="display:none">Guardar</button>
-                <button class="cancelar" data-id="${op.id}" style="display:none">Cancelar</button>
-                <button class="eliminar" data-id="${op.id}">Eliminar</button>
+                <button class="editar tabla-operadores-boton" data-id="${op.id}">Editar</button>
+                <button class="guardar tabla-operadores-boton" data-id="${op.id}" style="display:none">Guardar</button>
+                <button class="cancelar tabla-operadores-boton" data-id="${op.id}" style="display:none">Cancelar</button>
+                <button class="eliminar tabla-operadores-boton" data-id="${op.id}">Eliminar</button>
               </td>
             </tr>
           `;
