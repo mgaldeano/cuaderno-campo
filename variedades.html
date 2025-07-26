@@ -5,9 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ABM Variedades</title>
   <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <style>
+    .tabla-variedades-boton {
+      font-size: 0.85em;
+      padding: 2px 4px;
+      border-radius: 4px;
+      line-height: 1.2;
+      margin: 0 1px;
+      min-width: 48px;
+      max-width: 64px;
+      white-space: nowrap;
+    }
+    #tabla-variedades td:last-child {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo-contraste {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      max-height: 56px;
+      max-width: 120px;
+      display: block;
+    }
+  </style>
 </head>
 <body>
   <div id="header-container"></div>
+  <script>
+    // Mejora contraste del logo si existe en el header
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new MutationObserver(() => {
+        const logo = document.querySelector('#header-container img[src="logo.png"]');
+        if (logo && !logo.classList.contains('logo-contraste')) {
+          logo.classList.add('logo-contraste');
+        }
+      });
+      observer.observe(document.getElementById('header-container'), { childList: true, subtree: true });
+    });
+  </script>
   <script type="module">
     import { supabase } from "./supabaseClient.js";
     const { data: { user } } = await supabase.auth.getUser();
@@ -71,8 +111,8 @@
           <td>${v.color||''}</td>
           <td>${v.tipo_destino||''}</td>
           <td>
-            <button type='button' data-id='${v.id}' class='editar'>✎</button>
-            <button type='button' data-id='${v.id}' class='borrar' style='color:red;'>🗑</button>
+            <button type='button' data-id='${v.id}' class='editar tabla-variedades-boton'>✎</button>
+            <button type='button' data-id='${v.id}' class='borrar tabla-variedades-boton' style='color:red;'>🗑</button>
           </td>
         </tr>`;
       });

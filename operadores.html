@@ -8,10 +8,13 @@
   <style>
     .tabla-operadores-boton {
       font-size: 0.85em;
-      padding: 2px 8px;
+      padding: 2px 4px;
       border-radius: 4px;
       line-height: 1.2;
       margin: 0 1px;
+      min-width: 48px;
+      max-width: 64px;
+      white-space: nowrap;
     }
   </style>
   </head>
@@ -59,7 +62,7 @@
           <option value="aplicador">Aplicador</option>
         </select>
 
-        <button type="submit">Agregar operador</button>
+        <button type="submit">Agregar Operador</button>
       </form>
 
       <hr />
@@ -128,7 +131,7 @@
                   <option value="aplicador" ${op.rol === "aplicador" ? "selected" : ""}>Aplicador</option>
                 </select>
               </td>
-              <td>
+              <td style="display:flex; gap:12px; justify-content:center; align-items:center;">
                 <button class="editar tabla-operadores-boton" data-id="${op.id}">Editar</button>
                 <button class="guardar tabla-operadores-boton" data-id="${op.id}" style="display:none">Guardar</button>
                 <button class="cancelar tabla-operadores-boton" data-id="${op.id}" style="display:none">Cancelar</button>
