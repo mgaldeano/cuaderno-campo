@@ -48,6 +48,9 @@
 - [ ] Permitir agregar nuevos tipos de tareas en el futuro de forma sencilla.
 - [ ] Mejorar la experiencia de usuario en la selección y carga de tareas.
 
+# NOTA IMPORTANTE SOBRE REPORTES
+- Los reportes de Labores, Aplicaciones de Agroquímicos y Fertilizaciones requieren revisión y adaptación cuando las tablas correspondientes estén completas o cambie su estructura. Actualizar las funciones de consulta y visualización en reportes.js según los nuevos campos y relaciones.
+
 ---
 
 **Este archivo debe mantenerse actualizado a medida que se avanza en el desarrollo.**
