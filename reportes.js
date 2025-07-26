@@ -174,12 +174,7 @@ async function cargarFiltros() {
 await cargarFiltros();
 
 // Actualizar cuarteles según fincas seleccionadas
-    const { data: dataOperadores } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido, finca_id').in('finca_id', fincaIds);
-  const cuarteles = JSON.parse(cuartelSelect.dataset.allCuarteles || '[]');
-  const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
-  const cuartelesFiltrados = cuarteles.filter(c => fincasSeleccionadas.includes(String(c.finca_id)));
-    const { data: dataOperadores } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido, finca_id').in('finca_id', fincaIds);
-});
+// (La lógica debe ir en un event listener, no aquí duplicada. Si necesitas filtrar cuarteles dinámicamente, hazlo en el handler de cambio de finca)
 
 // Proponer fecha actual en fecha hasta
 if (fechaHasta) {
