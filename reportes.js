@@ -1,3 +1,4 @@
+// Versión: v0.4-dev | Última actualización: 26/07/2025
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
