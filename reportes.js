@@ -57,6 +57,19 @@ const fechaDesde = document.getElementById('fecha-desde');
 const fechaHasta = document.getElementById('fecha-hasta');
 const resultadoDiv = document.getElementById('reportes-resultado');
 
+// Si el contenedor de fincas es un <select>, lo reemplazamos por un <div> para los checkboxes
+if (fincaSelect && fincaSelect.tagName === 'SELECT') {
+  const fincaDiv = document.createElement('div');
+  fincaDiv.id = 'finca-reporte';
+  fincaSelect.parentNode.replaceChild(fincaDiv, fincaSelect);
+}
+// Si el contenedor de cuarteles es un <select>, lo reemplazamos por un <div> para los checkboxes
+if (cuartelSelect && cuartelSelect.tagName === 'SELECT') {
+  const cuartelDiv = document.createElement('div');
+  cuartelDiv.id = 'cuartel-reporte';
+  cuartelSelect.parentNode.replaceChild(cuartelSelect, cuartelSelect);
+}
+
 // Obtener rol del usuario actual
 let rolUsuario = "operador";
 let usuarioId = user.id;
