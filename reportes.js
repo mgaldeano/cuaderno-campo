@@ -1,5 +1,5 @@
-// Versión: v0.4.4-dev | Última actualización: 26/07/2025
-console.log('Versión reportes.js: v0.4.4-dev | Última actualización: 26/07/2025');
+// Versión: v0.4.5-dev | Última actualización: 26/07/2025
+console.log('Versión reportes.js: v0.4.5-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -81,49 +81,42 @@ async function cargarFiltros() {
   console.log('organizacionId:', organizacionId);
   console.log('productorId:', productorId);
   if (rolUsuario === "superadmin") {
-    // Superadmin: todas las fincas
     const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id');
     fincas = data ?? [];
   } else if (rolUsuario === "ingeniero" && organizacionId) {
-    // Ingeniero: todas las fincas de su organización
     const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id').eq('usuario_id', organizacionId);
     fincas = data ?? [];
   } else if (rolUsuario === "productor") {
-    // Productor: solo sus fincas
     const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id').eq('usuario_id', productorId);
     fincas = data ?? [];
   }
   console.log('Fincas cargadas:', fincas);
-  fincaSelect.innerHTML = '<option value="">Todas</option>' +
-    (fincas.map(f => `<option value="${f.id}">${f.nombre_finca}</option>`).join(''));
+  // Renderizar checkboxes de fincas
+  fincaSelect.innerHTML = fincas.map(f => `<label><input type="checkbox" name="finca" value="${f.id}"> ${f.nombre_finca}</label>`).join('');
 
   // Cuarteles
   let cuarteles = [];
-  if (fincas.length > 0) {
-    const { data } = await supabase.from('cuarteles').select('id, nombre, finca_id');
-    cuarteles = (data ?? []).filter(c => fincas.some(f => f.id === c.finca_id));
-  }
-  cuartelSelect.innerHTML = '<option value="">Todos</option>' +
-    (cuarteles.map(c => `<option value="${c.id}">${c.nombre}</option>`).join(''));
+  // Se cargan todos, pero se filtran por fincas seleccionadas al cambiar selección
+  const { data } = await supabase.from('cuarteles').select('id, nombre, finca_id');
+  cuarteles = data ?? [];
+  cuartelSelect.innerHTML = '';
+  // Se renderizan checkboxes, pero se actualizan según fincas seleccionadas
+  cuartelSelect.dataset.allCuarteles = JSON.stringify(cuarteles);
 
-  // Operadores
+  // Operadores (igual que antes)
   let operadores = [];
   if (rolUsuario === "superadmin" && fincas.length > 0) {
-    // Superadmin: todos los operarios de todas las fincas
     const fincaIds = fincas.map(f => f.id);
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, finca_id').in('finca_id', fincaIds);
     operadores = data ?? [];
   } else if (rolUsuario === "ingeniero" && fincas.length > 0) {
-    // Ingeniero: todos los operarios de las fincas de su organización
     const fincaIds = fincas.map(f => f.id);
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, finca_id').in('finca_id', fincaIds);
     operadores = data ?? [];
   } else if (rolUsuario === "productor") {
-    // Productor: operarios propios
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, usuario_id').eq('usuario_id', productorId);
     operadores = data ?? [];
   } else if (rolUsuario === "operador") {
-    // Operador: solo sí mismo
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre').eq('id', usuarioId);
     operadores = data ?? [];
   }
@@ -132,16 +125,33 @@ async function cargarFiltros() {
 }
 await cargarFiltros();
 
-let ultimoReporte = [];
-let ultimoTipo = '';
-let ultimoVisual = '';
+// Actualizar cuarteles según fincas seleccionadas
+fincaSelect.addEventListener('change', () => {
+  const cuarteles = JSON.parse(cuartelSelect.dataset.allCuarteles || '[]');
+  const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
+  const cuartelesFiltrados = cuarteles.filter(c => fincasSeleccionadas.includes(String(c.finca_id)));
+  cuartelSelect.innerHTML = cuartelesFiltrados.map(c => `<label><input type="checkbox" name="cuartel" value="${c.id}"> ${c.nombre}</label>`).join('');
+});
 
-filtrosForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+// Proponer fecha actual en fecha hasta
+if (fechaHasta) {
+  fechaHasta.value = new Date().toISOString().slice(0,10);
+}
+
+// Agregar botón para ver reporte en pantalla
+const verReporteBtn = document.createElement('button');
+verReporteBtn.type = 'button';
+verReporteBtn.textContent = 'Ver reporte';
+verReporteBtn.className = 'btn btn-primary';
+verReporteBtn.style.marginRight = '1em';
+filtrosForm.appendChild(verReporteBtn);
+
+verReporteBtn.addEventListener('click', async () => {
   resultadoDiv.innerHTML = '<p>Generando reporte...</p>';
   const tipo = tipoReporte.value;
-  const finca = fincaSelect.value;
-  const cuartel = cuartelSelect.value;
+  // Obtener fincas y cuarteles seleccionados
+  const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
+  const cuartelesSeleccionados = Array.from(cuartelSelect.querySelectorAll('input[name="cuartel"]:checked')).map(cb => cb.value);
   const operador = operadorSelect.value;
   const desde = fechaDesde.value;
   const hasta = fechaHasta.value;
@@ -151,12 +161,11 @@ filtrosForm.addEventListener('submit', async (e) => {
   if (rolUsuario === "operador") {
     filtrosRol.operador_id = usuarioId;
   } else if (rolUsuario === "productor") {
-    if (finca) filtrosRol.finca_id = finca;
-    if (cuartel) filtrosRol.cuartel_id = cuartel;
-  } else if (rolUsuario === "ingeniero") {
-    if (finca) filtrosRol.finca_id = finca;
-    if (cuartel) filtrosRol.cuartel_id = cuartel;
-    // Ingeniero puede ver todos los cuarteles de su organización
+    if (fincasSeleccionadas.length) filtrosRol.finca_id = fincasSeleccionadas;
+    if (cuartelesSeleccionados.length) filtrosRol.cuartel_id = cuartelesSeleccionados;
+  } else if (rolUsuario === "ingeniero" || rolUsuario === "superadmin") {
+    if (fincasSeleccionadas.length) filtrosRol.finca_id = fincasSeleccionadas;
+    if (cuartelesSeleccionados.length) filtrosRol.cuartel_id = cuartelesSeleccionados;
   }
 
   // Selección de consulta según tipo de reporte
@@ -442,7 +451,7 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
 function actualizarFooterVersion() {
   const footer = document.getElementById('footer-version');
   if (footer) {
-    footer.textContent = 'Versión: v0.4.4-dev | Última actualización: 26/07/2025';
+    footer.textContent = 'Versión: v0.4.5-dev | Última actualización: 26/07/2025';
   }
 }
 
