@@ -1,4 +1,27 @@
-// Versión: v0.4.6-dev | Última actualización: 26/07/2025
+// Versión: v0.4.7-dev | Última actualización: 26/07/2025
+// --- Función para generar el reporte de riegos ---
+async function generarReporteRiegos({ finca_id = [], cuartel_id = [], operador_id = [], desde, hasta }) {
+  // Construir filtros dinámicos
+  let query = supabase.from('riegos').select('id, finca_id, cuartel_id, operador_id, fecha, maquinaria, horas_riego, volumen_agua, observaciones, labor, objetivo, variedad, especie, created_at');
+  if (finca_id && finca_id.length) query = query.in('finca_id', finca_id);
+  if (cuartel_id && cuartel_id.length) query = query.in('cuartel_id', cuartel_id);
+  if (operador_id && operador_id.length) query = query.in('operador_id', operador_id);
+  if (desde) query = query.gte('fecha', desde);
+  if (hasta) query = query.lte('fecha', hasta);
+  const { data, error } = await query.order('fecha', { ascending: false });
+  if (error) {
+    console.error('Error consultando riegos:', error);
+    return [];
+  }
+  // Enriquecer con nombres de finca, cuartel y operador si es posible
+  // (Opcional: si tienes los datos en memoria, puedes mapearlos aquí)
+  return data.map(r => ({
+    ...r,
+    Finca: window.fincasMap?.[r.finca_id] || r.finca_id || '',
+    Cuartel: window.cuartelesMap?.[r.cuartel_id] || r.cuartel_id || '',
+    Regador: window.operadoresMap?.[r.operador_id] || r.operador_id || '',
+  }));
+}
 console.log('Versión reportes.js: v0.4.6-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
@@ -189,14 +212,12 @@ let ultimoVisual = '';
 verReporteBtn.addEventListener('click', async () => {
   resultadoDiv.innerHTML = '<p>Generando reporte...</p>';
   const tipo = tipoReporte.value;
-  // Obtener fincas y cuarteles seleccionados
   const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
   const cuartelesSeleccionados = Array.from(cuartelSelect.querySelectorAll('input[name="cuartel"]:checked')).map(cb => cb.value);
   const regadoresSeleccionados = Array.from(regadorSelect.querySelectorAll('input[name="regador"]:checked')).map(cb => cb.value);
   const desde = fechaDesde.value;
   const hasta = fechaHasta.value;
 
-  // Restricciones por rol
   let filtrosRol = {};
   if (rolUsuario === "operador") {
     filtrosRol.operador_id = usuarioId;
@@ -206,37 +227,54 @@ verReporteBtn.addEventListener('click', async () => {
     if (regadoresSeleccionados.length) filtrosRol.operador_id = regadoresSeleccionados;
   }
 
-  // Selección de consulta según tipo de reporte
+  // --- Mostrar resultado en pantalla ---
+  let datos = [];
   if (tipo === 'bpa') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteBPA({ ...filtrosRol, desde, hasta });
-    return;
-  }
-  if (tipo === 'riegos') {
+    datos = await generarReporteBPA({ ...filtrosRol, desde, hasta });
+    ultimoReporte = datos;
+  } else if (tipo === 'riegos') {
     ultimoTipo = tipo;
     if (typeof generarReporteRiegos === 'function') {
-      ultimoReporte = await generarReporteRiegos({ ...filtrosRol, desde, hasta });
+      datos = await generarReporteRiegos({ ...filtrosRol, desde, hasta });
+      ultimoReporte = datos;
     } else {
       resultadoDiv.innerHTML = '<p>Error: La función generarReporteRiegos no está definida.</p>';
+      return;
     }
-    return;
-  }
-  if (tipo === 'agroquimicos') {
+  } else if (tipo === 'agroquimicos') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteAgroquimicos({ ...filtrosRol, desde, hasta });
-    return;
-  }
-  if (tipo === 'fertilizaciones') {
+    datos = await generarReporteAgroquimicos({ ...filtrosRol, desde, hasta });
+    ultimoReporte = datos;
+  } else if (tipo === 'fertilizaciones') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteFertilizaciones({ ...filtrosRol, desde, hasta });
-    return;
-  }
-  if (tipo === 'labores') {
+    datos = await generarReporteFertilizaciones({ ...filtrosRol, desde, hasta });
+    ultimoReporte = datos;
+  } else if (tipo === 'labores') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteLabores({ ...filtrosRol, desde, hasta });
+    datos = await generarReporteLabores({ ...filtrosRol, desde, hasta });
+    ultimoReporte = datos;
+  } else {
+    resultadoDiv.innerHTML = '<p>Tipo de reporte no implementado aún.</p>';
     return;
   }
-  resultadoDiv.innerHTML = '<p>Tipo de reporte no implementado aún.</p>';
+
+  // Renderizar tabla si hay datos
+  if (datos && datos.length > 0) {
+    const keys = Object.keys(datos[0]);
+    let html = `<table style="font-size:0.95em; margin-top:1em;"><thead><tr>`;
+    keys.forEach(k => { html += `<th>${k}</th>`; });
+    html += `</tr></thead><tbody>`;
+    datos.forEach(r => {
+      html += `<tr>`;
+      keys.forEach(k => { html += `<td>${r[k] ?? ''}</td>`; });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    resultadoDiv.innerHTML = html;
+  } else {
+    resultadoDiv.innerHTML = '<p>No hay datos para mostrar.</p>';
+  }
 });
 
 // Exportar CSV
@@ -354,7 +392,7 @@ function actualizarFooterVersion() {
   window.setTimeout(() => {
     const footer = document.getElementById('footer-version');
     if (footer) {
-      footer.textContent = 'Versión: v0.4.6-dev | Última actualización: 26/07/2025';
+      footer.textContent = 'Versión: v0.4.7-dev | Última actualización: 26/07/2025';
     }
   }, 300);
 }
