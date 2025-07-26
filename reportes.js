@@ -173,8 +173,39 @@ async function cargarFiltros() {
 }
 await cargarFiltros();
 
-// Actualizar cuarteles según fincas seleccionadas
-// (La lógica debe ir en un event listener, no aquí duplicada. Si necesitas filtrar cuarteles dinámicamente, hazlo en el handler de cambio de finca)
+// Filtrar cuarteles y regadores dinámicamente al seleccionar finca
+fincaSelect.addEventListener('change', async () => {
+  // Filtrar cuarteles
+  const cuarteles = JSON.parse(cuartelSelect.dataset.allCuarteles || '[]');
+  const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
+  const cuartelesFiltrados = cuarteles.filter(c => fincasSeleccionadas.includes(String(c.finca_id)));
+  cuartelSelect.innerHTML = cuartelesFiltrados.map(c => `<label style="display:inline-block; margin:2px;"><input type="checkbox" name="cuartel" value="${c.id}"> <span style="font-size:0.95em;">${c.nombre}</span></label>`).join('');
+
+  // Filtrar regadores
+  let operadoresFiltrados = [];
+  if (fincasSeleccionadas.length > 0) {
+    const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido, finca_id').in('finca_id', fincasSeleccionadas);
+    operadoresFiltrados = data ?? [];
+    regadorSelect.innerHTML = operadoresFiltrados.map(o => `<label style="display:inline-block; margin:2px;"><input type="checkbox" name="regador" value="${o.id}"> <span style="font-size:0.95em;">${o.apellido ? o.apellido + ', ' : ''}${o.nombre}</span></label>`).join('');
+  } else {
+    regadorSelect.innerHTML = '';
+  }
+});
+
+// Mostrar el botón de reporte y los selectores todo/ninguno compactos
+// Usar la declaración única de btnCompactStyle que ya existe más abajo
+[
+  document.getElementById('finca-todo'),
+  document.getElementById('finca-nada'),
+  document.getElementById('cuartel-todo'),
+  document.getElementById('cuartel-nada'),
+  document.getElementById('regador-todo'),
+  document.getElementById('regador-nada')
+].forEach(btn => { if (btn) btn.style = btnCompactStyle; });
+if (!document.getElementById('ver-reporte-btn')) {
+  verReporteBtn.id = 'ver-reporte-btn';
+  filtrosForm.appendChild(verReporteBtn);
+}
 
 // Proponer fecha actual en fecha hasta
 if (fechaHasta) {
@@ -182,8 +213,6 @@ if (fechaHasta) {
 }
 
 // Agregar botón para ver reporte en pantalla
-const verReporteBtn = document.createElement('button');
-  regadorSelect.innerHTML = operadores.map(o => `<label style="display:inline-block; margin:2px;"><input type="checkbox" name="regador" value="${o.id}"> <span style="font-size:0.95em;">${o.apellido ? o.apellido + ', ' : ''}${o.nombre}</span></label>`).join('');
 verReporteBtn.textContent = 'Ver reporte';
 verReporteBtn.className = 'btn btn-primary';
 verReporteBtn.style.marginRight = '1em';
