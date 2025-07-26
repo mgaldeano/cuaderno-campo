@@ -1,5 +1,5 @@
-// Versión: v0.4.3-dev | Última actualización: 26/07/2025
-console.log('Versión reportes.js: v0.4.3-dev | Última actualización: 26/07/2025');
+// Versión: v0.4.4-dev | Última actualización: 26/07/2025
+console.log('Versión reportes.js: v0.4.4-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -80,7 +80,11 @@ async function cargarFiltros() {
   console.log('Rol usuario:', rolUsuario);
   console.log('organizacionId:', organizacionId);
   console.log('productorId:', productorId);
-  if (rolUsuario === "ingeniero" && organizacionId) {
+  if (rolUsuario === "superadmin") {
+    // Superadmin: todas las fincas
+    const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id');
+    fincas = data ?? [];
+  } else if (rolUsuario === "ingeniero" && organizacionId) {
     // Ingeniero: todas las fincas de su organización
     const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id').eq('usuario_id', organizacionId);
     fincas = data ?? [];
@@ -104,7 +108,12 @@ async function cargarFiltros() {
 
   // Operadores
   let operadores = [];
-  if (rolUsuario === "ingeniero" && fincas.length > 0) {
+  if (rolUsuario === "superadmin" && fincas.length > 0) {
+    // Superadmin: todos los operarios de todas las fincas
+    const fincaIds = fincas.map(f => f.id);
+    const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, finca_id').in('finca_id', fincaIds);
+    operadores = data ?? [];
+  } else if (rolUsuario === "ingeniero" && fincas.length > 0) {
     // Ingeniero: todos los operarios de las fincas de su organización
     const fincaIds = fincas.map(f => f.id);
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, finca_id').in('finca_id', fincaIds);
@@ -433,7 +442,7 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
 function actualizarFooterVersion() {
   const footer = document.getElementById('footer-version');
   if (footer) {
-    footer.textContent = 'Versión: v0.4.3-dev | Última actualización: 26/07/2025';
+    footer.textContent = 'Versión: v0.4.4-dev | Última actualización: 26/07/2025';
   }
 }
 
