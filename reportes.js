@@ -387,3 +387,17 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
   resultadoDiv.innerHTML = html;
   return labores;
 }
+
+// Mostrar versión en el footer
+function actualizarFooterVersion() {
+  const footer = document.getElementById('footer-version');
+  if (footer) {
+    footer.textContent = 'Versión: v0.4-dev | Última actualización: 26/07/2025';
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', actualizarFooterVersion);
+} else {
+  actualizarFooterVersion();
+}
