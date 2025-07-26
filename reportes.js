@@ -159,6 +159,10 @@ verReporteBtn.className = 'btn btn-primary';
 verReporteBtn.style.marginRight = '1em';
 filtrosForm.appendChild(verReporteBtn);
 
+let ultimoReporte = [];
+let ultimoTipo = '';
+let ultimoVisual = '';
+
 verReporteBtn.addEventListener('click', async () => {
   resultadoDiv.innerHTML = '<p>Generando reporte...</p>';
   const tipo = tipoReporte.value;
