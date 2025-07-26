@@ -48,9 +48,6 @@
       // Agregar link a fitosanitarios solo para ingeniero
       const ul = document.querySelector("main ul");
       const { data: { user } } = await supabase.auth.getUser();
-      if (user && (user.role === "superadmin" || user.role === "ingeniero")) {
-        document.getElementById("li-informe-visita").style.display = "list-item";
-      }
       if (user) {
         const { data: usuario } = await supabase
           .from("usuarios")
@@ -58,6 +55,7 @@
           .eq("id", user.id)
           .single();
         if (usuario?.rol === "ingeniero" || usuario?.rol === "superadmin") {
+          document.getElementById("li-informe-visita").style.display = "list-item";
           const liFito = document.createElement("li");
           liFito.innerHTML = '<a href="fitosanitarios.html">🧪 Gestionar Fitosanitarios</a>';
           ul.appendChild(liFito);
