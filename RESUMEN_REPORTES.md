@@ -29,44 +29,18 @@ Este archivo sirve como referencia y espacio de trabajo para definir, editar y d
 - Fecha desde/hasta (por defecto, hasta = hoy)
 
 **Exportación:**
-- Solo columnas principales
-- Excel, PDF, CSV
-
----
-
-## Reporte de Agroquímicos
-**Campos principales:**
 - fecha
 - Finca
-- Cuartel
-- Operador
-- producto
-- dosis
 - observaciones
 
-**Filtros:**
-- Finca
 - Cuartel
-- Operador
 - Fecha desde/hasta
 
 **Exportación:**
-- Solo columnas principales
-- Excel, PDF, CSV
-
----
-
-## Reporte de Fertilizaciones
-**Campos principales:**
 - fecha
 - Finca
-- Cuartel
-- Operador
-- fertilizante
 - dosis
 - observaciones
-
-**Filtros:**
 - Finca
 - Cuartel
 - Operador
