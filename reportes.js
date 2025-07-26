@@ -361,7 +361,7 @@ async function generarReporteRiegos({ finca, cuartel, operador, desde, hasta }) 
     const fincaNombre = fincas?.find(f => f.id === r.finca_id)?.nombre_finca || r.finca_id;
     const cuartelNombre = cuarteles?.find(c => c.id === r.cuartel_id)?.nombre || r.cuartel_id;
     const operadorNombre = operadores?.find(o => o.id === r.operador_id)?.nombre || r.operador_id;
-    html += `<tr><td>${r.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${r.volumen_agua}</td></tr>`;
+    html += `<tr><td>${r.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${r.horas_riego ?? ''}</td><td>${r.volumen_agua}</td></tr>`;
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
