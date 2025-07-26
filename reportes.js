@@ -174,11 +174,11 @@ async function cargarFiltros() {
 await cargarFiltros();
 
 // Actualizar cuarteles según fincas seleccionadas
-fincaSelect.addEventListener('change', () => {
+    const { data: dataOperadores } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido, finca_id').in('finca_id', fincaIds);
   const cuarteles = JSON.parse(cuartelSelect.dataset.allCuarteles || '[]');
   const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
   const cuartelesFiltrados = cuarteles.filter(c => fincasSeleccionadas.includes(String(c.finca_id)));
-  cuartelSelect.innerHTML = cuartelesFiltrados.map(c => `<label><input type="checkbox" name="cuartel" value="${c.id}"> ${c.nombre}</label>`).join('');
+    const { data: dataOperadores } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido, finca_id').in('finca_id', fincaIds);
 });
 
 // Proponer fecha actual en fecha hasta
@@ -188,7 +188,7 @@ if (fechaHasta) {
 
 // Agregar botón para ver reporte en pantalla
 const verReporteBtn = document.createElement('button');
-verReporteBtn.type = 'button';
+  regadorSelect.innerHTML = operadores.map(o => `<label style="display:inline-block; margin:2px;"><input type="checkbox" name="regador" value="${o.id}"> <span style="font-size:0.95em;">${o.apellido ? o.apellido + ', ' : ''}${o.nombre}</span></label>`).join('');
 verReporteBtn.textContent = 'Ver reporte';
 verReporteBtn.className = 'btn btn-primary';
 verReporteBtn.style.marginRight = '1em';
