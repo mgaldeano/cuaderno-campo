@@ -68,7 +68,7 @@
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${u.id}</td>
-            <td><input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" ${puedeEditar ? "" : "disabled"} /></td>
+            <td><input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" style="width:180px;" ${puedeEditar ? "" : "disabled"} /></td>
             <td><input type="email" value="${u.email ?? ''}" data-id="${u.id}" class="edit-email" ${puedeEditar ? "" : "disabled"} /></td>
             <td><input type="text" value="${u.cuit ?? ''}" data-id="${u.id}" class="edit-cuit" ${puedeEditar ? "" : "disabled"} /></td>
             <td><input type="text" value="${u.telefono ?? ''}" data-id="${u.id}" class="edit-telefono" ${puedeEditar ? "" : "disabled"} /></td>
