@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Registrar Informe de Ingeniero | Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <style>
+      .form-visita {
+        max-width: 600px;
+        margin: 2em auto;
+        padding: 2em;
+        background: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px #0001;
+      }
+      .form-visita label { margin-top: 1em; }
+      .form-visita .entidad-group { display: flex; gap: 1em; flex-wrap: wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="header-container"></div>
+    <main class="container">
+      <h2>Registrar Informe de Ingeniero</h2>
+      <form id="form-visita" class="form-visita">
+        <label>Productor
+          <select id="productor" required></select>
+        </label>
+        <div class="entidad-group">
+          <label>Finca/s
+            <select id="fincas" multiple></select>
+          </label>
+          <label>Cuartel/es
+            <select id="cuarteles" multiple></select>
+          </label>
+        </div>
+        <label>Fecha
+          <input type="date" id="fecha" required />
+        </label>
+        <label>Texto del informe
+          <textarea id="texto" rows="5" required placeholder="Describa la visita, observaciones y recomendaciones..."></textarea>
+        </label>
+        <label>Adjuntar archivos
+          <input type="file" id="adjuntos" multiple />
+        </label>
+        <button type="submit">Registrar informe</button>
+        <p id="status"></p>
+      </form>
+    </main>
+    <script type="module">
+      import { supabase } from "./supabaseClient.js";
+      // Cargar productores
+      async function cargarProductores() {
+        const { data, error } = await supabase.from("usuarios").select("id, nombre").eq("rol", "productor");
+        const sel = document.getElementById("productor");
+        sel.innerHTML = data ? data.map(u => `<option value="${u.id}">${u.nombre}</option>`).join("") : "";
+      }
+      // Cargar fincas según productor
+      async function cargarFincas(productorId) {
+        const { data, error } = await supabase.from("fincas").select("id, nombre_finca").eq("usuario_id", productorId);
+        const sel = document.getElementById("fincas");
+        sel.innerHTML = data ? data.map(f => `<option value="${f.id}">${f.nombre_finca}</option>`).join("") : "";
+      }
+      // Cargar cuarteles según finca
+      async function cargarCuarteles(fincaIds) {
+        if (!fincaIds.length) return document.getElementById("cuarteles").innerHTML = "";
+        const { data, error } = await supabase.from("cuarteles").select("id, nombre").in("finca_id", fincaIds);
+        const sel = document.getElementById("cuarteles");
+        sel.innerHTML = data ? data.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("") : "";
+      }
+      document.getElementById("productor").addEventListener("change", e => {
+        cargarFincas(e.target.value);
+        document.getElementById("cuarteles").innerHTML = "";
+      });
+      document.getElementById("fincas").addEventListener("change", e => {
+        const fincaIds = Array.from(e.target.selectedOptions).map(opt => opt.value);
+        cargarCuarteles(fincaIds);
+      });
+      await cargarProductores();
+      // Form submit
+      document.getElementById("form-visita").addEventListener("submit", async e => {
+        e.preventDefault();
+        const status = document.getElementById("status");
+        status.textContent = "Guardando...";
+        const id_productor = document.getElementById("productor").value;
+        const fincaIds = Array.from(document.getElementById("fincas").selectedOptions).map(opt => opt.value);
+        const cuartelIds = Array.from(document.getElementById("cuarteles").selectedOptions).map(opt => opt.value);
+        const fecha = document.getElementById("fecha").value;
+        const texto = document.getElementById("texto").value;
+        const adjuntosInput = document.getElementById("adjuntos");
+        // Validar al menos una entidad
+        if (!id_productor && !fincaIds.length && !cuartelIds.length) {
+          status.textContent = "Selecciona al menos productor, finca o cuartel.";
+          return;
+        }
+        // Subir adjuntos (opcional, solo si hay archivos)
+        let adjuntos = [];
+        if (adjuntosInput.files.length) {
+          for (const file of adjuntosInput.files) {
+            const { data, error } = await supabase.storage.from("informes").upload(`${Date.now()}_${file.name}`, file);
+            if (error) {
+              status.textContent = `Error al subir archivo: ${file.name}`;
+              return;
+            }
+            adjuntos.push({ url: data.path, nombre: file.name });
+          }
+        }
+        // Registrar informe (uno por cuartel, o por finca, o solo productor)
+        const id_ingeniero = (await supabase.auth.getUser()).data.user.id;
+        let registros = [];
+        if (cuartelIds.length) {
+          registros = cuartelIds.map(id_cuartel => ({
+            id_productor, id_finca: null, id_cuartel, id_ingeniero, fecha, texto, adjuntos
+          }));
+        } else if (fincaIds.length) {
+          registros = fincaIds.map(id_finca => ({
+            id_productor, id_finca, id_cuartel: null, id_ingeniero, fecha, texto, adjuntos
+          }));
+        } else {
+          registros = [{ id_productor, id_finca: null, id_cuartel: null, id_ingeniero, fecha, texto, adjuntos }];
+        }
+        const { error } = await supabase.from("visitas").insert(registros);
+        if (error) {
+          status.textContent = "❌ Error al guardar: " + error.message;
+        } else {
+          status.textContent = `✅ Informe registrado correctamente.`;
+          document.getElementById("form-visita").reset();
+          document.getElementById("fincas").innerHTML = "";
+          document.getElementById("cuarteles").innerHTML = "";
+        }
+      });
+    </script>
+  </body>
+</html>
