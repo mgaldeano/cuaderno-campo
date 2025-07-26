@@ -16,7 +16,10 @@
 - Mejoras en la experiencia de usuario y robustez de la UI de reportes.
 
 * Mejorar experiencia móvil y responsive: revisar tablas, formularios y botones para una visualización y uso óptimos en celulares. Tener en cuenta si se hacen otros cambios visuales o de flujo.
-# Futuras tareas y mejoras - Cuaderno de Campo
+
+# Tarea de revisión de ortografía y gramática
+- Revisar que todos los formularios, combos y textos de la aplicación respeten ortografía y gramática.
+- Asegurar que la primera letra de cada campo, label y opción esté en mayúscula (ejemplo: debe decir "Nombre" en lugar de "nombre").
 
 ## 1. Roles y permisos
 - [x] Crear el rol **ingeniero** en la tabla de usuarios. (Listo)
@@ -57,5 +60,21 @@
 - Los reportes de Labores, Aplicaciones de Agroquímicos y Fertilizaciones requieren revisión y adaptación cuando las tablas correspondientes estén completas o cambie su estructura. Actualizar las funciones de consulta y visualización en reportes.js según los nuevos campos y relaciones.
 
 ---
+
+
+---
+
+---
+
+# Modelo recomendado de ABM para reutilización
+- Botones de acción compactos y alineados horizontalmente con flexbox (`display:flex; gap:12px; justify-content:center; align-items:center;`).
+- Botones con ancho limitado (`min-width: 48px; max-width: 64px;`), padding reducido y texto claro.
+- Labels y opciones con ortografía y gramática correctas, primera letra en mayúscula.
+- Edición inline clara y funcional, con campos visibles y ocultos según estado.
+- Espaciado visual adecuado para mejor experiencia de usuario.
+- Estructura HTML y CSS fácil de adaptar a otros ABM del sistema.
+
+- Evaluar la implementación de protección avanzada contra bots y abuso (Captcha) en Supabase Auth cuando el proyecto lo requiera.
+- Por ahora, se prioriza facilidad de acceso y pruebas sobre máxima seguridad.
 
 **Este archivo debe mantenerse actualizado a medida que se avanza en el desarrollo.**
