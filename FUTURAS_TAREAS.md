@@ -77,4 +77,58 @@
 - Evaluar la implementación de protección avanzada contra bots y abuso (Captcha) en Supabase Auth cuando el proyecto lo requiera.
 - Por ahora, se prioriza facilidad de acceso y pruebas sobre máxima seguridad.
 
+
+
+## Modelo y lógica de VISITAS (informes de ingeniero)
+
+### Esquema SQL sugerido
+```sql
+CREATE TABLE visitas (
+  id SERIAL PRIMARY KEY,
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  texto TEXT NOT NULL,
+  id_productor INTEGER NOT NULL REFERENCES productores(id),
+  id_finca INTEGER REFERENCES fincas(id),
+  id_cuartel INTEGER REFERENCES cuarteles(id),
+  id_ingeniero INTEGER NOT NULL REFERENCES usuarios(id),
+  adjuntos JSONB, -- array de URLs o metadatos de archivos
+  enviado_mail BOOLEAN DEFAULT FALSE
+);
+```
+
+#### Seguridad y RLS
+- Solo el ingeniero puede crear, editar y borrar informes de visita.
+- El productor puede consultar los informes asociados a su usuario, finca o cuartel.
+- Los adjuntos deben validarse y almacenarse en bucket seguro (ej: Supabase Storage).
+
+### Lógica de mails
+- Al crear un informe, se envía mail inmediato al productor (si tiene mail registrado).
+- Alternativamente, se puede enviar un resumen semanal con todos los informes nuevos.
+- El mail incluye el texto, fecha, ingeniero, entidad asociada y links a adjuntos.
+
+### Carga de informe
+- Formulario para ingeniero: seleccionar productor, finca/s, cuartel/es, escribir texto, adjuntar archivos.
+- Validar que al menos una entidad esté seleccionada.
+- Guardar en la tabla y disparar lógica de mail.
+
+### Consultas de informes de visitas
+- El productor puede ver todos los informes asociados a su usuario, fincas y cuarteles.
+- Al consultar una finca, mostrar informes de esa finca y del productor.
+- Al consultar un cuartel, mostrar informes de ese cuartel, de la finca y del productor (herencia).
+- Filtros por fecha, ingeniero, entidad, etc.
+
+# Creación de fincas y cuarteles por ingeniero
+- El ingeniero podrá crear fincas y cuarteles para un productor (el productor no podrá cargarlos por sí mismo).
+- Se mantiene la estructura de relaciones: fincas asociadas a cada productor y cuarteles asociados a cada finca.
+- Esto permite que el ingeniero gestione la estructura productiva y evite errores de carga por parte del productor.
+El ingeniero puede crear un informe de visita y asociarlo a un productor, a una o varias fincas, o a uno o varios cuarteles.
+Si selecciona productor, el informe será texto general para el productor.
+Si selecciona finca/s, el informe será para esas finca/s.
+Si selecciona cuarteles, el informe será para esos cuarteles.
+El productor podrá ver estos informes como reporte o de otra forma.
+Al ver un reporte de una entidad menor (por ejemplo, finca o cuartel), se deben mostrar también los informes que fueron aplicados a una entidad mayor o superior (herencia de informes).
+Ejemplo: Si se consulta el reporte de un cuartel, se deben traer los informes aplicados al cuartel, a la finca correspondiente y al productor asociado.
+Requiere definir la estructura de la tabla de informes, lógica de asociación y consulta jerárquica.
+
+
 **Este archivo debe mantenerse actualizado a medida que se avanza en el desarrollo.**
