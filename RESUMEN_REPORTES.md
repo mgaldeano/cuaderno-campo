@@ -14,33 +14,66 @@ Este archivo sirve como referencia y espacio de trabajo para definir, editar y d
 
 ## Reporte de Riegos
 **Campos principales:**
+
+**Filtros:**
+
+**Exportación:**
+
+---
+
+## Reporte de Riegos por Regador
+**Campos principales:**
 - fecha
+- Regador (Apellido, Nombre)
 - Finca (nombre)
 - Cuartel (nombre)
-- Regador (Apellido, Nombre)
 - horas_riego
 - volumen_agua
 - observaciones
 
 **Filtros:**
-- Finca (multi)
-- Cuartel (multi, dependiente de finca)
 - Regador (multi, mostrar "Apellido, Nombre")
-- Fecha desde/hasta (por defecto, hasta = hoy)
+- Fecha desde (predefinida 01/01/2000)
+- Fecha hasta (predefinida fecha actual)
 
 **Exportación:**
+- Solo columnas principales
+- Excel, PDF, CSV
+---
+
+## Reporte de Agroquímicos
+**Campos principales:**
 - fecha
 - Finca
+- Cuartel
+- Operador
+- producto
+- dosis
 - observaciones
 
+**Filtros:**
+- Finca
 - Cuartel
+- Operador
 - Fecha desde/hasta
 
 **Exportación:**
+- Solo columnas principales
+- Excel, PDF, CSV
+
+---
+
+## Reporte de Fertilizaciones
+**Campos principales:**
 - fecha
 - Finca
+- Cuartel
+- Operador
+- fertilizante
 - dosis
 - observaciones
+
+**Filtros:**
 - Finca
 - Cuartel
 - Operador

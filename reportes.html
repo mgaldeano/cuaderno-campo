@@ -6,73 +6,54 @@
     <title>Reportes | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
     <style>
-      <h2>Reportes</h2>
-      <form id="reportes-filtros" style="margin-bottom:1.5em;">
-        <fieldset>
-          <legend>Filtros generales</legend>
-          <label>Tipo de reporte
-            <select id="tipo-reporte" required>
-              <option value="riegos">Riegos realizados</option>
-              <option value="agroquimicos">Aplicaciones de agroquímicos</option>
-              <option value="fertilizaciones">Fertilizaciones</option>
-              <option value="labores">Labores de suelo</option>
-              <option value="bpa">Normas BPA (auditoría)</option>
-              <option value="riegos-regador">Riegos por Regador</option>
-            </select>
-          </label>
-          <div id="filtros-generales">
-            <div id="filtros-riegos" style="display:block;">
-              <label>Finca
-                <div style="display:flex; gap:0.2em; align-items:center; margin-bottom:0.5em;">
-                  <button id="finca-todo" type="button" class="btn-compact">✓</button>
-                  <button id="finca-nada" type="button" class="btn-compact">✗</button>
-                  <span style="font-size:0.9em; color:#666;">Fincas</span>
-                </div>
-                <div id="finca-reporte"></div>
-                <small>Filtra los registros del reporte por finca seleccionada.</small>
-              </label>
-              <label>Cuartel
-                <div style="display:flex; gap:0.2em; align-items:center; margin-bottom:0.5em;">
-                  <button id="cuartel-todo" type="button" class="btn-compact">✓</button>
-                  <button id="cuartel-nada" type="button" class="btn-compact">✗</button>
-                  <span style="font-size:0.9em; color:#666;">Cuarteles</span>
-                </div>
-                <div id="cuartel-reporte"></div>
-                <small>Filtra los registros del reporte por cuartel seleccionado.</small>
-              </label>
-              <label>Desde
-                <input type="date" id="fecha-desde" value="2000-01-01" />
-                <small>Filtra los registros del reporte desde esta fecha.</small>
-              </label>
-              <label>Hasta
-                <input type="date" id="fecha-hasta" />
-                <small>Filtra los registros del reporte hasta esta fecha.</small>
-              </label>
-            </div>
-            <div id="filtros-riegos-regador" style="display:none;">
-              <label>Regador
-                <div style="display:flex; gap:0.2em; align-items:center; margin-bottom:0.5em;">
-                  <button id="regador-todo" type="button" class="btn-compact">✓</button>
-                  <button id="regador-nada" type="button" class="btn-compact">✗</button>
-                  <span style="font-size:0.9em; color:#666;">Regadores</span>
-                </div>
-                <div id="regador-reporte"></div>
-                <small>Filtra los registros del reporte por regador seleccionado.</small>
-              </label>
-              <label>Desde
-                <input type="date" id="fecha-desde-regador" value="2000-01-01" />
-                <small>Filtra los registros del reporte desde esta fecha.</small>
-              </label>
-              <label>Hasta
-                <input type="date" id="fecha-hasta-regador" />
-                <small>Filtra los registros del reporte hasta esta fecha.</small>
-              </label>
-            </div>
-          </div>
-          <div id="filtros-productor" style="display:none;"></div>
-          <div id="filtros-operador" style="display:none;"></div>
-        </fieldset>
-      </form>
+      .btn-compact {
+        font-size:0.95em !important;
+        height:1.5em !important;
+        width:auto !important;
+        min-width:1.5em !important;
+        padding:0 !important;
+        background:#f5f5f5 !important;
+        border:1px solid #bbb !important;
+        color:#222 !important;
+        border-radius:4px !important;
+        box-shadow:none !important;
+        display:inline-block !important;
+      }
+    </style>
+    <!-- SheetJS para exportar a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF para exportar a PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script type="module">
+    // Reporte de tareas: campos usados según la base de datos actual
+    // id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs
+    import { supabase } from "./supabaseClient.js";
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "login.html";
+      throw new Error("No autorizado");
+    }
+      const contenedor = document.querySelector("#reportes-resultado");
+
+      async function cargarReporte() {
+        const { data, error } = await supabase
+          .from("tareas")
+          .select("id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs")
+          .order("fecha", { ascending: false });
+
+        if (error) {
+          contenedor.innerHTML = "<p>❌ Error al cargar el reporte</p>";
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          contenedor.innerHTML = "<p>No hay tareas registradas aún.</p>";
+          return;
+        }
+
+        const tabla = document.createElement("table");
+        tabla.innerHTML = `
+          <thead>
             <tr>
               <th>Fecha</th>
               <th>Tipo de Tarea</th>
@@ -130,6 +111,7 @@
           <label>Tipo de reporte
             <select id="tipo-reporte" required>
               <option value="riegos">Riegos realizados</option>
+              <option value="riegos-regador">Riegos por regador</option>
               <option value="agroquimicos">Aplicaciones de agroquímicos</option>
               <option value="fertilizaciones">Fertilizaciones</option>
               <option value="labores">Labores de suelo</option>
@@ -185,6 +167,23 @@
       <small id="footer-version" style="color:#888;"></small>
     </footer>
     <script type="module" src="reportes.js"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const tipoReporte = document.getElementById('tipo-reporte');
+        const filtrosGenerales = document.getElementById('filtros-generales');
+        if (tipoReporte) {
+          tipoReporte.addEventListener('change', (e) => {
+            if (e.target.value === 'riegos-regador') {
+              if (filtrosGenerales) filtrosGenerales.style.display = 'none';
+              if (window.renderRiegosPorRegadorUI) window.renderRiegosPorRegadorUI();
+            } else {
+              if (filtrosGenerales) filtrosGenerales.style.display = '';
+              window.location.reload(); // recarga para mostrar el filtro estándar
+            }
+          });
+        }
+      });
+    </script>
     <!-- Funcionalidad seleccionar todo/nada para finca, cuartel y regador -->
     <script>
       window.addEventListener('DOMContentLoaded', () => {

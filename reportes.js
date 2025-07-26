@@ -55,6 +55,115 @@ document.getElementById('exportar-excel').addEventListener('click', () => {
 import { supabase } from "./supabaseClient.js";
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // --- Reporte de Riegos por Regador ---
+  async function generarReporteRiegosPorRegador({ regador_id = [], desde, hasta }) {
+    let query = supabase.from('riegos').select('id, fecha, operador_id, finca_id, cuartel_id, horas_riego, volumen_agua, observaciones');
+    if (regador_id && regador_id.length) query = query.in('operador_id', regador_id);
+    if (desde) query = query.gte('fecha', desde);
+    if (hasta) query = query.lte('fecha', hasta);
+    const { data, error } = await query.order('fecha', { ascending: false });
+    if (error) {
+      console.error('Error consultando riegos por regador:', error);
+      return [];
+    }
+    return data.map(r => ({
+      ...r,
+      Finca: window.fincasMap?.[r.finca_id] || r.finca_id || '',
+      Cuartel: window.cuartelesMap?.[r.cuartel_id] || r.cuartel_id || '',
+      Regador: window.operadoresMap?.[r.operador_id] || r.operador_id || '',
+    }));
+  }
+
+  // Renderizar filtros y tabla para el nuevo reporte
+  window.renderRiegosPorRegadorUI = function renderRiegosPorRegadorUI() {
+    const filtrosForm = document.getElementById('reportes-filtros');
+    const resultadoDiv = document.getElementById('reportes-resultado');
+    // Limpiar filtros
+    filtrosForm.innerHTML = `
+      <fieldset>
+        <legend>Riegos por regador</legend>
+        <label>Tipo de reporte
+          <select id="tipo-reporte" required>
+            <option value="riegos">Riegos realizados</option>
+            <option value="riegos-regador" selected>Riegos por regador</option>
+            <option value="agroquimicos">Aplicaciones de agroquímicos</option>
+            <option value="fertilizaciones">Fertilizaciones</option>
+            <option value="labores">Labores de suelo</option>
+            <option value="bpa">Normas BPA (auditoría)</option>
+          </select>
+        </label>
+        <label>Regador
+          <div id="regador-reporte"></div>
+        </label>
+        <label>Desde
+          <input type="date" id="fecha-desde" value="2000-01-01" />
+        </label>
+        <label>Hasta
+          <input type="date" id="fecha-hasta" />
+        </label>
+        <button id="ver-informe-regador" type="button">Ver informe</button>
+      </fieldset>
+    `;
+    // Preseleccionar fecha actual en 'Hasta'
+    const fechaHastaInput = document.getElementById('fecha-hasta');
+    if (fechaHastaInput) {
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      fechaHastaInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+    // Poblar regadores
+        // Poblar regadores solo con apellido y nombre
+        const regadorSelect = document.getElementById('regador-reporte');
+        const regadores = Object.entries(window.operadoresMap || {}).map(([id, nombre]) => ({ id, nombre }));
+        regadorSelect.innerHTML = regadores.length > 0
+          ? regadores.map(o => `<label style="display:inline-block; margin:2px;"><input type="checkbox" name="regador" value="${o.id}"> <span style="font-size:0.95em;">${o.nombre}</span></label>`).join('')
+          : '<span style="color:#888;">No hay regadores disponibles.</span>';
+    // Listener botón
+    document.getElementById('ver-informe-regador').addEventListener('click', async () => {
+      const regadorIds = Array.from(document.querySelectorAll('input[name="regador"]:checked')).map(cb => cb.value);
+      const desde = document.getElementById('fecha-desde').value;
+      const hasta = document.getElementById('fecha-hasta').value;
+      const datos = await generarReporteRiegosPorRegador({ regador_id: regadorIds, desde, hasta });
+      if (!datos || datos.length === 0) {
+        resultadoDiv.innerHTML = '<p>No hay registros de riegos para los filtros seleccionados.</p>';
+        return;
+      }
+      // Generar tabla
+      const tabla = document.createElement('table');
+      tabla.innerHTML = `
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Regador</th>
+            <th>Finca</th>
+            <th>Cuartel</th>
+            <th>Horas riego</th>
+            <th>Volumen agua</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${datos.map(r => `
+            <tr>
+              <td>${r.fecha ?? '-'}</td>
+              <td>${r.Regador ?? '-'}</td>
+              <td>${r.Finca ?? '-'}</td>
+              <td>${r.Cuartel ?? '-'}</td>
+              <td>${r.horas_riego ?? '-'}</td>
+              <td>${r.volumen_agua ?? '-'}</td>
+              <td>${r.observaciones ?? ''}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+      resultadoDiv.innerHTML = '';
+      resultadoDiv.appendChild(tabla);
+    });
+  }
+
+  // Ejemplo: para probar, puedes llamar renderRiegosPorRegadorUI() desde la consola
   // Preseleccionar fecha actual en el campo 'Hasta'
   const fechaHastaInput = document.getElementById('fecha-hasta');
   if (fechaHastaInput) {
