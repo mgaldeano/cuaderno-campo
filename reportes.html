@@ -10,6 +10,8 @@
     <!-- jsPDF para exportar a PDF -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script type="module">
+    // Reporte de tareas: campos usados según la base de datos actual
+    // id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs
     import { supabase } from "./supabaseClient.js";
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -21,7 +23,7 @@
       async function cargarReporte() {
         const { data, error } = await supabase
           .from("tareas")
-          .select("id, tipo_tarea, fecha, cuartel_id, duracion")
+          .select("id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs")
           .order("fecha", { ascending: false });
 
         if (error) {
@@ -29,7 +31,7 @@
           return;
         }
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
           contenedor.innerHTML = "<p>No hay tareas registradas aún.</p>";
           return;
         }
@@ -42,6 +44,8 @@
               <th>Tipo de Tarea</th>
               <th>Cuartel</th>
               <th>Duración (min)</th>
+              <th>Cant. Agua</th>
+              <th>Observaciones</th>
             </tr>
           </thead>
           <tbody>
@@ -49,16 +53,19 @@
               .map(
                 t => `
               <tr>
-                <td>${t.fecha}</td>
-                <td>${t.tipo_tarea}</td>
-                <td>${t.cuartel_id}</td>
+                <td>${t.fecha ?? "-"}</td>
+                <td>${t.tipo_tarea_old ?? "-"}</td>
+                <td>${t.cuartel_id ?? "-"}</td>
                 <td>${t.duracion ?? "-"}</td>
+                <td>${t.cant_agua ?? "-"}</td>
+                <td>${t.obs ?? ""}</td>
               </tr>
             `
               )
               .join("")}
           </tbody>
         `;
+        contenedor.innerHTML = "";
         contenedor.appendChild(tabla);
       }
 
