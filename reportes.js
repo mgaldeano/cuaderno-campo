@@ -157,6 +157,21 @@ filtrosForm.addEventListener('submit', async (e) => {
     ultimoReporte = await generarReporteRiegos({ ...filtrosRol, operador, desde, hasta });
     return;
   }
+  if (tipo === 'agroquimicos') {
+    ultimoTipo = tipo;
+    ultimoReporte = await generarReporteAgroquimicos({ ...filtrosRol, operador, desde, hasta });
+    return;
+  }
+  if (tipo === 'fertilizaciones') {
+    ultimoTipo = tipo;
+    ultimoReporte = await generarReporteFertilizaciones({ ...filtrosRol, operador, desde, hasta });
+    return;
+  }
+  if (tipo === 'labores') {
+    ultimoTipo = tipo;
+    ultimoReporte = await generarReporteLabores({ ...filtrosRol, operador, desde, hasta });
+    return;
+  }
   resultadoDiv.innerHTML = '<p>Tipo de reporte no implementado aún.</p>';
 });
 
@@ -301,4 +316,71 @@ async function generarReporteRiegos({ finca, cuartel, operador, desde, hasta }) 
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
+  return riegos;
+}
+
+// Reporte de aplicaciones de agroquímicos
+async function generarReporteAgroquimicos({ finca, cuartel, operador, desde, hasta }) {
+  let query = supabase.from('aplicaciones_agroquimicos').select('*');
+  if (finca) query = query.eq('finca_id', finca);
+  if (cuartel) query = query.eq('cuartel_id', cuartel);
+  if (operador) query = query.eq('operador_id', operador);
+  if (desde) query = query.gte('fecha', desde);
+  if (hasta) query = query.lte('fecha', hasta);
+  const { data: aplicaciones } = await query;
+  if (!aplicaciones || aplicaciones.length === 0) {
+    resultadoDiv.innerHTML = '<p>No hay registros de aplicaciones de agroquímicos para los filtros seleccionados.</p>';
+    return [];
+  }
+  let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Producto</th><th>Dosis</th></tr></thead><tbody>`;
+  aplicaciones.forEach(a => {
+    html += `<tr><td>${a.fecha}</td><td>${a.finca_id}</td><td>${a.cuartel_id}</td><td>${a.operador_id}</td><td>${a.producto}</td><td>${a.dosis}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  resultadoDiv.innerHTML = html;
+  return aplicaciones;
+}
+
+// Reporte de fertilizaciones
+async function generarReporteFertilizaciones({ finca, cuartel, operador, desde, hasta }) {
+  let query = supabase.from('fertilizaciones').select('*');
+  if (finca) query = query.eq('finca_id', finca);
+  if (cuartel) query = query.eq('cuartel_id', cuartel);
+  if (operador) query = query.eq('operador_id', operador);
+  if (desde) query = query.gte('fecha', desde);
+  if (hasta) query = query.lte('fecha', hasta);
+  const { data: fertilizaciones } = await query;
+  if (!fertilizaciones || fertilizaciones.length === 0) {
+    resultadoDiv.innerHTML = '<p>No hay registros de fertilizaciones para los filtros seleccionados.</p>';
+    return [];
+  }
+  let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Producto</th><th>Dosis</th></tr></thead><tbody>`;
+  fertilizaciones.forEach(f => {
+    html += `<tr><td>${f.fecha}</td><td>${f.finca_id}</td><td>${f.cuartel_id}</td><td>${f.operador_id}</td><td>${f.producto}</td><td>${f.dosis}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  resultadoDiv.innerHTML = html;
+  return fertilizaciones;
+}
+
+// Reporte de labores de suelo
+async function generarReporteLabores({ finca, cuartel, operador, desde, hasta }) {
+  let query = supabase.from('labores').select('*');
+  if (finca) query = query.eq('finca_id', finca);
+  if (cuartel) query = query.eq('cuartel_id', cuartel);
+  if (operador) query = query.eq('operador_id', operador);
+  if (desde) query = query.gte('fecha', desde);
+  if (hasta) query = query.lte('fecha', hasta);
+  const { data: labores } = await query;
+  if (!labores || labores.length === 0) {
+    resultadoDiv.innerHTML = '<p>No hay registros de labores de suelo para los filtros seleccionados.</p>';
+    return [];
+  }
+  let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Labores</th><th>Maquinaria</th></tr></thead><tbody>`;
+  labores.forEach(l => {
+    html += `<tr><td>${l.fecha}</td><td>${l.finca_id}</td><td>${l.cuartel_id}</td><td>${l.operador_id}</td><td>${l.labores_realizadas}</td><td>${l.maquinaria_utilizada}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  resultadoDiv.innerHTML = html;
+  return labores;
 }
