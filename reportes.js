@@ -35,24 +35,13 @@ document.getElementById('exportar-excel').addEventListener('click', () => {
     let datos = ultimoReporte;
     if (ultimoTipo === 'riegos') {
       datos = ultimoReporte.map(r => ({
-        id: r.id,
-        finca_id: r.finca_id,
-        cuartel_id: r.cuartel_id,
+        fecha: r.fecha,
         Finca: r.Finca,
         Cuartel: r.Cuartel,
-        variedad: r.variedad,
-        especie: r.especie,
-        labores: r.labores,
-        operador_id: r.operador_id,
         Regador: r.Regador,
-        fecha: r.fecha,
-        maquinaria: r.maquinaria,
         horas_riego: r.horas_riego,
         volumen_agua: r.volumen_agua,
-        observaciones: r.observaciones,
-        created_at: r.created_at,
-        labor: r.labor,
-        objetivo: r.objetivo
+        observaciones: r.observaciones
       }));
     }
     const ws = window.XLSX.utils.json_to_sheet(datos);
@@ -261,13 +250,24 @@ verReporteBtn.addEventListener('click', async () => {
 
   // Renderizar tabla si hay datos
   if (datos && datos.length > 0) {
-    const keys = Object.keys(datos[0]);
+    let columnas = [];
+    if (tipo === 'riegos') {
+      columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'horas_riego', 'volumen_agua', 'observaciones'];
+    } else if (tipo === 'agroquimicos') {
+      columnas = Object.keys(datos[0]);
+    } else if (tipo === 'fertilizaciones') {
+      columnas = Object.keys(datos[0]);
+    } else if (tipo === 'labores') {
+      columnas = Object.keys(datos[0]);
+    } else {
+      columnas = Object.keys(datos[0]);
+    }
     let html = `<table style="font-size:0.95em; margin-top:1em;"><thead><tr>`;
-    keys.forEach(k => { html += `<th>${k}</th>`; });
+    columnas.forEach(k => { html += `<th>${k}</th>`; });
     html += `</tr></thead><tbody>`;
     datos.forEach(r => {
       html += `<tr>`;
-      keys.forEach(k => { html += `<td>${r[k] ?? ''}</td>`; });
+      columnas.forEach(k => { html += `<td>${r[k] ?? ''}</td>`; });
       html += `</tr>`;
     });
     html += `</tbody></table>`;
@@ -283,8 +283,21 @@ document.getElementById('exportar-csv').addEventListener('click', () => {
     alert('No hay datos para exportar');
     return;
   }
-  const keys = Object.keys(ultimoReporte[0]);
-  const csv = [keys.join(',')].concat(ultimoReporte.map(r => keys.map(k => JSON.stringify(r[k] ?? '')).join(','))).join('\n');
+  let datos = ultimoReporte;
+  let columnas = Object.keys(datos[0]);
+  if (ultimoTipo === 'riegos') {
+    columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'horas_riego', 'volumen_agua', 'observaciones'];
+    datos = datos.map(r => ({
+      fecha: r.fecha,
+      Finca: r.Finca,
+      Cuartel: r.Cuartel,
+      Regador: r.Regador,
+      horas_riego: r.horas_riego,
+      volumen_agua: r.volumen_agua,
+      observaciones: r.observaciones
+    }));
+  }
+  const csv = [columnas.join(',')].concat(datos.map(r => columnas.map(k => JSON.stringify(r[k] ?? '')).join(','))).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -336,33 +349,23 @@ document.getElementById('exportar-pdf').addEventListener('click', async () => {
     doc.text(`Reporte: ${ultimoTipo} (${new Date().toLocaleDateString()})`, 10, y);
     y += 10;
     let datos = ultimoReporte;
+    let columnas = Object.keys(datos[0]);
     if (ultimoTipo === 'riegos') {
-      datos = ultimoReporte.map(r => ({
-        id: r.id,
-        finca_id: r.finca_id,
-        cuartel_id: r.cuartel_id,
+      columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'horas_riego', 'volumen_agua', 'observaciones'];
+      datos = datos.map(r => ({
+        fecha: r.fecha,
         Finca: r.Finca,
         Cuartel: r.Cuartel,
-        variedad: r.variedad,
-        especie: r.especie,
-        labores: r.labores,
-        operador_id: r.operador_id,
         Regador: r.Regador,
-        fecha: r.fecha,
-        maquinaria: r.maquinaria,
         horas_riego: r.horas_riego,
         volumen_agua: r.volumen_agua,
-        observaciones: r.observaciones,
-        created_at: r.created_at,
-        labor: r.labor,
-        objetivo: r.objetivo
+        observaciones: r.observaciones
       }));
     }
-    const keys = Object.keys(datos[0]);
-    doc.text(keys.join(' | '), 10, y);
+    doc.text(columnas.join(' | '), 10, y);
     y += 10;
     datos.forEach(r => {
-      doc.text(keys.map(k => String(r[k] ?? '')).join(' | '), 10, y);
+      doc.text(columnas.map(k => String(r[k] ?? '')).join(' | '), 10, y);
       y += 8;
       if (y > 270) {
         doc.addPage();
