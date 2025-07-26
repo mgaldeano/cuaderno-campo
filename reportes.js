@@ -75,7 +75,7 @@ const filtrosForm = document.getElementById('reportes-filtros');
 const tipoReporte = document.getElementById('tipo-reporte');
 const fincaSelect = document.getElementById('finca-reporte');
 const cuartelSelect = document.getElementById('cuartel-reporte');
-const operadorSelect = document.getElementById('operador-reporte');
+const regadorSelect = document.getElementById('regador-reporte');
 const fechaDesde = document.getElementById('fecha-desde');
 const fechaHasta = document.getElementById('fecha-hasta');
 const resultadoDiv = document.getElementById('reportes-resultado');
@@ -156,8 +156,8 @@ async function cargarFiltros() {
     const { data } = await supabase.from('aplicadores_operarios').select('id, nombre').eq('id', usuarioId);
     operadores = data ?? [];
   }
-  operadorSelect.innerHTML = '<option value="">Todos</option>' +
-    (operadores.map(o => `<option value="${o.id}">${o.nombre}</option>`).join(''));
+  // Renderizar checkboxes de regadores
+  regadorSelect.innerHTML = operadores.map(o => `<label><input type="checkbox" name="regador" value="${o.id}"> ${o.nombre}</label>`).join('');
 }
 await cargarFiltros();
 
@@ -192,7 +192,7 @@ verReporteBtn.addEventListener('click', async () => {
   // Obtener fincas y cuarteles seleccionados
   const fincasSeleccionadas = Array.from(fincaSelect.querySelectorAll('input[name="finca"]:checked')).map(cb => cb.value);
   const cuartelesSeleccionados = Array.from(cuartelSelect.querySelectorAll('input[name="cuartel"]:checked')).map(cb => cb.value);
-  const operador = operadorSelect.value;
+  const regadoresSeleccionados = Array.from(regadorSelect.querySelectorAll('input[name="regador"]:checked')).map(cb => cb.value);
   const desde = fechaDesde.value;
   const hasta = fechaHasta.value;
 
@@ -200,38 +200,40 @@ verReporteBtn.addEventListener('click', async () => {
   let filtrosRol = {};
   if (rolUsuario === "operador") {
     filtrosRol.operador_id = usuarioId;
-  } else if (rolUsuario === "productor") {
+  } else {
     if (fincasSeleccionadas.length) filtrosRol.finca_id = fincasSeleccionadas;
     if (cuartelesSeleccionados.length) filtrosRol.cuartel_id = cuartelesSeleccionados;
-  } else if (rolUsuario === "ingeniero" || rolUsuario === "superadmin") {
-    if (fincasSeleccionadas.length) filtrosRol.finca_id = fincasSeleccionadas;
-    if (cuartelesSeleccionados.length) filtrosRol.cuartel_id = cuartelesSeleccionados;
+    if (regadoresSeleccionados.length) filtrosRol.operador_id = regadoresSeleccionados;
   }
 
   // Selección de consulta según tipo de reporte
   if (tipo === 'bpa') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteBPA({ ...filtrosRol, operador, desde, hasta });
+    ultimoReporte = await generarReporteBPA({ ...filtrosRol, desde, hasta });
     return;
   }
   if (tipo === 'riegos') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteRiegos({ ...filtrosRol, operador, desde, hasta });
+    if (typeof generarReporteRiegos === 'function') {
+      ultimoReporte = await generarReporteRiegos({ ...filtrosRol, desde, hasta });
+    } else {
+      resultadoDiv.innerHTML = '<p>Error: La función generarReporteRiegos no está definida.</p>';
+    }
     return;
   }
   if (tipo === 'agroquimicos') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteAgroquimicos({ ...filtrosRol, operador, desde, hasta });
+    ultimoReporte = await generarReporteAgroquimicos({ ...filtrosRol, desde, hasta });
     return;
   }
   if (tipo === 'fertilizaciones') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteFertilizaciones({ ...filtrosRol, operador, desde, hasta });
+    ultimoReporte = await generarReporteFertilizaciones({ ...filtrosRol, desde, hasta });
     return;
   }
   if (tipo === 'labores') {
     ultimoTipo = tipo;
-    ultimoReporte = await generarReporteLabores({ ...filtrosRol, operador, desde, hasta });
+    ultimoReporte = await generarReporteLabores({ ...filtrosRol, desde, hasta });
     return;
   }
   resultadoDiv.innerHTML = '<p>Tipo de reporte no implementado aún.</p>';
@@ -335,9 +337,24 @@ document.getElementById('exportar-pdf').addEventListener('click', async () => {
   }
 });
 
+// Botones seleccionar todo/nada para finca, cuartel y regador
+function setCheckboxes(container, checked) {
+  Array.from(container.querySelectorAll('input[type="checkbox"]')).forEach(cb => {
+    cb.checked = checked;
+  });
+}
+document.getElementById('finca-todo').addEventListener('click', () => setCheckboxes(fincaSelect, true));
+document.getElementById('finca-nada').addEventListener('click', () => setCheckboxes(fincaSelect, false));
+document.getElementById('cuartel-todo').addEventListener('click', () => setCheckboxes(cuartelSelect, true));
+document.getElementById('cuartel-nada').addEventListener('click', () => setCheckboxes(cuartelSelect, false));
+document.getElementById('regador-todo').addEventListener('click', () => setCheckboxes(regadorSelect, true));
+document.getElementById('regador-nada').addEventListener('click', () => setCheckboxes(regadorSelect, false));
+
 function actualizarFooterVersion() {
-  const footer = document.getElementById('footer-version');
-  if (footer) {
-    footer.textContent = 'Versión: v0.4.6-dev | Última actualización: 26/07/2025';
-  }
+  window.setTimeout(() => {
+    const footer = document.getElementById('footer-version');
+    if (footer) {
+      footer.textContent = 'Versión: v0.4.6-dev | Última actualización: 26/07/2025';
+    }
+  }, 300);
 }
