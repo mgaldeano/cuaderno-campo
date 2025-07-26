@@ -2,6 +2,10 @@
 
 Aplicación web para cooperativas, productores y técnicos vitícolas. Permite registrar tareas, gestionar fincas, cuarteles y usuarios. Desarrollada con Supabase, HTML + PicoCSS.
 
+### Cambios recientes (25/07/2025)
+- Ayuda contextual de riego ahora se carga desde archivo externo, con logs de versión para depuración y cierre de modal robusto.
+- Mejoras en la UI de riego: columna 'Regador' más ancha, propagación inmediata de selección.
+
 ---
 
 ## 🚀 Funcionalidades principales
@@ -42,16 +46,17 @@ cuaderno-campo/
 3. Crear tabla `usuarios` y relacionarlas con `organizaciones`
 4. Editar `supabaseClient.js` con tu información:
 
-# 📒 Cuaderno de Campo Digital
-
-Aplicación web para cooperativas, productores y técnicos vitícolas. Permite registrar tareas, gestionar fincas, cuarteles y usuarios. Desarrollada con Supabase, HTML + PicoCSS.
-
-### Cambios recientes (25/07/2025)
-- Ayuda contextual de riego ahora se carga desde archivo externo, con logs de versión para depuración y cierre de modal robusto.
-- Mejoras en la UI de riego: columna 'Regador' más ancha, propagación inmediata de selección.
-
 ```js
 const supabase = createClient(
   'https://TUPROYECTO.supabase.co',
+```
+
+## Estructura de la base de datos
+
+La estructura actual de todas las tablas y campos del proyecto está documentada en el archivo:
+
+- `estructura_bd_actual.csv`
+
+Este archivo se actualiza con cada cambio relevante y debe ser la referencia principal para desarrollo, reportes y migraciones.
 
 

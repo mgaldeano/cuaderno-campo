@@ -1,0 +1,145 @@
+tabla,columna,tipo_dato,es_nulo
+aplicadores_operarios,id,uuid,NO
+aplicadores_operarios,nombre,text,NO
+aplicadores_operarios,cuit,text,SI
+aplicadores_operarios,telefono,text,SI
+aplicadores_operarios,rol,text,SI
+aplicadores_operarios,finca_id,bigint,SI
+aplicadores_operarios,usuario_id,uuid,SI
+aplicadores_operarios,created_at,timestamp with time zone,SI
+aplicadores_operarios,apellido,text,SI
+aplicadores_operarios,direccion,text,SI
+cuartel_variedades,cuartel_id,bigint,NO
+cuartel_variedades,variedad_id,uuid,NO
+cuarteles,id,bigint,NO
+cuarteles,finca_id,bigint,SI
+cuarteles,superficie,numeric,SI
+cuarteles,nro_viñedo,text,SI
+cuarteles,provincia,text,SI
+cuarteles,departamento,text,SI
+cuarteles,created_at,timestamp with time zone,SI
+cuarteles,nombre,text,NO
+cuarteles,especie,text,SI
+cuarteles,variedad,text,SI
+especies,id,uuid,NO
+especies,nombre,text,NO
+fertilizantes,id,uuid,NO
+fertilizantes,producto,text,SI
+fertilizantes,formula,text,SI
+fertilizantes,n,numeric,SI
+fertilizantes,p,numeric,SI
+fertilizantes,k,numeric,SI
+fertilizantes,ca,numeric,SI
+fertilizantes,mg,numeric,SI
+fertilizantes,s,numeric,SI
+fertilizantes,fe,numeric,SI
+fertilizantes,mn,numeric,SI
+fertilizantes,zn,numeric,SI
+fertilizantes,cu,numeric,SI
+fertilizantes,bo,numeric,SI
+fertilizantes,mo,numeric,SI
+fertilizantes,cl,numeric,SI
+fertilizantes,ph,text,SI
+fertilizantes,otro,text,SI
+fincas,id,bigint,NO
+fincas,nombre_finca,text,NO
+fincas,usuario_id,uuid,SI
+fincas,created_at,timestamp with time zone,SI
+fincas,direccion,text,SI
+fincas,superficie,numeric,SI
+fitosanitarios,id,bigint,NO
+fitosanitarios,nombre_comercial,text,NO
+fitosanitarios,principio_activo,text,SI
+fitosanitarios,formulacion,text,SI
+fitosanitarios,plaga_o_enfermedad,text,SI
+fitosanitarios,accion,text,SI
+fitosanitarios,tc_tiempo_carencia,text,SI
+fitosanitarios,ct,text,SI
+fitosanitarios,dosis_marbete,text,SI
+fitosanitarios,unidad_marbete,text,SI
+fitosanitarios,lmr_senasa,text,SI
+fitosanitarios,lmr_eu,text,SI
+fitosanitarios,uso,text,SI
+fitosanitarios,dosis_frecuente_100l,text,SI
+fitosanitarios,registro_para,text,SI
+metodos_de_aplicacion,id,integer,NO
+metodos_de_aplicacion,nombre,text,NO
+metodos_de_aplicacion,descripcion,text,SI
+operario_finca,operario_id,uuid,NO
+operario_finca,finca_id,bigint,NO
+operario_finca,estado,text,NO
+organizaciones,id,uuid,NO
+organizaciones,nombre,text,NO
+organizaciones,logo_url,text,SI
+organizaciones,color_base,text,SI
+riegos,id,bigint,NO
+riegos,finca_id,bigint,SI
+riegos,cuartel_id,bigint,SI
+riegos,variedad,text,SI
+riegos,especie,text,SI
+riegos,labores,text,SI
+riegos,operador_id,uuid,SI
+riegos,fecha,date,SI
+riegos,maquinaria,text,SI
+riegos,horas_riego,numeric,SI
+riegos,volumen_agua,numeric,SI
+riegos,observaciones,text,SI
+riegos,created_at,timestamp with time zone,SI
+riegos,labor,text,SI
+riegos,objetivo,text,SI
+tareas,id,bigint,NO
+tareas,tipo_tarea_old,text,SI
+tareas,fecha,date,SI
+tareas,cuartel_id,bigint,SI
+tareas,duracion,integer,SI
+tareas,cant_agua,integer,SI
+tareas,obs,text,SI
+tareas,created_at,timestamp with time zone,SI
+tareas,tipo_tarea_id,integer,SI
+tipos_tarea,id,integer,NO
+tipos_tarea,nombre,text,NO
+tipos_tarea,requiere_duracion,boolean,SI
+tipos_tarea,requiere_agua,boolean,SI
+tipos_tarea,requiere_obs,boolean,SI
+usuarios,id,uuid,NO
+usuarios,nombre,text,SI
+usuarios,cuit,text,SI
+usuarios,telefono,text,SI
+usuarios,rol,text,SI
+usuarios,created_at,timestamp with time zone,SI
+usuarios,organizacion_id,uuid,SI
+usuarios,email,text,SI
+variedades,id,uuid,NO
+variedades,nombre,text,NO
+variedades,color,text,SI
+variedades,tipo_destino,text,SI
+# Ejemplos de consultas útiles para reportes y auditoría
+
+-- Resumen de tareas por finca y tipo
+SELECT finca_id, tipo_tarea_id::text AS tipo, COUNT(*) AS total
+FROM tareas
+GROUP BY finca_id, tipo_tarea_id;
+
+-- Riegos por operador y fecha
+SELECT operador_id, fecha, COUNT(*) AS total
+FROM riegos
+GROUP BY operador_id, fecha
+ORDER BY fecha DESC;
+
+-- Aplicaciones de agroquímicos por cuartel y producto
+SELECT cuartel_id, producto, COUNT(*) AS aplicaciones
+FROM aplicaciones_agroquimicos
+GROUP BY cuartel_id, producto;
+
+-- Fertilizaciones por cuartel y tipo de fertilizante
+SELECT cuartel_id, producto, COUNT(*) AS fertilizaciones
+FROM fertilizaciones
+GROUP BY cuartel_id, producto;
+
+-- Labores de suelo por cuartel y operador
+SELECT cuartel_id, operador_id, COUNT(*) AS labores
+FROM labores
+GROUP BY cuartel_id, operador_id;
+
+# FUTURA TAREA
+- Revisar y agregar funciones SQL específicas para reportes y auditoría al final del proyecto, según necesidades reales de gestión y certificación.
