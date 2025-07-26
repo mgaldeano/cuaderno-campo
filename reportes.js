@@ -22,7 +22,7 @@ async function generarReporteRiegos({ finca_id = [], cuartel_id = [], operador_i
     Regador: window.operadoresMap?.[r.operador_id] || r.operador_id || '',
   }));
 }
-console.log('Versión reportes.js: v0.4.6-dev | Última actualización: 26/07/2025');
+console.log('Versión reportes.js: v0.4.7-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -381,12 +381,18 @@ function setCheckboxes(container, checked) {
     cb.checked = checked;
   });
 }
-document.getElementById('finca-todo').addEventListener('click', () => setCheckboxes(fincaSelect, true));
-document.getElementById('finca-nada').addEventListener('click', () => setCheckboxes(fincaSelect, false));
-document.getElementById('cuartel-todo').addEventListener('click', () => setCheckboxes(cuartelSelect, true));
-document.getElementById('cuartel-nada').addEventListener('click', () => setCheckboxes(cuartelSelect, false));
-document.getElementById('regador-todo').addEventListener('click', () => setCheckboxes(regadorSelect, true));
-document.getElementById('regador-nada').addEventListener('click', () => setCheckboxes(regadorSelect, false));
+const fincaTodoBtn = document.getElementById('finca-todo');
+if (fincaTodoBtn) fincaTodoBtn.addEventListener('click', () => setCheckboxes(fincaSelect, true));
+const fincaNadaBtn = document.getElementById('finca-nada');
+if (fincaNadaBtn) fincaNadaBtn.addEventListener('click', () => setCheckboxes(fincaSelect, false));
+const cuartelTodoBtn = document.getElementById('cuartel-todo');
+if (cuartelTodoBtn) cuartelTodoBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, true));
+const cuartelNadaBtn = document.getElementById('cuartel-nada');
+if (cuartelNadaBtn) cuartelNadaBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, false));
+const regadorTodoBtn = document.getElementById('regador-todo');
+if (regadorTodoBtn) regadorTodoBtn.addEventListener('click', () => setCheckboxes(regadorSelect, true));
+const regadorNadaBtn = document.getElementById('regador-nada');
+if (regadorNadaBtn) regadorNadaBtn.addEventListener('click', () => setCheckboxes(regadorSelect, false));
 
 function actualizarFooterVersion() {
   window.setTimeout(() => {
