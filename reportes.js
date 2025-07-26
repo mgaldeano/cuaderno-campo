@@ -1,5 +1,5 @@
-// Versión: v0.4.1-dev | Última actualización: 26/07/2025
-console.log('Versión reportes.js: v0.4.1-dev | Última actualización: 26/07/2025');
+// Versión: v0.4.2-dev | Última actualización: 26/07/2025
+console.log('Versión reportes.js: v0.4.2-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -77,6 +77,9 @@ document.getElementById('filtros-operador').style.display = (rolUsuario === "ope
 async function cargarFiltros() {
   // Fincas
   let fincas = [];
+  console.log('Rol usuario:', rolUsuario);
+  console.log('organizacionId:', organizacionId);
+  console.log('productorId:', productorId);
   if (rolUsuario === "ingeniero" && organizacionId) {
     // Ingeniero: todas las fincas de su organización
     const { data } = await supabase.from('fincas').select('id, nombre_finca, organizacion_id').eq('organizacion_id', organizacionId);
@@ -86,6 +89,7 @@ async function cargarFiltros() {
     const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id').eq('usuario_id', productorId);
     fincas = data ?? [];
   }
+  console.log('Fincas cargadas:', fincas);
   fincaSelect.innerHTML = '<option value="">Todas</option>' +
     (fincas.map(f => `<option value="${f.id}">${f.nombre_finca}</option>`).join(''));
 
@@ -393,7 +397,7 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
 function actualizarFooterVersion() {
   const footer = document.getElementById('footer-version');
   if (footer) {
-    footer.textContent = 'Versión: v0.4.1-dev | Última actualización: 26/07/2025';
+    footer.textContent = 'Versión: v0.4.2-dev | Última actualización: 26/07/2025';
   }
 }
 
