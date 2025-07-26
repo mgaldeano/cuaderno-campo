@@ -1,5 +1,5 @@
-// Versión: v0.4-dev | Última actualización: 26/07/2025
-console.log('Versión reportes.js: v0.4-dev | Última actualización: 26/07/2025');
+// Versión: v0.4.1-dev | Última actualización: 26/07/2025
+console.log('Versión reportes.js: v0.4.1-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -393,7 +393,7 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
 function actualizarFooterVersion() {
   const footer = document.getElementById('footer-version');
   if (footer) {
-    footer.textContent = 'Versión: v0.4-dev | Última actualización: 26/07/2025';
+    footer.textContent = 'Versión: v0.4.1-dev | Última actualización: 26/07/2025';
   }
 }
 
