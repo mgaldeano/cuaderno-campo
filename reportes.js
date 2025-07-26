@@ -1,4 +1,4 @@
-// Versión: v0.4.7-dev | Última actualización: 26/07/2025
+// Versión: v0.4.8-dev | Última actualización: 26/07/2025
 // --- Función para generar el reporte de riegos ---
 async function generarReporteRiegos({ finca_id = [], cuartel_id = [], operador_id = [], desde, hasta }) {
   // Construir filtros dinámicos
@@ -384,24 +384,43 @@ function setCheckboxes(container, checked) {
     cb.checked = checked;
   });
 }
+const btnCompactStyle = 'font-size:0.95em; padding:2px 8px; margin:2px;';
 const fincaTodoBtn = document.getElementById('finca-todo');
-if (fincaTodoBtn) fincaTodoBtn.addEventListener('click', () => setCheckboxes(fincaSelect, true));
+if (fincaTodoBtn) {
+  fincaTodoBtn.style = btnCompactStyle;
+  fincaTodoBtn.addEventListener('click', () => setCheckboxes(fincaSelect, true));
+}
 const fincaNadaBtn = document.getElementById('finca-nada');
-if (fincaNadaBtn) fincaNadaBtn.addEventListener('click', () => setCheckboxes(fincaSelect, false));
+if (fincaNadaBtn) {
+  fincaNadaBtn.style = btnCompactStyle;
+  fincaNadaBtn.addEventListener('click', () => setCheckboxes(fincaSelect, false));
+}
 const cuartelTodoBtn = document.getElementById('cuartel-todo');
-if (cuartelTodoBtn) cuartelTodoBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, true));
+if (cuartelTodoBtn) {
+  cuartelTodoBtn.style = btnCompactStyle;
+  cuartelTodoBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, true));
+}
 const cuartelNadaBtn = document.getElementById('cuartel-nada');
-if (cuartelNadaBtn) cuartelNadaBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, false));
+if (cuartelNadaBtn) {
+  cuartelNadaBtn.style = btnCompactStyle;
+  cuartelNadaBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, false));
+}
 const regadorTodoBtn = document.getElementById('regador-todo');
-if (regadorTodoBtn) regadorTodoBtn.addEventListener('click', () => setCheckboxes(regadorSelect, true));
+if (regadorTodoBtn) {
+  regadorTodoBtn.style = btnCompactStyle;
+  regadorTodoBtn.addEventListener('click', () => setCheckboxes(regadorSelect, true));
+}
 const regadorNadaBtn = document.getElementById('regador-nada');
-if (regadorNadaBtn) regadorNadaBtn.addEventListener('click', () => setCheckboxes(regadorSelect, false));
+if (regadorNadaBtn) {
+  regadorNadaBtn.style = btnCompactStyle;
+  regadorNadaBtn.addEventListener('click', () => setCheckboxes(regadorSelect, false));
+}
 
 function actualizarFooterVersion() {
   window.setTimeout(() => {
     const footer = document.getElementById('footer-version');
     if (footer) {
-      footer.textContent = 'Versión: v0.4.7-dev | Última actualización: 26/07/2025';
+      footer.textContent = 'Versión: v0.4.8-dev | Última actualización: 26/07/2025';
     }
   }, 300);
 }
