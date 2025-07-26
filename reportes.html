@@ -16,7 +16,7 @@
       window.location.href = "login.html";
       throw new Error("No autorizado");
     }
-      const contenedor = document.querySelector("#reporte-tareas");
+      const contenedor = document.querySelector("#reportes-resultado");
 
       async function cargarReporte() {
         const { data, error } = await supabase
@@ -102,24 +102,7 @@
               <option value="bpa">Normas BPA (auditoría)</option>
             </select>
           </label>
-          <div id="filtros-productor" style="display:none;">
-            <label>Finca
-              <select id="finca-reporte"></select>
-            </label>
-            <label>Cuartel
-              <select id="cuartel-reporte"></select>
-            </label>
-          </div>
-          <div id="filtros-operador" style="display:none;">
-            <label>Operador
-              <select id="operador-reporte"></select>
-            </label>
-          </div>
-          <div id="filtros-fecha">
-            <label>Desde
-              <input type="date" id="fecha-desde" />
-            </label>
-            <label>Hasta
+          <!-- Filtros unificados -->
           <div id="filtros-generales">
             <label>Finca
               <select id="finca-reporte"></select>
@@ -128,6 +111,10 @@
             <label>Cuartel
               <select id="cuartel-reporte"></select>
               <small>Filtra los registros del reporte por cuartel seleccionado.</small>
+            </label>
+            <label>Operador
+              <select id="operador-reporte"></select>
+              <small>Filtra los registros del reporte por operador seleccionado.</small>
             </label>
             <label>Desde
               <input type="date" id="fecha-desde" value="2000-01-01" />
@@ -138,4 +125,17 @@
               <small>Filtra los registros del reporte hasta esta fecha.</small>
             </label>
           </div>
+        </fieldset>
+      </form>
+
+      <div id="reportes-resultado"></div>
+    </main>
+
+    <footer class="container">
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
+      <br>
+      <small style="color:#888;">Versión desarrollo: reportes.html v0.3 - 26/07/2025</small>
+    </footer>
+  </body>
+</html>
 
