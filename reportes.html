@@ -120,21 +120,18 @@
               <input type="date" id="fecha-desde" />
             </label>
             <label>Hasta
+          <div id="filtros-generales">
+            <label>Finca
+              <select id="finca-reporte"></select>
+            </label>
+            <label>Cuartel
+              <select id="cuartel-reporte"></select>
+            </label>
+            <label>Desde
+              <input type="date" id="fecha-desde" value="2000-01-01" />
+            </label>
+            <label>Hasta
               <input type="date" id="fecha-hasta" />
             </label>
           </div>
-          <button type="submit">Generar reporte</button>
-        </fieldset>
-      </form>
-      <div style="margin-bottom:1em; display:flex; gap:1em;">
-        <button id="exportar-csv" type="button">Exportar CSV</button>
-        <button id="exportar-pdf" type="button">Exportar PDF</button>
-        <button id="exportar-excel" type="button">Exportar Excel</button>
-      </div>
-      <div id="reportes-resultado"></div>
-      <div id="reportes-visualizacion" style="margin-top:2em;"></div>
-    </main>
 
-    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
-  </body>
-</html>
