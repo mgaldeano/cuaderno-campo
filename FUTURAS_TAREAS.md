@@ -87,10 +87,10 @@ CREATE TABLE visitas (
   id SERIAL PRIMARY KEY,
   fecha TIMESTAMP NOT NULL DEFAULT NOW(),
   texto TEXT NOT NULL,
-  id_productor INTEGER NOT NULL REFERENCES productores(id),
-  id_finca INTEGER REFERENCES fincas(id),
-  id_cuartel INTEGER REFERENCES cuarteles(id),
-  id_ingeniero INTEGER NOT NULL REFERENCES usuarios(id),
+  id_productor UUID NOT NULL REFERENCES usuarios(id),
+  id_finca BIGINT REFERENCES fincas(id),
+  id_cuartel BIGINT REFERENCES cuarteles(id),
+  id_ingeniero UUID NOT NULL REFERENCES usuarios(id),
   adjuntos JSONB, -- array de URLs o metadatos de archivos
   enviado_mail BOOLEAN DEFAULT FALSE
 );
