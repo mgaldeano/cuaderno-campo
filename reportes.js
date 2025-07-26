@@ -1,5 +1,5 @@
-// Versión: v0.4.2-dev | Última actualización: 26/07/2025
-console.log('Versión reportes.js: v0.4.2-dev | Última actualización: 26/07/2025');
+// Versión: v0.4.3-dev | Última actualización: 26/07/2025
+console.log('Versión reportes.js: v0.4.3-dev | Última actualización: 26/07/2025');
 // NOTA: Algunos reportes (labores, agroquímicos, fertilizaciones) requieren revisión y adaptación cuando las tablas estén completas o cambie su estructura. Actualizar las funciones correspondientes.
 
 // Exportar Excel (.xlsx) usando SheetJS si está disponible
@@ -82,7 +82,7 @@ async function cargarFiltros() {
   console.log('productorId:', productorId);
   if (rolUsuario === "ingeniero" && organizacionId) {
     // Ingeniero: todas las fincas de su organización
-    const { data } = await supabase.from('fincas').select('id, nombre_finca, organizacion_id').eq('organizacion_id', organizacionId);
+    const { data } = await supabase.from('fincas').select('id, nombre_finca, usuario_id').eq('usuario_id', organizacionId);
     fincas = data ?? [];
   } else if (rolUsuario === "productor") {
     // Productor: solo sus fincas
@@ -95,12 +95,7 @@ async function cargarFiltros() {
 
   // Cuarteles
   let cuarteles = [];
-  if (rolUsuario === "ingeniero" && organizacionId) {
-    // Ingeniero: todos los cuarteles de fincas de su organización
-    const { data } = await supabase.from('cuarteles').select('id, nombre, finca_id');
-    cuarteles = (data ?? []).filter(c => fincas.some(f => f.id === c.finca_id));
-  } else if (rolUsuario === "productor") {
-    // Productor: solo cuarteles de sus fincas
+  if (fincas.length > 0) {
     const { data } = await supabase.from('cuarteles').select('id, nombre, finca_id');
     cuarteles = (data ?? []).filter(c => fincas.some(f => f.id === c.finca_id));
   }
@@ -109,9 +104,10 @@ async function cargarFiltros() {
 
   // Operadores
   let operadores = [];
-  if (rolUsuario === "ingeniero" && organizacionId) {
-    // Ingeniero: todos los operarios de la organización
-    const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, organizacion_id').eq('organizacion_id', organizacionId);
+  if (rolUsuario === "ingeniero" && fincas.length > 0) {
+    // Ingeniero: todos los operarios de las fincas de su organización
+    const fincaIds = fincas.map(f => f.id);
+    const { data } = await supabase.from('aplicadores_operarios').select('id, nombre, finca_id').in('finca_id', fincaIds);
     operadores = data ?? [];
   } else if (rolUsuario === "productor") {
     // Productor: operarios propios
@@ -313,14 +309,24 @@ async function generarReporteRiegos({ finca, cuartel, operador, desde, hasta }) 
   if (desde) query = query.gte('fecha', desde);
   if (hasta) query = query.lte('fecha', hasta);
   const { data: riegos } = await query;
-  // Renderizar tabla simple
+  // Obtener nombres de finca, cuartel y operador
+  const fincaIds = [...new Set(riegos.map(r => r.finca_id))];
+  const cuartelIds = [...new Set(riegos.map(r => r.cuartel_id))];
+  const operadorIds = [...new Set(riegos.map(r => r.operador_id))];
+  const { data: fincas } = await supabase.from('fincas').select('id, nombre_finca').in('id', fincaIds);
+  const { data: cuarteles } = await supabase.from('cuarteles').select('id, nombre').in('id', cuartelIds);
+  const { data: operadores } = await supabase.from('aplicadores_operarios').select('id, nombre').in('id', operadorIds);
+  // Renderizar tabla con nombres
   if (!riegos || riegos.length === 0) {
     resultadoDiv.innerHTML = '<p>No hay registros de riego para los filtros seleccionados.</p>';
     return;
   }
   let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Volumen</th></tr></thead><tbody>`;
   riegos.forEach(r => {
-    html += `<tr><td>${r.fecha}</td><td>${r.finca_id}</td><td>${r.cuartel_id}</td><td>${r.operador_id}</td><td>${r.volumen_agua}</td></tr>`;
+    const fincaNombre = fincas?.find(f => f.id === r.finca_id)?.nombre_finca || r.finca_id;
+    const cuartelNombre = cuarteles?.find(c => c.id === r.cuartel_id)?.nombre || r.cuartel_id;
+    const operadorNombre = operadores?.find(o => o.id === r.operador_id)?.nombre || r.operador_id;
+    html += `<tr><td>${r.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${r.volumen_agua}</td></tr>`;
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
@@ -336,13 +342,23 @@ async function generarReporteAgroquimicos({ finca, cuartel, operador, desde, has
   if (desde) query = query.gte('fecha', desde);
   if (hasta) query = query.lte('fecha', hasta);
   const { data: aplicaciones } = await query;
+  // Obtener nombres de finca, cuartel y operador
+  const fincaIds = [...new Set(aplicaciones.map(a => a.finca_id))];
+  const cuartelIds = [...new Set(aplicaciones.map(a => a.cuartel_id))];
+  const operadorIds = [...new Set(aplicaciones.map(a => a.operador_id))];
+  const { data: fincas } = await supabase.from('fincas').select('id, nombre_finca').in('id', fincaIds);
+  const { data: cuarteles } = await supabase.from('cuarteles').select('id, nombre').in('id', cuartelIds);
+  const { data: operadores } = await supabase.from('aplicadores_operarios').select('id, nombre').in('id', operadorIds);
   if (!aplicaciones || aplicaciones.length === 0) {
     resultadoDiv.innerHTML = '<p>No hay registros de aplicaciones de agroquímicos para los filtros seleccionados.</p>';
     return [];
   }
   let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Producto</th><th>Dosis</th></tr></thead><tbody>`;
   aplicaciones.forEach(a => {
-    html += `<tr><td>${a.fecha}</td><td>${a.finca_id}</td><td>${a.cuartel_id}</td><td>${a.operador_id}</td><td>${a.producto}</td><td>${a.dosis}</td></tr>`;
+    const fincaNombre = fincas?.find(f => f.id === a.finca_id)?.nombre_finca || a.finca_id;
+    const cuartelNombre = cuarteles?.find(c => c.id === a.cuartel_id)?.nombre || a.cuartel_id;
+    const operadorNombre = operadores?.find(o => o.id === a.operador_id)?.nombre || a.operador_id;
+    html += `<tr><td>${a.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${a.producto}</td><td>${a.dosis}</td></tr>`;
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
@@ -358,13 +374,23 @@ async function generarReporteFertilizaciones({ finca, cuartel, operador, desde, 
   if (desde) query = query.gte('fecha', desde);
   if (hasta) query = query.lte('fecha', hasta);
   const { data: fertilizaciones } = await query;
+  // Obtener nombres de finca, cuartel y operador
+  const fincaIds = [...new Set(fertilizaciones.map(f => f.finca_id))];
+  const cuartelIds = [...new Set(fertilizaciones.map(f => f.cuartel_id))];
+  const operadorIds = [...new Set(fertilizaciones.map(f => f.operador_id))];
+  const { data: fincas } = await supabase.from('fincas').select('id, nombre_finca').in('id', fincaIds);
+  const { data: cuarteles } = await supabase.from('cuarteles').select('id, nombre').in('id', cuartelIds);
+  const { data: operadores } = await supabase.from('aplicadores_operarios').select('id, nombre').in('id', operadorIds);
   if (!fertilizaciones || fertilizaciones.length === 0) {
     resultadoDiv.innerHTML = '<p>No hay registros de fertilizaciones para los filtros seleccionados.</p>';
     return [];
   }
   let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Producto</th><th>Dosis</th></tr></thead><tbody>`;
   fertilizaciones.forEach(f => {
-    html += `<tr><td>${f.fecha}</td><td>${f.finca_id}</td><td>${f.cuartel_id}</td><td>${f.operador_id}</td><td>${f.producto}</td><td>${f.dosis}</td></tr>`;
+    const fincaNombre = fincas?.find(ff => ff.id === f.finca_id)?.nombre_finca || f.finca_id;
+    const cuartelNombre = cuarteles?.find(cc => cc.id === f.cuartel_id)?.nombre || f.cuartel_id;
+    const operadorNombre = operadores?.find(oo => oo.id === f.operador_id)?.nombre || f.operador_id;
+    html += `<tr><td>${f.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${f.producto}</td><td>${f.dosis}</td></tr>`;
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
@@ -380,13 +406,23 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
   if (desde) query = query.gte('fecha', desde);
   if (hasta) query = query.lte('fecha', hasta);
   const { data: labores } = await query;
+  // Obtener nombres de finca, cuartel y operador
+  const fincaIds = [...new Set(labores.map(l => l.finca_id))];
+  const cuartelIds = [...new Set(labores.map(l => l.cuartel_id))];
+  const operadorIds = [...new Set(labores.map(l => l.operador_id))];
+  const { data: fincas } = await supabase.from('fincas').select('id, nombre_finca').in('id', fincaIds);
+  const { data: cuarteles } = await supabase.from('cuarteles').select('id, nombre').in('id', cuartelIds);
+  const { data: operadores } = await supabase.from('aplicadores_operarios').select('id, nombre').in('id', operadorIds);
   if (!labores || labores.length === 0) {
     resultadoDiv.innerHTML = '<p>No hay registros de labores de suelo para los filtros seleccionados.</p>';
     return [];
   }
   let html = `<table><thead><tr><th>Fecha</th><th>Finca</th><th>Cuartel</th><th>Operador</th><th>Labores</th><th>Maquinaria</th></tr></thead><tbody>`;
   labores.forEach(l => {
-    html += `<tr><td>${l.fecha}</td><td>${l.finca_id}</td><td>${l.cuartel_id}</td><td>${l.operador_id}</td><td>${l.labores_realizadas}</td><td>${l.maquinaria_utilizada}</td></tr>`;
+    const fincaNombre = fincas?.find(f => f.id === l.finca_id)?.nombre_finca || l.finca_id;
+    const cuartelNombre = cuarteles?.find(c => c.id === l.cuartel_id)?.nombre || l.cuartel_id;
+    const operadorNombre = operadores?.find(o => o.id === l.operador_id)?.nombre || l.operador_id;
+    html += `<tr><td>${l.fecha}</td><td>${fincaNombre}</td><td>${cuartelNombre}</td><td>${operadorNombre}</td><td>${l.labores_realizadas}</td><td>${l.maquinaria_utilizada}</td></tr>`;
   });
   html += '</tbody></table>';
   resultadoDiv.innerHTML = html;
@@ -397,7 +433,7 @@ async function generarReporteLabores({ finca, cuartel, operador, desde, hasta })
 function actualizarFooterVersion() {
   const footer = document.getElementById('footer-version');
   if (footer) {
-    footer.textContent = 'Versión: v0.4.2-dev | Última actualización: 26/07/2025';
+    footer.textContent = 'Versión: v0.4.3-dev | Última actualización: 26/07/2025';
   }
 }
 
