@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reportes | Cuaderno de Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <!-- SheetJS para exportar a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF para exportar a PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script type="module">
     import { supabase } from "./supabaseClient.js";
     const { data: { user } } = await supabase.auth.getUser();
@@ -85,11 +89,50 @@
     </nav>
 
     <main class="container">
-      <hgroup>
-        <h2>Reporte de Tareas</h2>
-        <h3>Resumen agrupado por cuartel y tipo</h3>
-      </hgroup>
-      <div id="reporte-tareas"></div>
+      <h2>Reportes</h2>
+      <form id="reportes-filtros" style="margin-bottom:1.5em;">
+        <fieldset>
+          <legend>Filtros generales</legend>
+          <label>Tipo de reporte
+            <select id="tipo-reporte" required>
+              <option value="riegos">Riegos realizados</option>
+              <option value="agroquimicos">Aplicaciones de agroquímicos</option>
+              <option value="fertilizaciones">Fertilizaciones</option>
+              <option value="labores">Labores de suelo</option>
+              <option value="bpa">Normas BPA (auditoría)</option>
+            </select>
+          </label>
+          <div id="filtros-productor" style="display:none;">
+            <label>Finca
+              <select id="finca-reporte"></select>
+            </label>
+            <label>Cuartel
+              <select id="cuartel-reporte"></select>
+            </label>
+          </div>
+          <div id="filtros-operador" style="display:none;">
+            <label>Operador
+              <select id="operador-reporte"></select>
+            </label>
+          </div>
+          <div id="filtros-fecha">
+            <label>Desde
+              <input type="date" id="fecha-desde" />
+            </label>
+            <label>Hasta
+              <input type="date" id="fecha-hasta" />
+            </label>
+          </div>
+          <button type="submit">Generar reporte</button>
+        </fieldset>
+      </form>
+      <div style="margin-bottom:1em; display:flex; gap:1em;">
+        <button id="exportar-csv" type="button">Exportar CSV</button>
+        <button id="exportar-pdf" type="button">Exportar PDF</button>
+        <button id="exportar-excel" type="button">Exportar Excel</button>
+      </div>
+      <div id="reportes-resultado"></div>
+      <div id="reportes-visualizacion" style="margin-top:2em;"></div>
     </main>
 
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
