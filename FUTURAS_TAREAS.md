@@ -5,6 +5,9 @@
    - Incluir reporte especial para normas BPA (Buenas Prácticas Agrícolas): mostrar registros, tareas y controles relevantes para auditoría y certificación.
 3. Crear los reportes: implementar consultas, filtros y visualización.
    - Agregar opción en la UI para generar el reporte BPA, con filtros y formato adecuado para inspección/auditoría.
+4. Agregar gestión de tractores e implementos.
+5. Agregar mantenimiento de tractores e implementos.
+6. Desarrollar la lógica y el código para tractores e implementos (incluyendo base de datos, formularios y reportes).
 # Cambios recientes (25/07/2025)
 - Ayuda contextual de riego: texto externo mejorado y verificado, con logs de versión para depuración.
 - Ancho de columna 'Regador' ampliado y propagación inmediata al hacer click o change.
