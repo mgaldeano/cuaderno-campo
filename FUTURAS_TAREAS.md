@@ -8,10 +8,12 @@
 4. Agregar gestión de tractores e implementos.
 5. Agregar mantenimiento de tractores e implementos.
 6. Desarrollar la lógica y el código para tractores e implementos (incluyendo base de datos, formularios y reportes).
-# Cambios recientes (25/07/2025)
-- Ayuda contextual de riego: texto externo mejorado y verificado, con logs de versión para depuración.
-- Ancho de columna 'Regador' ampliado y propagación inmediata al hacer click o change.
-- Fix robusto para el cierre del modal de ayuda (delegación de eventos).
+
+# Cambios recientes (26/07/2025)
+- Nuevo reporte "Riegos por regador" con filtros específicos (regador y fechas).
+- Filtros dinámicos y selector de tipo de reporte siempre visible y funcional.
+- Exportación validada para los informes "Riegos realizados" y "Riegos por regador" (Excel, CSV, PDF).
+- Mejoras en la experiencia de usuario y robustez de la UI de reportes.
 
 * Mejorar experiencia móvil y responsive: revisar tablas, formularios y botones para una visualización y uso óptimos en celulares. Tener en cuenta si se hacen otros cambios visuales o de flujo.
 # Futuras tareas y mejoras - Cuaderno de Campo

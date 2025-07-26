@@ -2,9 +2,12 @@
 
 Aplicación web para cooperativas, productores y técnicos vitícolas. Permite registrar tareas, gestionar fincas, cuarteles y usuarios. Desarrollada con Supabase, HTML + PicoCSS.
 
-### Cambios recientes (25/07/2025)
-- Ayuda contextual de riego ahora se carga desde archivo externo, con logs de versión para depuración y cierre de modal robusto.
-- Mejoras en la UI de riego: columna 'Regador' más ancha, propagación inmediata de selección.
+
+### Cambios recientes (26/07/2025)
+- Nuevo reporte "Riegos por regador" con filtros específicos (regador y fechas).
+- Filtros dinámicos y selector de tipo de reporte siempre visible y funcional.
+- Exportación validada para los informes "Riegos realizados" y "Riegos por regador" (Excel, CSV, PDF).
+- Mejoras en la experiencia de usuario y robustez de la UI de reportes.
 
 ---
 
