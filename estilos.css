@@ -1,0 +1,91 @@
+:root {
+  --color-primary: #1976d2;
+  --color-secondary: #43a047;
+  --color-accent: #ffb300;
+  --color-bg: #f7f8fa;
+  --color-bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #f7f8fa 100%);
+  --color-card: #fff;
+  --color-border: #e0e0e0;
+  --color-text: #222;
+  --color-muted: #888;
+  --font-main: 'Roboto', 'Segoe UI', Arial, sans-serif;
+}
+body {
+  background: var(--color-bg-gradient);
+  font-family: var(--font-main);
+  color: var(--color-text);
+}
+.mui-card {
+  background: var(--color-card);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0002;
+  padding: 1.5em;
+  margin-bottom: 2em;
+  border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.mui-card:hover {
+  box-shadow: 0 6px 24px #1976d233;
+  transform: translateY(-2px) scale(1.01);
+}
+.btn-primary, .btn-secondary {
+  box-shadow: 0 2px 4px #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn-primary:hover, .btn-secondary:hover {
+  box-shadow: 0 4px 12px #1976d233;
+  transform: translateY(-1px) scale(1.03);
+}
+.form-control, .selectpicker {
+  font-family: var(--font-main);
+  font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: #fafafa;
+  color: var(--color-text);
+  margin-bottom: 1em;
+  transition: border-color 0.2s;
+}
+.form-control:focus, .selectpicker:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+label {
+  font-weight: 500;
+  color: var(--color-primary);
+  font-family: var(--font-main);
+}
+small.form-text {
+  color: var(--color-muted);
+  font-family: var(--font-main);
+}
+/* Personalización Bootstrap Select: checks más visibles y alineados a la izquierda */
+.bootstrap-select .dropdown-menu li a span.check-mark {
+  left: 8px;
+  color: var(--color-primary);
+  font-size: 1.2em;
+}
+.bootstrap-select .dropdown-menu li.selected a {
+  background-color: #e3f2fd;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.bootstrap-select .dropdown-menu li a {
+  padding-left: 32px !important;
+  font-family: var(--font-main);
+}
+.bootstrap-select .dropdown-menu li.selected a span.text {
+  font-weight: bold;
+}
+.bootstrap-select .dropdown-menu li.disabled a {
+  color: #bbb !important;
+}
+/* Custom radio/checkbox */
+.form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.form-check-label {
+  font-family: var(--font-main);
+  color: var(--color-text);
+}
