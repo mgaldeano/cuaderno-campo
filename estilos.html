@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo de Estilos y Componentes</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <!-- Bootstrap 4 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <!-- Bootstrap Select -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Bootstrap JS (debe ir antes de Bootstrap Select JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap Select JS (debe ir después de Bootstrap JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
+  <style>
+    :root {
+      --color-primary: #1976d2;
+      --color-secondary: #43a047;
+      --color-accent: #ffb300;
+      --color-bg: #f7f8fa;
+      --color-bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #f7f8fa 100%);
+      --color-card: #fff;
+      --color-border: #e0e0e0;
+      --color-text: #222;
+      --color-muted: #888;
+      --font-main: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    }
+    body {
+      background: var(--color-bg-gradient);
+      font-family: var(--font-main);
+      color: var(--color-text);
+    }
+    .demo-container {
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 2em;
+      background: var(--color-card);
+      border-radius: 12px;
+      box-shadow: 0 2px 16px #0002;
+      border: 1px solid var(--color-border);
+    }
+    h2, h4 {
+      color: var(--color-primary);
+      font-family: var(--font-main);
+    }
+    .mui-card {
+      background: var(--color-card);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0002;
+      padding: 1.5em;
+      margin-bottom: 2em;
+      border: 1px solid var(--color-border);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .mui-card:hover {
+      box-shadow: 0 6px 24px #1976d233;
+      transform: translateY(-2px) scale(1.01);
+    }
+    .btn-primary, .btn-secondary {
+      box-shadow: 0 2px 4px #0001;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover, .btn-secondary:hover {
+      box-shadow: 0 4px 12px #1976d233;
+      transform: translateY(-1px) scale(1.03);
+    }
+    .form-control, .selectpicker {
+      font-family: var(--font-main);
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: #fafafa;
+      color: var(--color-text);
+      margin-bottom: 1em;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus, .selectpicker:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+    label {
+      font-weight: 500;
+      color: var(--color-primary);
+      font-family: var(--font-main);
+    }
+    small.form-text {
+      color: var(--color-muted);
+      font-family: var(--font-main);
+    }
+    /* Personalización Bootstrap Select: checks más visibles y alineados a la izquierda */
+    .bootstrap-select .dropdown-menu li a span.check-mark {
+      left: 8px;
+      color: var(--color-primary);
+      font-size: 1.2em;
+    }
+    .bootstrap-select .dropdown-menu li.selected a {
+      background-color: #e3f2fd;
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+    .bootstrap-select .dropdown-menu li a {
+      padding-left: 32px !important;
+      font-family: var(--font-main);
+    }
+    .bootstrap-select .dropdown-menu li.selected a span.text {
+      font-weight: bold;
+    }
+    .bootstrap-select .dropdown-menu li.disabled a {
+      color: #bbb !important;
+    }
+    /* Custom radio/checkbox */
+    .form-check-input:checked {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    .form-check-label {
+      font-family: var(--font-main);
+      color: var(--color-text);
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="demo-container">
+    <h2>Demo de Estilos y Componentes</h2>
+    <!-- Bootstrap 4 -->
+    <div class="mui-card">
+      <h4 class="mb-3">Opción 1: Bootstrap 4</h4>
+      <div class="form-group">
+        <label for="bs-combo-multi">Combo multiseleccionable</label>
+        <select id="bs-combo-multi" class="form-control" multiple>
+          <option value="1">Opción 1</option>
+          <option value="2">Opción 2</option>
+          <option value="3">Opción 3</option>
+          <option value="4">Opción 4</option>
+          <option value="5">Opción 5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="bs-combo-simple">Combo simple</label>
+        <select id="bs-combo-simple" class="form-control">
+          <option value="">Seleccione...</option>
+          <option value="A">Opción A</option>
+          <option value="B">Opción B</option>
+          <option value="C">Opción C</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="bs-input-text">Campo texto</label>
+        <input type="text" id="bs-input-text" class="form-control" placeholder="Escriba algo..." />
+      </div>
+      <div class="form-group">
+        <label for="bs-input-num">Campo numérico</label>
+        <input type="number" id="bs-input-num" class="form-control" min="0" max="100" value="10" />
+      </div>
+      <div class="form-group">
+        <label for="bs-input-date">Fecha</label>
+        <input type="date" id="bs-input-date" class="form-control" />
+      </div>
+      <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="bs-input-check" />
+        <label class="form-check-label" for="bs-input-check">Checkbox</label>
+      </div>
+      <div class="form-group">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="bs-demo-radio" id="bs-input-radio1" value="1" />
+          <label class="form-check-label" for="bs-input-radio1">Radio 1</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="bs-demo-radio" id="bs-input-radio2" value="2" />
+          <label class="form-check-label" for="bs-input-radio2">Radio 2</label>
+        </div>
+      </div>
+      <button class="btn btn-primary mr-2"><i class="bi bi-plus-circle mr-1"></i>Agregar</button>
+      <button class="btn btn-secondary"><i class="bi bi-pencil-square mr-1"></i>Editar</button>
+    </div>
+    <!-- Bootstrap Select -->
+    <div class="mui-card">
+      <h4 class="mb-3">Opción 1.1: Bootstrap Select</h4>
+      <div class="form-group">
+        <label for="bs-combo-multi-select">Combo multiseleccionable con checks y búsqueda</label>
+        <select id="bs-combo-multi-select" class="form-control selectpicker" multiple data-live-search="true" title="Seleccione opciones...">
+          <option value="1">Manzana</option>
+          <option value="2">Banana</option>
+          <option value="3">Naranja</option>
+          <option value="4">Pera</option>
+          <option value="5">Durazno</option>
+          <option value="6">Tomate</option>
+          <option value="7">Lechuga</option>
+          <option value="8">Zanahoria</option>
+          <option value="9" disabled>Opción deshabilitada</option>
+        </select>
+        <small class="form-text text-muted">Puedes buscar, seleccionar varias y ver los checks a la izquierda.</small>
+      </div>
+      <div class="form-group">
+        <label for="bs-combo-multi-select2">Combo con grupos y checks</label>
+        <select id="bs-combo-multi-select2" class="form-control selectpicker" multiple data-live-search="true" title="Seleccione opciones...">
+          <optgroup label="Frutas">
+            <option value="manzana">Manzana</option>
+            <option value="banana">Banana</option>
+            <option value="naranja">Naranja</option>
+          </optgroup>
+          <optgroup label="Verduras">
+            <option value="tomate">Tomate</option>
+            <option value="lechuga">Lechuga</option>
+            <option value="zanahoria">Zanahoria</option>
+          </optgroup>
+        </select>
+        <small class="form-text text-muted">Ejemplo con grupos y checks personalizados.</small>
+      </div>
+      <script>
+        // Inicializar Bootstrap Select en los combos agregados
+        $(function() {
+          $('.selectpicker').selectpicker();
+        });
+      </script>
+    </div>
+  </div>
+</body>
+</html>
