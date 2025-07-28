@@ -1,3 +1,37 @@
+/* Título principal en el header */
+.titulo-header {
+  color: var(--color-primary);
+  font-family: var(--font-main);
+  font-size: 1.35em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-right: 0.5em;
+}
+
+/* Caja de usuario/institución en header */
+.header-info-box {
+  font-size: 0.98em;
+  color: var(--color-text);
+  background: #fff !important;
+  color: var(--color-text) !important;
+  border-radius: 10px;
+  padding: 6px 18px;
+  box-shadow: 0 2px 8px #0001;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-left: 1em;
+  border: 1px solid var(--color-border);
+}
+/* Título principal para login y páginas importantes */
+.titulo-principal {
+  color: var(--color-primary);
+  font-family: var(--font-main);
+  font-size: 2.1em;
+  font-weight: 500;
+  margin-bottom: 0.5em;
+  letter-spacing: 0.01em;
+}
 :root {
   --color-primary: #1976d2;
   --color-secondary: #43a047;

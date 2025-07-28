@@ -42,36 +42,32 @@ async function mostrarHeaderInfo(user) {
     logoUrl = org?.logo_url ?? "";
   }
 
-  if (!logoUrl || logoUrl.trim() === "") {
-    if (location.protocol === "https:") {
-      logoUrl = "https://mgaldeano.github.io/cuaderno-campo/logo.png";
-    } else {
-      logoUrl = "http://galdeano.com.ar/cuaderno-campo/logo.png";
-    }
+  // Usar logo local en desarrollo para evitar bloqueos de navegador
+  if (!logoUrl || logoUrl.trim() === "" || location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    logoUrl = "logo.png";
   }
 
-  const headerInfo = document.getElementById("header-info");
-  // Tamaño de fuente general del header
-  headerInfo.style.fontSize = "0.75em";
-  // Color de texto principal
-  headerInfo.style.color = "#444";
-  // Fondo suave, similar al fondo de la página (PicoCSS)
-  headerInfo.style.background = "#26313bff";
-  // Bordes redondeados del rectángulo
-  headerInfo.style.borderRadius = "6px";
-  // Espaciado interno reducido
-  headerInfo.style.padding = "2px 8px";
-  // Mostrar elementos en línea y centrados verticalmente
-  headerInfo.style.display = "inline-flex";
-  headerInfo.style.alignItems = "center";
-  // Espacio entre logo, organización y nombre
-  headerInfo.style.gap = "12px";
+  // Actualizar saludo en navbar
+  const navbarUser = document.getElementById("navbar-user");
+  let rol = "usuario";
+  if (usuario) rol = usuario.rol ?? rol;
+  if (navbarUser) {
+    navbarUser.innerHTML = `Bienvenido, <i>${nombre}</i> (${rol})`;
+  }
 
-  headerInfo.innerHTML = `
-  <img src="${logoUrl}" alt="Logo" style="height:16px; margin-right:6px; border-radius:3px;"> <!-- Logo de la organización -->
-  <span style="font-weight:500; font-size:0.85em; color:#666;">${organizacion}</span> <!-- Nombre de la organización -->
-  <span style="margin-left:10px; font-size:0.8em; color:#888;">${nombre}</span> <!-- Nombre del usuario -->
-`;
+  // Menús por rol (igual que index.html)
+  if (rol === "ingeniero" || rol === "superadmin") {
+    const navInforme = document.getElementById("nav-informe-visita");
+    if (navInforme) navInforme.classList.remove("d-none");
+    const gestionMenu = document.getElementById("gestion-dropdown-menu");
+    if (gestionMenu) {
+      gestionMenu.innerHTML += `<a class='dropdown-item' href='fitosanitarios.html'>Gestionar Fitosanitarios</a>`;
+      gestionMenu.innerHTML += `<a class='dropdown-item' href='fertilizantes.html'>Gestionar Fertilizantes</a>`;
+      gestionMenu.innerHTML += `<a class='dropdown-item' href='metodos_de_aplicacion.html'>Métodos de Aplicación</a>`;
+      gestionMenu.innerHTML += `<a class='dropdown-item' href='variedades.html'>Gestionar Variedades</a>`;
+      gestionMenu.innerHTML += `<a class='dropdown-item' href='especies.html'>Gestionar Especies</a>`;
+    }
+  }
 }
 
 // Manejo universal de cierre de sesión
