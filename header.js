@@ -15,7 +15,7 @@ async function mostrarHeaderInfo(user) {
   console.log("Ejecutando mostrarHeaderInfo");
   const { data: usuario, error: errorUsuario } = await supabase
     .from("usuarios")
-    .select("nombre, organizacion_id")
+    .select("nombre, organizacion_id, rol")
     .eq("id", user.id)
     .single();
   console.log("usuario:", usuario);
@@ -24,9 +24,11 @@ async function mostrarHeaderInfo(user) {
     console.log("Error usuario:", errorUsuario);
     return;
   }
+
   let nombre = usuario?.nombre ?? "Usuario";
   let organizacion = "";
   let logoUrl = "";
+  let rol = usuario?.rol ?? "usuario";
 
   if (usuario?.organizacion_id) {
     const { data: org, error: errorOrg } = await supabase
@@ -40,19 +42,25 @@ async function mostrarHeaderInfo(user) {
     }
     organizacion = org?.nombre ?? "";
     logoUrl = org?.logo_url ?? "";
+    // Actualizar nombre de la organización en el header
+    const orgNombre = document.getElementById("org-nombre");
+    if (orgNombre) orgNombre.textContent = organizacion;
+    // Actualizar logo de la organización en el header
+    const orgLogo = document.getElementById("org-logo");
+    if (orgLogo && logoUrl) orgLogo.src = logoUrl;
   }
 
   // Usar logo local en desarrollo para evitar bloqueos de navegador
   if (!logoUrl || logoUrl.trim() === "" || location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     logoUrl = "logo.png";
+    const orgLogo = document.getElementById("org-logo");
+    if (orgLogo) orgLogo.src = logoUrl;
   }
 
   // Actualizar saludo en navbar
   const navbarUser = document.getElementById("navbar-user");
-  let rol = "usuario";
-  if (usuario) rol = usuario.rol ?? rol;
   if (navbarUser) {
-    navbarUser.innerHTML = `Bienvenido, <i>${nombre}</i> (${rol})`;
+    navbarUser.innerHTML = `Bienvenido, <i>${nombre}</i> <span style="color:#888;font-size:0.88em; margin-left:0.3em;">(${rol})</span>`;
   }
 
   // Menús por rol (igual que index.html)
