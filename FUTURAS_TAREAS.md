@@ -1,3 +1,7 @@
+### Pendiente: Menú desplegable de Gestión (header)
+- Solucionar definitivamente el stacking y el parpadeo del menú desplegable sobre las tarjetas del dashboard en index.html.
+- El menú debe quedar siempre por encima de las tarjetas, sin parpadear ni perder el foco, y correctamente alineado.
+- Revisar posibles conflictos de stacking context, z-index y eventos de Bootstrap.
 ## Pendientes próximos pasos (25/07/2025)
 
 1. Asegurar que el help funcione correctamente en todas las páginas (botón flotante y modal).
