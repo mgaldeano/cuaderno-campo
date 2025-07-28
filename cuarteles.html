@@ -24,60 +24,47 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mui-card mb-4">
-      <a class="navbar-brand" href="#"><img src="logo.png" height="32"> Coop. Probando</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav mr-auto" id="navbar-menu">
-          <li class="nav-item dropdown" id="nav-gestion">
-            <a class="nav-link dropdown-toggle" href="#" id="gestionDropdown" data-toggle="dropdown">Gestión</a>
-            <div class="dropdown-menu" id="gestion-dropdown-menu">
-              <a class="dropdown-item" href="fincas.html">Fincas</a>
-              <a class="dropdown-item" href="cuarteles.html">Cuarteles</a>
-              <a class="dropdown-item" href="tareas.html">Tareas</a>
-              <a class="dropdown-item" href="operadores.html">Operadores</a>
-            </div>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes</a></li>
-          <li class="nav-item"><a class="nav-link" href="usuarios.html">Usuarios</a></li>
-          <li class="nav-item d-none" id="nav-informe-visita"><a class="nav-link" href="informe_visita.html">Informe de Ingeniero</a></li>
-        </ul>
-        <span class="navbar-text ml-auto" id="navbar-user">Bienvenido, <i>Usuario</i></span>
-      </div>
-    </nav>
-    <main class="container">
-      <hgroup>
-        <h2 class="titulo-principal">Cuarteles</h2>
-      </hgroup>
-      <form id="cuartel-form">
-        <fieldset>
-          <legend>Datos Principales</legend>
-          <label for="finca_id">Finca</label>
-          <select name="finca_id" id="finca_id" required>
-            <option value="">Seleccionar Finca...</option>
-          </select>
-          <label for="nombre_cuartel">Nombre del Cuartel</label>
-          <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del Cuartel" required />
-          <label for="superficie_cuartel">Superficie (ha)</label>
-          <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
-        </fieldset>
-        <fieldset>
-          <legend>Datos Secundarios</legend>
-          <label for="nro_viñedo">Nro. de Viñedo</label>
-          <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro. de Viñedo" />
-          <label for="provincia">Provincia</label>
-          <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
-          <label for="departamento">Departamento</label>
-          <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
-          <label for="especie">Especie</label>
-          <input type="text" name="especie" id="especie" placeholder="Especie" />
-        </fieldset>
-        <fieldset>
-          <legend>Variedades</legend>
-          <label for="variedades_cuartel">Variedades</label>
-          <select id="variedades_cuartel" multiple size="3">
+    <div id="header-container"></div>
+    <script type="module">
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+        });
+    </script>
+    <main class="container mt-5">
+      <div class="card mb-4 p-4">
+        <hgroup>
+          <h2 class="titulo-principal">Cuarteles</h2>
+        </hgroup>
+        <form id="cuartel-form">
+          <fieldset>
+            <legend>Datos Principales</legend>
+            <label for="finca_id">Finca</label>
+            <select name="finca_id" id="finca_id" required>
+              <option value="">Seleccionar Finca...</option>
+            </select>
+            <label for="nombre_cuartel">Nombre del Cuartel</label>
+            <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del Cuartel" required />
+            <label for="superficie_cuartel">Superficie (ha)</label>
+            <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
+          </fieldset>
+          <fieldset>
+            <legend>Datos Secundarios</legend>
+            <label for="nro_viñedo">Nro. de Viñedo</label>
+            <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro. de Viñedo" />
+            <label for="provincia">Provincia</label>
+            <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
+            <label for="departamento">Departamento</label>
+            <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
+            <label for="especie">Especie</label>
+            <input type="text" name="especie" id="especie" placeholder="Especie" />
+          </fieldset>
+          <fieldset>
+            <legend>Variedades</legend>
+            <label for="variedades_cuartel">Variedades</label>
+            <select id="variedades_cuartel" multiple size="3">
             <!-- Opciones generadas dinámicamente -->
           </select>
           <small>Puedes seleccionar hasta 3 Variedades</small>

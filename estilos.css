@@ -1,3 +1,10 @@
+.mui-card {
+  position: relative;
+}
+/* Asegura que el menú desplegable siempre quede por encima de las tarjetas y no parpadee */
+.dropdown-menu {
+  z-index: 2000 !important;
+}
 /* Título principal en el header */
 .titulo-header {
   color: var(--color-primary);
@@ -122,4 +129,84 @@ small.form-text {
 .form-check-label {
   font-family: var(--font-main);
   color: var(--color-text);
+}
+
+/* Unificar tamaño y altura de letra en navbar y botón cerrar sesión */
+.navbar, .navbar-nav .nav-link, .navbar-text, #logoutBtn {
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
+#logoutBtn {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  font-size: 1.05em !important;
+  font-weight: 500;
+  box-shadow: 0 2px 4px #0001;
+  border-radius: 6px;
+  border: none;
+  padding: 0.45em 1.2em;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.navbar {
+  min-height: 64px;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  align-items: center;
+  display: flex;
+}
+.navbar .navbar-brand,
+.navbar .navbar-nav,
+.navbar .navbar-text,
+.navbar #logoutBtn {
+  align-items: center;
+  display: flex;
+}
+
+/* Header dinámico */
+#header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#header-container .titulo-header {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+#header-container .header-info-box {
+  position: absolute;
+  right: 1em;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary);
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#header-container .header-info-box:hover {
+  background: #fff;
+  color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para el script de header.js */
+#header-container.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+#header-container.loaded {
+  opacity: 1;
+  transition: opacity 0.3s;
 }
