@@ -414,3 +414,51 @@ small.form-text {
 #formulario-finca {
   transition: opacity 0.3s ease;
 }
+
+/* ===== ESTILOS DASHBOARD ===== */
+.dashboard-card-link {
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover {
+  text-decoration: none !important;
+}
+
+.dashboard-card-link .mui-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e3e6ea;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.dashboard-card-link:hover .mui-card {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  border-color: #d1ecf1;
+}
+
+.dashboard-card-link .card-body {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover .card-body {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Efecto especial para iconos del dashboard */
+.dashboard-card-link i {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover i {
+  transform: scale(1.1);
+}
+
+/* Números en el dashboard */
+.dashboard-card-link h2 {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover h2 {
+  color: #007bff !important;
+}

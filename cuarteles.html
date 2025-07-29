@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cuarteles - Cuaderno de Campo</title>
     
-    <!-- Bootstrap 4 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- Estilos personalizados -->
     <link href="estilos.css" rel="stylesheet">
@@ -94,7 +94,7 @@
                         <p class="text-muted mb-0">Administra los lotes y variedades por finca</p>
                     </div>
                     <div class="d-flex align-items-center">
-                        <span id="contador-cuarteles" class="badge badge-secondary badge-lg mr-3">
+                        <span id="contador-cuarteles" class="badge badge-secondary badge-lg me-3">
                             Cargando...
                         </span>
                         <button type="button" id="toggle-form-btn" class="btn btn-primary">
@@ -251,10 +251,8 @@
         </div>
     </div>
 
-    <!-- Bootstrap 4 JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     // Variables globales
     let supabase = null;
@@ -562,10 +560,10 @@
         
         if (supabase && currentUser) {
             contador.textContent = texto;
-            contador.className = cantidad > 0 ? 'badge badge-primary badge-lg mr-3' : 'badge badge-secondary badge-lg mr-3';
+            contador.className = cantidad > 0 ? 'badge badge-primary badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
         } else {
             contador.textContent = texto + ' (demo)';
-            contador.className = 'badge badge-warning badge-lg mr-3';
+            contador.className = 'badge badge-warning badge-lg me-3';
         }
     }
 
@@ -599,28 +597,28 @@
                         <div class="d-flex align-items-center mb-2">
                             <h6 class="mb-0 font-weight-bold text-primary">
                                 ${cuartel.nombre}
-                                <small class="text-muted font-weight-normal ml-2">
+                                <small class="text-muted font-weight-normal ms-2">
                                     en ${cuartel.fincas?.nombre_finca || 'Finca no especificada'}
                                 </small>
                             </h6>
                         </div>
                         <div class="d-flex flex-wrap align-items-center mb-2">
-                            <span class="badge badge-light mr-2">#${cuartel.id}</span>
-                            ${cuartel.superficie ? `<span class="badge badge-secondary mr-2">${cuartel.superficie} ha</span>` : ''}
-                            ${cuartel.nro_viñedo ? `<span class="badge badge-info mr-2">${cuartel.nro_viñedo}</span>` : ''}
+                            <span class="badge badge-light me-2">#${cuartel.id}</span>
+                            ${cuartel.superficie ? `<span class="badge badge-secondary me-2">${cuartel.superficie} ha</span>` : ''}
+                            ${cuartel.nro_viñedo ? `<span class="badge badge-info me-2">${cuartel.nro_viñedo}</span>` : ''}
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 ${cuartel.especie ? `
                                     <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="bi bi-flower1 mr-2"></i>
+                                        <i class="bi bi-flower1 me-2"></i>
                                         ${cuartel.especie}
                                     </small>
                                 ` : ''}
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-flex align-items-center mb-1">
-                                    <i class="bi bi-collection mr-2"></i>
+                                    <i class="bi bi-collection me-2"></i>
                                     ${variedadesText}
                                 </small>
                             </div>
