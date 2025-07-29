@@ -2,14 +2,52 @@ import { supabase } from "./supabaseClient.js";
 
 console.log("Cuaderno de Campo - Header v1.0.0 cargado");
 
-supabase.auth.getUser().then(({ data: { user } }) => {
-  console.log("Usuario logueado:", user);
-  if (user) {
-    mostrarHeaderInfo(user);
-  } else {
-    console.log("No hay usuario logueado");
+// Función principal que espera a que el DOM esté listo
+function initializeHeader() {
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    console.log("Usuario logueado:", user);
+    if (user) {
+      mostrarHeaderInfo(user);
+    } else {
+      console.log("No hay usuario logueado, mostrando info demo");
+      mostrarInfoDemo();
+    }
+  }).catch(error => {
+    console.warn("Error obteniendo usuario, mostrando info demo:", error);
+    mostrarInfoDemo();
+  });
+}
+
+// Función para mostrar información demo cuando no hay usuario
+function mostrarInfoDemo() {
+  const userName = document.getElementById("user-name");
+  const navbarUser = document.getElementById("navbar-user");
+  
+  if (userName) {
+    userName.textContent = "Usuario Demo";
+    console.log("✅ Mostrando usuario demo");
   }
-});
+  
+  if (navbarUser) {
+    // Agregar indicador de modo demo
+    const existingRole = navbarUser.querySelector('.user-role');
+    if (!existingRole) {
+      const roleSpan = document.createElement('span');
+      roleSpan.className = 'user-role';
+      roleSpan.style.cssText = 'color:#ff6b35; font-size:0.85em; margin-left:0.5em; font-weight:normal;';
+      roleSpan.textContent = '(modo demo)';
+      navbarUser.appendChild(roleSpan);
+    }
+  }
+}
+
+// Si el DOM ya está listo, inicializar inmediatamente
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHeader);
+} else {
+  // Si el script se carga después de DOMContentLoaded, ejecutar inmediatamente
+  setTimeout(initializeHeader, 100);
+}
 
 async function mostrarHeaderInfo(user) {
   console.log("Ejecutando mostrarHeaderInfo");
@@ -59,8 +97,30 @@ async function mostrarHeaderInfo(user) {
 
   // Actualizar saludo en navbar
   const navbarUser = document.getElementById("navbar-user");
-  if (navbarUser) {
-    navbarUser.innerHTML = `Bienvenido, <i>${nombre}</i> <span style="color:#888;font-size:0.88em; margin-left:0.3em;">(${rol})</span>`;
+  const userName = document.getElementById("user-name");
+  
+  console.log("Elementos encontrados:", { navbarUser, userName });
+  console.log("Datos del usuario:", { nombre, rol });
+  
+  if (navbarUser && userName) {
+    userName.textContent = nombre;
+    console.log("✅ Nombre actualizado a:", nombre);
+    
+    // Agregar rol después del nombre si no existe ya
+    const existingRole = navbarUser.querySelector('.user-role');
+    if (!existingRole) {
+      const roleSpan = document.createElement('span');
+      roleSpan.className = 'user-role';
+      roleSpan.style.cssText = 'color:#888; font-size:0.85em; margin-left:0.5em; font-weight:normal;';
+      roleSpan.textContent = `(${rol})`;
+      navbarUser.appendChild(roleSpan);
+      console.log("✅ Rol agregado:", rol);
+    } else {
+      existingRole.textContent = `(${rol})`;
+      console.log("✅ Rol actualizado:", rol);
+    }
+  } else {
+    console.warn("❌ No se encontraron elementos del header:", { navbarUser, userName });
   }
 
   // Menús por rol (igual que index.html)

@@ -1,549 +1,1056 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cuarteles</title>
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <!-- Bootstrap Select -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Cuarteles - Cuaderno de Campo</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- PicoCSS (opcional) -->
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
-    <!-- Google Fonts Roboto -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
-    <!-- Tu CSS personalizado -->
-    <link rel="stylesheet" href="estilos.css">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Select JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
-  </head>
-  <body>
-    <div id="header-container"></div>
-    <script type="module">
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
-        });
-    </script>
-    <main class="container mt-4">
-      <!-- Header de página -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h1 class="h3 mb-1 text-primary font-weight-bold">
-                <i class="bi bi-tree text-primary me-2"></i>
-                Gestión de Cuarteles
-              </h1>
-              <p class="text-muted mb-0">Administra los lotes y variedades por finca</p>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Estilos personalizados -->
+    <link href="estilos.css" rel="stylesheet">
+    
+    <style>
+        .badge-lg { 
+            font-size: 0.9em; 
+            padding: 0.5rem 0.75rem; 
+        }
+        .card-header-custom {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        .list-group-item:hover { 
+            background-color: #f8f9fa; 
+        }
+        #formulario-cuartel {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        #cuarteles-list {
+            display: block;
+            min-height: 200px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        
+        /* Mejorar legibilidad del botón principal */
+        #toggle-form-btn {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        }
+        
+        #toggle-form-btn:hover {
+            background-color: #0056b3 !important;
+            border-color: #004085 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        #toggle-form-btn:focus {
+            background-color: #0056b3 !important;
+            border-color: #004085 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Header Container -->
+    <div id="header-container">
+        <!-- Header simple mientras carga -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-leaf"></i> Cuaderno de Campo
+                </a>
             </div>
-            <div class="d-flex align-items-center">
-              <span class="badge badge-light px-3 py-2" id="contador-cuarteles">0 cuarteles</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </nav>
+    </div>
 
-      <!-- Formulario de cuartel -->
-      <div class="row mb-4">
-        <div class="col-lg-10 col-xl-8">
-          <div class="card shadow-sm border-0" style="border-radius: 16px;">
-            <div class="card-header bg-white border-0 pt-4 pb-0">
-              <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="bi bi-plus-circle text-primary me-2"></i>
-                <span id="form-title">Nuevo Cuartel</span>
-              </h5>
-            </div>
-            <div class="card-body p-4">
-              <form id="cuartel-form">
-                <!-- Datos Principales -->
-                <div class="row mb-4">
-                  <div class="col-12">
-                    <h6 class="text-muted mb-3 d-flex align-items-center">
-                      <i class="bi bi-info-circle me-2"></i>Datos Principales
-                    </h6>
-                  </div>
-                  
-                  <div class="col-md-6 mb-3">
-                    <label for="finca_id" class="form-label font-weight-medium">
-                      <i class="bi bi-house-door me-1"></i> Finca *
-                    </label>
-                    <select name="finca_id" id="finca_id" class="form-control form-control-lg" required style="border-radius: 8px; border: 2px solid #e9ecef;">
-                      <option value="">Seleccionar Finca...</option>
-                    </select>
-                  </div>
-                  
-                  <div class="col-md-6 mb-3">
-                    <label for="nombre_cuartel" class="form-label font-weight-medium">
-                      <i class="bi bi-tag me-1"></i> Nombre del Cuartel *
-                    </label>
-                    <input type="text" name="nombre" id="nombre_cuartel" class="form-control form-control-lg" 
-                           placeholder="Ej: Cuartel Norte" required style="border-radius: 8px; border: 2px solid #e9ecef;">
-                  </div>
-                  
-                  <div class="col-md-6 mb-3">
-                    <label for="superficie_cuartel" class="form-label font-weight-medium">
-                      <i class="bi bi-rulers me-1"></i> Superficie (hectáreas)
-                    </label>
-                    <input type="number" name="superficie" id="superficie_cuartel" class="form-control" 
-                           placeholder="0.00" step="0.01" min="0" style="border-radius: 8px; border: 2px solid #e9ecef;">
-                  </div>
-                  
-                  <div class="col-md-6 mb-3">
-                    <label for="nro_viñedo" class="form-label font-weight-medium">
-                      <i class="bi bi-123 me-1"></i> Nro. de Viñedo
-                    </label>
-                    <input type="text" name="nro_viñedo" id="nro_viñedo" class="form-control" 
-                           placeholder="Opcional" style="border-radius: 8px; border: 2px solid #e9ecef;">
-                  </div>
-                </div>
-
-                <!-- Datos Secundarios -->
-                <div class="row mb-4">
-                  <div class="col-12">
-                    <h6 class="text-muted mb-3 d-flex align-items-center">
-                      <i class="bi bi-gear me-2"></i>Datos Adicionales
-                    </h6>
-                  </div>
-                  
-                  <div class="col-md-12 mb-3">
-                    <label for="especie" class="form-label font-weight-medium">
-                      <i class="bi bi-flower1 me-1"></i> Especie
-                    </label>
-                    <input type="text" name="especie" id="especie" class="form-control" 
-                           placeholder="Ej: Vitis vinifera" style="border-radius: 8px; border: 2px solid #e9ecef;">
-                  </div>
-                </div>
-
-                <!-- Variedades -->
-                <div class="row mb-4">
-                  <div class="col-12">
-                    <h6 class="text-muted mb-3 d-flex align-items-center">
-                      <i class="bi bi-collection me-2"></i>Variedades <small class="text-muted">(máximo 3)</small>
-                    </h6>
-                    <select id="variedades_cuartel" multiple size="4" class="form-control" style="border-radius: 8px; border: 2px solid #e9ecef;">
-                      <!-- Opciones generadas dinámicamente -->
-                    </select>
-                    <small class="form-text text-muted mt-2">
-                      <i class="bi bi-info-circle me-1"></i>
-                      Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples variedades
-                    </small>
-                  </div>
-                </div>
-                
+    <div class="container-fluid mt-4">
+        <!-- Título principal -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
-                  <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px; font-weight: 500;">
-                    <i class="bi bi-check-circle me-2"></i>
-                    <span id="btn-text">Guardar Cuartel</span>
-                  </button>
-                  <button type="button" id="cancelEdit" class="btn btn-outline-secondary" style="display:none; border-radius: 8px;">
-                    <i class="bi bi-x-circle me-1"></i> Cancelar
-                  </button>
+                    <div>
+                        <h2 class="mb-1 text-dark font-weight-bold">
+                            <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>
+                            Gestión de Cuarteles
+                        </h2>
+                        <p class="text-muted mb-0">Administra los lotes y variedades por finca</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span id="contador-cuarteles" class="badge badge-secondary badge-lg mr-3">
+                            Cargando...
+                        </span>
+                        <button type="button" id="toggle-form-btn" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar Cuartel
+                        </button>
+                    </div>
                 </div>
-              </form>
-              
-              <!-- Estado/Mensajes -->
-              <div id="status" class="mt-3"></div>
             </div>
-          </div>
         </div>
-      </div>
 
-      <!-- Lista de cuarteles -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card shadow-sm border-0" style="border-radius: 16px;">
-            <div class="card-header bg-white border-0 pt-4 pb-0">
-              <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="bi bi-list-ul text-primary me-2"></i>
-                Cuarteles Registrados
-              </h5>
+        <!-- Barra de búsqueda -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="busqueda-cuarteles" 
+                           placeholder="Buscar cuarteles por nombre, finca, especie..."
+                           autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="limpiar-busqueda">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+                <small class="text-muted">Resultados en tiempo real mientras escribes</small>
+            </div>
+            <div class="col-md-4">
+                <!-- Estadísticas de búsqueda -->
+                <div id="busqueda-stats" class="text-muted small">
+                    <span id="resultados-count"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes de estado -->
+        <div id="status" class="mb-3"></div>
+        <!-- Formulario de cuartel (oculto por defecto) -->
+        <div id="formulario-cuartel">
+            <div class="card shadow">
+                <div class="card-header card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span id="form-title">Nuevo Cuartel</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="cuartel-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="finca_id" class="form-label font-weight-bold">
+                                    <i class="bi bi-geo-alt-fill text-success me-1"></i>
+                                    Finca *
+                                </label>
+                                <select id="finca_id" class="form-control" required>
+                                    <option value="">Seleccionar Finca...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-tag-fill text-primary me-1"></i>
+                                    Nombre del Cuartel *
+                                </label>
+                                <input type="text" class="form-control" id="nombre_cuartel" 
+                                       placeholder="Ej: Cuartel Norte" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="superficie_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-rulers text-warning me-1"></i>
+                                    Superficie (hectáreas)
+                                </label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="superficie_cuartel" 
+                                       placeholder="Ej: 5.5">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nro_viñedo" class="form-label font-weight-bold">
+                                    <i class="bi bi-123 text-info me-1"></i>
+                                    Nro. de Viñedo
+                                </label>
+                                <input type="text" class="form-control" id="nro_viñedo" 
+                                       placeholder="Opcional">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="especie" class="form-label font-weight-bold">
+                                <i class="bi bi-flower1 text-danger me-1"></i>
+                                Especie
+                            </label>
+                            <input type="text" class="form-control" id="especie" 
+                                   placeholder="Ej: Vitis vinifera">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="variedades_cuartel" class="form-label font-weight-bold">
+                                <i class="bi bi-collection text-secondary me-1"></i>
+                                Variedades <small class="text-muted">(máximo 3)</small>
+                            </label>
+                            <select id="variedades_cuartel" multiple size="4" class="form-control">
+                                <!-- Opciones generadas dinámicamente -->
+                            </select>
+                            <small class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples variedades
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="button" id="cancelEdit" class="btn btn-secondary" style="display: none;">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Cancelar
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                <span id="btn-text">Guardar Cuartel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de cuarteles -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 text-secondary">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Lista de Cuarteles
+                </h5>
             </div>
             <div class="card-body p-0">
-              <div id="cuarteles-list" class="list-group list-group-flush">
-                <!-- Lista dinámica -->
-              </div>
-              <div id="empty-state" class="text-center py-5" style="display: none;">
-                <i class="bi bi-tree" style="font-size: 3rem; color: #dee2e6;"></i>
-                <p class="text-muted mt-3 mb-0">No hay cuarteles registrados</p>
-                <small class="text-muted">Agrega tu primer cuartel usando el formulario de arriba</small>
-              </div>
+                <!-- Lista principal -->
+                <div id="cuarteles-list" class="list-group list-group-flush">
+                    <!-- Los cuarteles se cargarán aquí dinámicamente -->
+                </div>
+
+                <!-- Estado vacío -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <div class="mb-3">
+                        <i class="bi bi-grid-3x3-gap display-1 text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">No hay cuarteles registrados</h5>
+                    <p class="text-muted mb-4">
+                        Comienza agregando tu primer cuartel para gestionar tus lotes.
+                    </p>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('toggle-form-btn').click()">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Agregar Primer Cuartel
+                    </button>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </main>
-    <script type="module">
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
+    </div>
+
+    <!-- Bootstrap 4 JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <script>
+    // Variables globales
+    let supabase = null;
+    let currentUser = null;
+    let cuartelesData = [];
+    let cuartelesOriginales = []; // Para búsqueda
+    let fincasData = [];
+    let variedadesData = [];
+    let editId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM cargado, inicializando...');
+        inicializarPagina();
+    });
+
+    async function inicializarPagina() {
+        try {
+            // Intentar conectar con Supabase
+            await conectarSupabase();
+            
+            // Configurar funcionalidades
+            configurarToggleForm();
+            configurarFormulario();
+            
+            // Cargar datos
+            await cargarDatos();
+            
+            // Intentar cargar header dinámico
+            cargarHeaderDinamico();
+            
+            console.log('✅ Página completamente inicializada');
+        } catch (error) {
+            console.error('Error inicializando página:', error);
+        }
     }
 
-      const form = document.getElementById("cuartel-form");
-      const status = document.getElementById("status");
-      const lista = document.getElementById("cuarteles-list");
-      const emptyState = document.querySelector("#empty-state");
-      const contador = document.querySelector("#contador-cuarteles");
-      const formTitle = document.querySelector("#form-title");
-      const btnText = document.querySelector("#btn-text");
-      const cancelEditBtn = document.getElementById("cancelEdit");
-      
-      const fincaSelect = document.getElementById("finca_id");
-      const nombreInput = document.getElementById("nombre_cuartel");
-      const superficieInput = document.getElementById("superficie_cuartel");
-      const nroViñedoInput = document.getElementById("nro_viñedo");
-      const especieInput = document.getElementById("especie");
-      const variedadInput = document.getElementById("variedad");
-      const variedadesSelect = document.getElementById("variedades_cuartel");
+    async function conectarSupabase() {
+        try {
+            console.log('🔗 Intentando conectar con Supabase...');
+            const supabaseModule = await import('./supabaseClient.js');
+            supabase = supabaseModule.supabase;
+            
+            if (supabase) {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (user && !error) {
+                    currentUser = user;
+                    console.log('✅ Usuario autenticado:', user.email);
+                    mostrarMensaje('✅ Conectado a Supabase como: ' + user.email, 'success');
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Supabase no disponible:', error.message);
+            mostrarMensaje('⚠️ Modo demo - Supabase no disponible', 'warning');
+        }
+        return false;
+    }
 
-      let editId = null;
-      let fincasMap = {};
-      let variedadesMap = {};
-
-      // Función para mostrar mensajes con estilo
-      function mostrarMensaje(mensaje, tipo = 'info') {
+    function mostrarMensaje(mensaje, tipo = 'info') {
+        const status = document.getElementById('status');
+        if (!status) return;
+        
         const clases = {
-          'success': 'alert-success',
-          'error': 'alert-danger', 
-          'warning': 'alert-warning',
-          'info': 'alert-info'
+            'success': 'alert-success',
+            'error': 'alert-danger', 
+            'warning': 'alert-warning',
+            'info': 'alert-info'
         };
-        status.innerHTML = `<div class="alert ${clases[tipo]} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
-          ${mensaje}
-          <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-          </button>
-        </div>`;
-      }
-
-      // Función para resetear formulario
-      function resetearFormulario() {
-        form.reset();
-        editId = null;
-        formTitle.textContent = "Nuevo Cuartel";
-        btnText.textContent = "Guardar Cuartel";
-        cancelEditBtn.style.display = "none";
-        status.innerHTML = "";
         
-        // Limpiar selecciones de variedades
-        Array.from(variedadesSelect.options).forEach(opt => {
-          opt.selected = false;
-        });
-      }
-
-      // Cancelar edición
-      cancelEditBtn.addEventListener('click', resetearFormulario);
-
-      // Obtener usuario actual
-      // user ya está definido globalmente arriba
-      const userId = user?.id;
-
-      async function cargarFincas() {
-        const { data, error } = await supabase
-          .from("fincas")
-          .select("id, nombre_finca, provincia, departamento")
-          .eq("usuario_id", userId);
-
-        fincaSelect.innerHTML = '<option value="">Seleccionar finca...</option>';
-        fincasMap = {};
-        if (error || !data) {
-          status.textContent = "❌ Error cargando fincas";
-          status.className = "error";
-          return;
+        status.innerHTML = `
+            <div class="alert ${clases[tipo]} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+                ${mensaje}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        // Auto-ocultar después de 5 segundos para mensajes de info y success
+        if (tipo === 'info' || tipo === 'success') {
+            setTimeout(() => {
+                const alert = status.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
         }
-        data.forEach(f => {
-          fincasMap[f.id] = {
-            nombre: f.nombre_finca,
-            provincia: f.provincia,
-            departamento: f.departamento
-          };
-          const opt = document.createElement("option");
-          opt.value = f.id;
-          opt.textContent = f.nombre_finca;
-          fincaSelect.appendChild(opt);
-        });
-      }
+    }
 
-      async function cargarVariedades() {
-        const { data, error } = await supabase
-          .from("variedades")
-          .select("id, nombre");
-        variedadesSelect.innerHTML = "";
-        variedadesMap = {};
-        if (error || !data) return;
-        data.forEach(v => {
-          variedadesMap[v.id] = v.nombre;
-          const opt = document.createElement("option");
-          opt.value = v.id;
-          opt.textContent = v.nombre;
-          variedadesSelect.appendChild(opt);
-        });
-      }
-
-      // Obtener variedades de un cuartel
-      async function obtenerVariedadesCuartel(cuartelId) {
-        const { data, error } = await supabase
-          .from("cuartel_variedades")
-          .select("variedad_id")
-          .eq("cuartel_id", cuartelId);
-        if (error || !data) return [];
-        return data.map(v => v.variedad_id);
-      }
-
-      // Guardar variedades seleccionadas para un cuartel
-      async function guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas) {
-        await supabase.from("cuartel_variedades").delete().eq("cuartel_id", cuartelId);
-        for (const variedadId of variedadesSeleccionadas) {
-          const { error } = await supabase.from("cuartel_variedades").insert({ cuartel_id: cuartelId, variedad_id: variedadId });
-          if (error) console.error("Error insertando variedad:", variedadId, error);
+    async function cargarDatos() {
+        try {
+            if (supabase && currentUser) {
+                await Promise.all([
+                    cargarFincas(),
+                    cargarVariedades(),
+                    cargarCuarteles()
+                ]);
+            } else {
+                cargarDatosDemo();
+            }
+        } catch (error) {
+            console.error('❌ Error cargando datos:', error);
+            cargarDatosDemo();
         }
-      }
+    }
 
-      async function cargarCuarteles() {
-        const { data, error } = await supabase
-          .from("cuarteles")
-          .select("*")
-          .in("finca_id", Object.keys(fincasMap))
-          .order('created_at', { ascending: false });
+    async function cargarFincas() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("fincas")
+                .select("*")
+                .eq("usuario_id", currentUser.id)
+                .order('nombre_finca');
 
-        if (error) {
-          mostrarMensaje("❌ Error cargando cuarteles: " + error.message, 'error');
-          return;
+            if (error) throw error;
+            fincasData = data;
+        } else {
+            fincasData = [
+                { id: 1, nombre_finca: "Finca Demo 1" },
+                { id: 2, nombre_finca: "Finca Demo 2" }
+            ];
         }
         
-        // Actualizar contador
-        contador.textContent = `${data.length} cuartel${data.length !== 1 ? 'es' : ''}`;
+        llenarSelectFincas();
+    }
+
+    async function cargarVariedades() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("variedades")
+                .select("*")
+                .order('nombre');
+
+            if (error) throw error;
+            variedadesData = data;
+        } else {
+            variedadesData = [
+                { id: 1, nombre: "Malbec" },
+                { id: 2, nombre: "Cabernet Sauvignon" },
+                { id: 3, nombre: "Chardonnay" },
+                { id: 4, nombre: "Syrah" }
+            ];
+        }
         
-        // Mostrar empty state si no hay cuarteles
-        if (data.length === 0) {
-          lista.style.display = 'none';
-          emptyState.style.display = 'block';
-          return;
+        llenarSelectVariedades();
+    }
+
+    async function cargarCuarteles() {
+        console.log('📋 Cargando cuarteles...');
+        
+        try {
+            if (supabase && currentUser) {
+                console.log('🔗 Cargando desde Supabase...');
+                const { data, error } = await supabase
+                    .from("cuarteles")
+                    .select(`
+                        *,
+                        fincas!inner(nombre_finca, usuario_id),
+                        cuartel_variedades(
+                            variedades(nombre)
+                        )
+                    `)
+                    .eq("fincas.usuario_id", currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                cuartelesData = data;
+                cuartelesOriginales = [...data];
+                console.log('✅ Cuarteles cargados desde Supabase:', data.length);
+                
+                if (data.length === 0) {
+                    mostrarMensaje('ℹ️ No tienes cuarteles registrados. ¡Agrega tu primer cuartel!', 'info');
+                }
+                
+                configurarBusqueda();
+                
+            } else {
+                console.log('🎭 Cargando datos demo...');
+                cargarCuartelesDemo();
+            }
+            
+            actualizarContador();
+            renderizarCuarteles();
+            
+        } catch (error) {
+            console.error('❌ Error cargando cuarteles:', error);
+            mostrarMensaje('❌ Error cargando cuarteles: ' + error.message, 'error');
+            cargarCuartelesDemo();
+        }
+    }
+
+    function cargarDatosDemo() {
+        // Cargar fincas demo
+        fincasData = [
+            { id: 1, nombre_finca: "Finca Demo 1" },
+            { id: 2, nombre_finca: "Finca Demo 2" },
+            { id: 3, nombre_finca: "Finca Demo 3" }
+        ];
+        
+        // Cargar variedades demo
+        variedadesData = [
+            { id: 1, nombre: "Malbec" },
+            { id: 2, nombre: "Cabernet Sauvignon" },
+            { id: 3, nombre: "Chardonnay" },
+            { id: 4, nombre: "Syrah" },
+            { id: 5, nombre: "Merlot" }
+        ];
+        
+        // Llenar selects
+        llenarSelectFincas();
+        llenarSelectVariedades();
+        
+        // Cargar cuarteles demo
+        cargarCuartelesDemo();
+    }
+
+    function cargarCuartelesDemo() {
+        cuartelesData = [
+            {
+                id: 1,
+                nombre: "Cuartel Norte",
+                superficie: 5.2,
+                nro_viñedo: "V001",
+                especie: "Vitis vinifera",
+                finca_id: 1,
+                fincas: { nombre_finca: "Finca Demo 1" },
+                cuartel_variedades: [
+                    { variedades: { nombre: "Malbec" } },
+                    { variedades: { nombre: "Cabernet Sauvignon" } }
+                ],
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                nombre: "Cuartel Sur",
+                superficie: 3.8,
+                nro_viñedo: "V002",
+                especie: "Vitis vinifera",
+                finca_id: 2,
+                fincas: { nombre_finca: "Finca Demo 2" },
+                cuartel_variedades: [
+                    { variedades: { nombre: "Chardonnay" } }
+                ],
+                created_at: new Date().toISOString()
+            }
+        ];
+        
+        cuartelesOriginales = [...cuartelesData];
+        console.log('✅ Datos demo de cuarteles cargados');
+        configurarBusqueda();
+        actualizarContador();
+        renderizarCuarteles();
+    }
+
+    function llenarSelectFincas() {
+        const selectFincas = document.getElementById('finca_id');
+        if (!selectFincas) return;
+        
+        selectFincas.innerHTML = '<option value="">Seleccionar Finca...</option>';
+        
+        fincasData.forEach(finca => {
+            const option = document.createElement('option');
+            option.value = finca.id;
+            option.textContent = finca.nombre_finca;
+            selectFincas.appendChild(option);
+        });
+    }
+
+    function llenarSelectVariedades() {
+        const selectVariedades = document.getElementById('variedades_cuartel');
+        if (!selectVariedades) return;
+        
+        selectVariedades.innerHTML = '';
+        
+        variedadesData.forEach(variedad => {
+            const option = document.createElement('option');
+            option.value = variedad.id;
+            option.textContent = variedad.nombre;
+            selectVariedades.appendChild(option);
+        });
+    }
+
+    function actualizarContador() {
+        const contador = document.getElementById('contador-cuarteles');
+        if (!contador) return;
+        
+        const cantidad = cuartelesData.length;
+        const texto = `${cantidad} cuartel${cantidad !== 1 ? 'es' : ''}`;
+        
+        if (supabase && currentUser) {
+            contador.textContent = texto;
+            contador.className = cantidad > 0 ? 'badge badge-primary badge-lg mr-3' : 'badge badge-secondary badge-lg mr-3';
+        } else {
+            contador.textContent = texto + ' (demo)';
+            contador.className = 'badge badge-warning badge-lg mr-3';
+        }
+    }
+
+    function renderizarCuarteles() {
+        const lista = document.getElementById('cuarteles-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!lista || !emptyState) return;
+        
+        if (cuartelesData.length === 0) {
+            lista.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
         }
         
         lista.style.display = 'block';
         emptyState.style.display = 'none';
-        lista.innerHTML = "";
+        lista.innerHTML = '';
         
-        for (const c of data) {
-          const variedadesIds = await obtenerVariedadesCuartel(c.id);
-          const variedadesNombres = variedadesIds.map(id => variedadesMap[id]).filter(Boolean);
-          const fincaInfo = fincasMap[c.finca_id];
-          
-          const cuartelItem = document.createElement("div");
-          cuartelItem.className = "list-group-item border-0 py-3";
-          cuartelItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-start">
-              <div class="flex-grow-1">
-                <div class="d-flex align-items-center mb-2">
-                  <h6 class="mb-0 font-weight-bold text-primary">${c.nombre}</h6>
-                  <span class="badge badge-light ml-2">#${c.id}</span>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <small class="text-muted d-flex align-items-center mb-1">
-                      <i class="bi bi-house-door me-1"></i>
-                      <strong>Finca:</strong> ${fincaInfo ? fincaInfo.nombre : '-'}
-                    </small>
-                  </div>
-                  ${c.superficie ? `
-                    <div class="col-md-6">
-                      <small class="text-muted d-flex align-items-center mb-1">
-                        <i class="bi bi-rulers me-1"></i>
-                        <strong>Superficie:</strong> ${c.superficie} ha
-                      </small>
-                    </div>
-                  ` : ''}
-                  ${c.nro_viñedo ? `
-                    <div class="col-md-6">
-                      <small class="text-muted d-flex align-items-center mb-1">
-                        <i class="bi bi-123 me-1"></i>
-                        <strong>Viñedo:</strong> ${c.nro_viñedo}
-                      </small>
-                    </div>
-                  ` : ''}
-                  ${fincaInfo && (fincaInfo.provincia || fincaInfo.departamento) ? `
-                    <div class="col-md-6">
-                      <small class="text-muted d-flex align-items-center mb-1">
-                        <i class="bi bi-geo-alt me-1"></i>
-                        <strong>Ubicación:</strong> ${fincaInfo.provincia || ''} ${fincaInfo.departamento ? (fincaInfo.provincia ? ', ' + fincaInfo.departamento : fincaInfo.departamento) : ''}
-                      </small>
-                    </div>
-                  ` : ''}
-                  ${c.especie ? `
-                    <div class="col-md-6">
-                      <small class="text-muted d-flex align-items-center mb-1">
-                        <i class="bi bi-flower1 me-1"></i>
-                        <strong>Especie:</strong> ${c.especie}
-                      </small>
-                    </div>
-                  ` : ''}
-                  ${variedadesNombres.length ? `
-                    <div class="col-12">
-                      <small class="text-muted d-flex align-items-start">
-                        <i class="bi bi-collection me-1 mt-1"></i>
-                        <span><strong>Variedades:</strong> ${variedadesNombres.map(v => `<span class="badge badge-secondary mr-1">${v}</span>`).join('')}</span>
-                      </small>
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-              <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-outline-primary btn-sm" data-id="${c.id}" data-action="edit" style="border-radius: 6px 0 0 6px;">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button type="button" class="btn btn-outline-danger btn-sm" data-id="${c.id}" data-action="delete" style="border-radius: 0 6px 6px 0;">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </div>
-          `;
-          lista.appendChild(cuartelItem);
-        }
-
-        // Event listeners para editar y eliminar
-        lista.addEventListener('click', async (e) => {
-          const btn = e.target.closest('button');
-          if (!btn) return;
-          
-          const id = btn.dataset.id;
-          const action = btn.dataset.action;
-          const cuartel = data.find(c => c.id == id);
-          
-          if (action === 'edit') {
-            editId = id;
-            fincaSelect.value = cuartel.finca_id;
-            nombreInput.value = cuartel.nombre;
-            superficieInput.value = cuartel.superficie || "";
-            nroViñedoInput.value = cuartel.nro_viñedo || "";
-            especieInput.value = cuartel.especie || "";
+        cuartelesData.forEach((cuartel) => {
+            const cuartelItem = document.createElement("div");
+            cuartelItem.className = "list-group-item border-0 py-3";
             
-            // Cargar variedades seleccionadas
-            const variedadesIds = await obtenerVariedadesCuartel(editId);
-            Array.from(variedadesSelect.options).forEach(opt => {
-              opt.selected = variedadesIds.includes(Number(opt.value));
+            // Preparar variedades
+            const variedades = cuartel.cuartel_variedades?.map(cv => cv.variedades?.nombre).filter(Boolean) || [];
+            const variedadesText = variedades.length > 0 ? variedades.join(', ') : 'Sin variedades';
+            
+            cuartelItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <h6 class="mb-0 font-weight-bold text-primary">${cuartel.nombre}</h6>
+                            <span class="badge badge-light ml-2">#${cuartel.id}</span>
+                            ${cuartel.superficie ? `<span class="badge badge-secondary ml-1">${cuartel.superficie} ha</span>` : ''}
+                            ${cuartel.nro_viñedo ? `<span class="badge badge-info ml-1">${cuartel.nro_viñedo}</span>` : ''}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted d-flex align-items-center mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    ${cuartel.fincas?.nombre_finca || 'Finca no especificada'}
+                                </small>
+                                ${cuartel.especie ? `
+                                    <small class="text-muted d-flex align-items-center mb-1">
+                                        <i class="bi bi-flower1 me-1"></i>
+                                        ${cuartel.especie}
+                                    </small>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-flex align-items-center mb-1">
+                                    <i class="bi bi-collection me-1"></i>
+                                    ${variedadesText}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary btn-sm btn-editar" 
+                                data-id="${cuartel.id}" title="Editar cuartel">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar" 
+                                data-id="${cuartel.id}" title="Eliminar cuartel">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            lista.appendChild(cuartelItem);
+        });
+        
+        // Agregar event listeners a los botones
+        agregarEventListenersAcciones();
+    }
+
+    function agregarEventListenersAcciones() {
+        // Botones de editar
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                editarCuartel(id);
+            });
+        });
+        
+        // Botones de eliminar
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                eliminarCuartel(id);
+            });
+        });
+    }
+
+    function configurarToggleForm() {
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        const formularioCuartel = document.getElementById('formulario-cuartel');
+        
+        if (toggleFormBtn && formularioCuartel) {
+            toggleFormBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Toggle clickeado!');
+                
+                const isHidden = formularioCuartel.style.display === 'none' || formularioCuartel.style.display === '';
+                
+                if (isHidden) {
+                    // Mostrar formulario
+                    console.log('Mostrando formulario...');
+                    formularioCuartel.style.display = 'block';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+                    
+                    // Scroll al formulario
+                    setTimeout(() => {
+                        formularioCuartel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } else {
+                    // Ocultar formulario
+                    console.log('Ocultando formulario...');
+                    formularioCuartel.style.display = 'none';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Cuartel';
+                }
             });
             
-            formTitle.textContent = "Editar Cuartel";
-            btnText.textContent = "Actualizar Cuartel";
-            cancelEditBtn.style.display = "inline-block";
-            
-            // Scroll al formulario
-            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            nombreInput.focus();
-            
-            mostrarMensaje(`✏️ Editando cuartel: ${cuartel.nombre}`, 'info');
-            
-          } else if (action === 'delete') {
-            if (!confirm(`¿Estás seguro de eliminar el cuartel "${cuartel.nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
-            
-            // Eliminar relaciones de variedades primero
-            await supabase.from("cuartel_variedades").delete().eq("cuartel_id", id);
-            
-            const { error } = await supabase.from("cuarteles").delete().eq("id", id);
-            if (error) {
-              mostrarMensaje("❌ Error al eliminar cuartel: " + error.message, 'error');
-            } else {
-              mostrarMensaje(`✅ Cuartel "${cuartel.nombre}" eliminado correctamente`, 'success');
-              cargarCuarteles();
-            }
-          }
-        });
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        // Validaciones
-        if (!fincaSelect.value || !nombreInput.value) {
-          status.textContent = "⚠️ Debe completar finca y nombre";
-          status.className = "warn";
-          return;
-        }
-        if (superficieInput.value && Number(superficieInput.value) <= 0) {
-          status.textContent = "⚠️ La superficie debe ser positiva";
-          status.className = "warn";
-          return;
-        }
-        const finca_id = fincaSelect.value;
-        const nombre = nombreInput.value;
-        const superficie = superficieInput.value ? Number(superficieInput.value) : null;
-        const nro_viñedo = nroViñedoInput.value || null;
-        const especie = especieInput.value || null;
-        const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions)
-          .map(opt => opt.value)
-          .filter(id => id) // filtra vacíos
-          .slice(0, 3);
-        console.log("Variedades seleccionadas:", variedadesSeleccionadas);
-
-        let cuartelId = editId;
-        if (editId) {
-          // Editar cuartel
-          const { error } = await supabase
-            .from("cuarteles")
-            .update({ finca_id, nombre, superficie, nro_viñedo, especie })
-            .eq("id", editId);
-          if (error) {
-            status.textContent = "❌ Error al editar cuartel";
-            status.className = "error";
-          } else {
-            await guardarVariedadesCuartel(editId, variedadesSeleccionadas);
-            status.textContent = "✅ Cuartel editado";
-            status.className = "success";
-            form.reset();
-            editId = null;
-            cancelEditBtn.style.display = "none";
-          }
+            console.log('✅ Toggle configurado correctamente');
         } else {
-          // Crear cuartel
-          const { data, error } = await supabase
-            .from("cuarteles")
-            .insert({ finca_id, nombre, superficie, nro_viñedo, especie })
-            .select();
-          if (error || !data || !data[0]) {
-            status.textContent = "❌ Error al guardar cuartel";
-            status.className = "error";
-          } else {
-            cuartelId = data[0].id;
-            await guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas);
-            status.textContent = "✅ Cuartel registrado";
-            status.className = "success";
-            form.reset();
-          }
+            console.error('No se encontraron elementos del formulario');
         }
-        cargarCuarteles();
-      });
+    }
 
-      cancelEditBtn.addEventListener("click", () => {
-        form.reset();
+    function configurarFormulario() {
+        const form = document.getElementById('cuartel-form');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+        
+        if (!form) return;
+        
+        // Botón cancelar edición
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', cancelarEdicion);
+        }
+        
+        // Envío del formulario
+        form.addEventListener('submit', manejarEnvioFormulario);
+        
+        console.log('📝 Formulario configurado');
+    }
+
+    async function manejarEnvioFormulario(e) {
+        e.preventDefault();
+        
+        const fincaSelect = document.getElementById('finca_id');
+        const nombreInput = document.getElementById('nombre_cuartel');
+        const superficieInput = document.getElementById('superficie_cuartel');
+        const nroViñedoInput = document.getElementById('nro_viñedo');
+        const especieInput = document.getElementById('especie');
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        
+        // Validaciones básicas
+        if (!fincaSelect.value) {
+            mostrarMensaje('⚠️ Debes seleccionar una finca', 'warning');
+            fincaSelect.focus();
+            return;
+        }
+        
+        if (!nombreInput.value.trim()) {
+            mostrarMensaje('⚠️ El nombre del cuartel es obligatorio', 'warning');
+            nombreInput.focus();
+            return;
+        }
+        
+        // Preparar datos
+        const datos = {
+            finca_id: parseInt(fincaSelect.value),
+            nombre: nombreInput.value.trim(),
+            superficie: superficieInput.value ? parseFloat(superficieInput.value) : null,
+            nro_viñedo: nroViñedoInput.value.trim() || null,
+            especie: especieInput.value.trim() || null,
+            variedades: Array.from(variedadesSelect.selectedOptions).map(opt => parseInt(opt.value))
+        };
+        
+        // Preparar UI para guardado
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>' + (editId ? 'Actualizando...' : 'Guardando...');
+        submitBtn.disabled = true;
+        
+        try {
+            if (editId) {
+                await actualizarCuartel({ id: editId, ...datos });
+            } else {
+                await crearCuartel(datos);
+            }
+            
+            // Resetear formulario después del éxito
+            resetearFormulario();
+            
+            // Recargar datos
+            await cargarCuarteles();
+            
+        } catch (error) {
+            console.error('❌ Error guardando cuartel:', error);
+            mostrarMensaje('❌ Error guardando cuartel: ' + error.message, 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    async function crearCuartel(datos) {
+        console.log('➕ Creando nuevo cuartel:', datos);
+        
+        if (supabase && currentUser) {
+            // Crear en Supabase
+            const { data: cuartel, error } = await supabase
+                .from("cuarteles")
+                .insert({
+                    finca_id: datos.finca_id,
+                    nombre: datos.nombre,
+                    superficie: datos.superficie,
+                    nro_viñedo: datos.nro_viñedo,
+                    especie: datos.especie
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            // Agregar variedades si existen
+            if (datos.variedades.length > 0) {
+                const variedadesInsert = datos.variedades.map(variedadId => ({
+                    cuartel_id: cuartel.id,
+                    variedad_id: variedadId
+                }));
+                
+                const { error: varError } = await supabase
+                    .from("cuartel_variedades")
+                    .insert(variedadesInsert);
+                
+                if (varError) console.warn('Error agregando variedades:', varError);
+            }
+            
+            mostrarMensaje('✅ Cuartel creado exitosamente', 'success');
+            console.log('✅ Cuartel creado en Supabase:', cuartel);
+            
+        } else {
+            // Crear en modo demo
+            const nuevoId = Math.max(...cuartelesData.map(c => c.id), 0) + 1;
+            const finca = fincasData.find(f => f.id === datos.finca_id);
+            const variedadesSeleccionadas = datos.variedades.map(vId => {
+                const variedad = variedadesData.find(v => v.id === vId);
+                return { variedades: { nombre: variedad?.nombre || 'Desconocida' } };
+            });
+            
+            const nuevoCuartel = {
+                id: nuevoId,
+                nombre: datos.nombre,
+                superficie: datos.superficie,
+                nro_viñedo: datos.nro_viñedo,
+                especie: datos.especie,
+                finca_id: datos.finca_id,
+                fincas: { nombre_finca: finca?.nombre_finca || 'Finca Desconocida' },
+                cuartel_variedades: variedadesSeleccionadas,
+                created_at: new Date().toISOString()
+            };
+            
+            cuartelesData.push(nuevoCuartel);
+            cuartelesOriginales.push(nuevoCuartel);
+            mostrarMensaje('✅ Cuartel creado exitosamente (modo demo)', 'success');
+            console.log('✅ Cuartel creado en modo demo:', nuevoCuartel);
+            
+            // Actualizar vista inmediatamente en modo demo
+            actualizarContador();
+            renderizarCuarteles();
+        }
+    }
+
+    async function actualizarCuartel(datos) {
+        console.log('✏️ Actualizando cuartel:', datos);
+        mostrarMensaje('🔄 Función de actualizar cuarteles se implementará próximamente', 'info');
+    }
+
+    function editarCuartel(id) {
+        console.log('✏️ Editando cuartel con ID:', id);
+        mostrarMensaje('✏️ Función de editar cuarteles se implementará próximamente', 'info');
+    }
+
+    function eliminarCuartel(id) {
+        console.log('🗑️ Eliminar cuartel:', id);
+        
+        const cuartel = cuartelesData.find(c => c.id === id);
+        if (!cuartel) {
+            mostrarMensaje('❌ Cuartel no encontrado', 'error');
+            return;
+        }
+        
+        // Mostrar confirmación
+        if (confirm(`¿Estás seguro de que deseas eliminar el cuartel "${cuartel.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+            eliminarCuartelConfirmado(id);
+        }
+    }
+    
+    async function eliminarCuartelConfirmado(id) {
+        try {
+            if (supabase && currentUser) {
+                console.log('🗑️ Eliminando de Supabase...');
+                
+                // Primero verificar que el cuartel pertenezca al usuario (a través de la finca)
+                const { data: cuartelData, error: checkError } = await supabase
+                    .from("cuarteles")
+                    .select("id, fincas!inner(usuario_id)")
+                    .eq("id", id)
+                    .eq("fincas.usuario_id", currentUser.id)
+                    .single();
+                
+                if (checkError || !cuartelData) {
+                    throw new Error('No tienes permisos para eliminar este cuartel');
+                }
+                
+                // Eliminar relaciones de variedades
+                await supabase
+                    .from("cuartel_variedades")
+                    .delete()
+                    .eq("cuartel_id", id);
+                
+                // Eliminar el cuartel
+                const { error } = await supabase
+                    .from("cuarteles")
+                    .delete()
+                    .eq("id", id);
+                
+                if (error) throw error;
+                
+                mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                console.log('✅ Cuartel eliminado de Supabase');
+                
+                // Recargar datos
+                await cargarCuarteles();
+                
+            } else {
+                console.log('🗑️ Eliminando en modo demo...');
+                // Eliminar de ambos arrays
+                cuartelesData = cuartelesData.filter(c => c.id !== id);
+                cuartelesOriginales = cuartelesOriginales.filter(c => c.id !== id);
+                
+                mostrarMensaje('✅ Cuartel eliminado exitosamente (modo demo)', 'success');
+                console.log('✅ Cuartel eliminado en modo demo');
+                
+                // Actualizar vista inmediatamente en modo demo
+                renderizarCuarteles();
+                actualizarContador();
+                
+                // Mantener búsqueda activa si hay un término
+                const busquedaInput = document.getElementById('busqueda-cuarteles');
+                if (busquedaInput && busquedaInput.value.trim()) {
+                    const termino = busquedaInput.value.trim().toLowerCase();
+                    buscarCuarteles(termino);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Error eliminando cuartel:', error);
+            mostrarMensaje('❌ Error eliminando cuartel: ' + error.message, 'error');
+        }
+    }
+
+    function cancelarEdicion() {
+        resetearFormulario();
+        mostrarMensaje('ℹ️ Edición cancelada', 'info');
+    }
+
+    function resetearFormulario() {
+        // Resetear formulario
+        const form = document.getElementById('cuartel-form');
+        if (form) form.reset();
+        
+        // Resetear estado de edición
         editId = null;
-        status.textContent = "";
-        status.className = "";
-        cancelEditBtn.style.display = "none";
-      });
+        
+        // Resetear textos de forma segura
+        const formTitle = document.getElementById('form-title');
+        const btnText = document.getElementById('btn-text');
+        const cancelEdit = document.getElementById('cancelEdit');
+        
+        if (formTitle) formTitle.textContent = 'Nuevo Cuartel';
+        if (btnText) btnText.textContent = 'Guardar Cuartel';
+        if (cancelEdit) cancelEdit.style.display = 'none';
+        
+        // Ocultar formulario
+        const formularioCuartel = document.getElementById('formulario-cuartel');
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        
+        if (formularioCuartel && toggleFormBtn) {
+            formularioCuartel.style.display = 'none';
+            toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Cuartel';
+        }
+        
+        console.log('🔄 Formulario reseteado');
+    }
 
-      // Cargar header y manejar logout
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
-          // Manejo de logout (opcional, si no lo tienes en header.js)
-          // Eliminar el manejo de logoutBtn ya que se maneja en header.js
+    // ===== FUNCIONALIDAD DE BÚSQUEDA =====
+    
+    function configurarBusqueda() {
+        console.log('🔍 Configurando búsqueda...');
+        
+        const busquedaInput = document.getElementById('busqueda-cuarteles');
+        const limpiarBtn = document.getElementById('limpiar-busqueda');
+        
+        if (!busquedaInput || !limpiarBtn) {
+            console.warn('⚠️ Elementos de búsqueda no encontrados');
+            return;
+        }
+        
+        // Búsqueda en tiempo real
+        busquedaInput.addEventListener('input', function() {
+            const termino = this.value.trim().toLowerCase();
+            buscarCuarteles(termino);
         });
+        
+        // Limpiar búsqueda
+        limpiarBtn.addEventListener('click', function() {
+            busquedaInput.value = '';
+            buscarCuarteles('');
+            busquedaInput.focus();
+        });
+        
+        // Tecla Escape para limpiar
+        busquedaInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                buscarCuarteles('');
+            }
+        });
+        
+        console.log('✅ Búsqueda configurada');
+    }
+    
+    function buscarCuarteles(termino) {
+        if (!termino) {
+            // Mostrar todos los cuarteles
+            cuartelesData = [...cuartelesOriginales];
+            renderizarCuarteles();
+            actualizarEstadisticasBusqueda(cuartelesData.length, cuartelesOriginales.length);
+            return;
+        }
+        
+        // Buscar en nombre, finca, especie y variedades
+        const resultados = cuartelesOriginales.filter(cuartel => {
+            const nombre = (cuartel.nombre || '').toLowerCase();
+            const finca = (cuartel.fincas?.nombre_finca || '').toLowerCase();
+            const especie = (cuartel.especie || '').toLowerCase();
+            const variedades = cuartel.cuartel_variedades?.map(cv => 
+                (cv.variedades?.nombre || '').toLowerCase()
+            ).join(' ') || '';
+            
+            return nombre.includes(termino) || 
+                   finca.includes(termino) || 
+                   especie.includes(termino) || 
+                   variedades.includes(termino);
+        });
+        
+        cuartelesData = resultados;
+        renderizarCuarteles();
+        actualizarEstadisticasBusqueda(resultados.length, cuartelesOriginales.length);
+        
+        if (resultados.length === 0) {
+            mostrarMensaje(`🔍 No se encontraron cuarteles que coincidan con "${termino}"`, 'info');
+        }
+    }
+    
+    function actualizarEstadisticasBusqueda(encontrados, total) {
+        const statsElement = document.getElementById('resultados-count');
+        if (statsElement) {
+            if (encontrados === total) {
+                statsElement.textContent = `Mostrando ${total} cuarteles`;
+            } else {
+                statsElement.textContent = `${encontrados} de ${total} cuarteles`;
+            }
+        }
+    }
 
-      await cargarFincas();
-      await cargarVariedades();
-      await cargarCuarteles();
+    function cargarHeaderDinamico() {
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                const headerContainer = document.getElementById('header-container');
+                if (headerContainer) {
+                    headerContainer.innerHTML = html;
+                    console.log('✅ Header dinámico cargado');
+                    
+                    // Importar header.js después de cargar el HTML
+                    import('./header.js')
+                        .then(() => {
+                            console.log('✅ Header.js importado exitosamente');
+                        })
+                        .catch(error => {
+                            console.warn('⚠️ Error importando header.js:', error);
+                        });
+                }
+            })
+            .catch(error => {
+                console.warn('Header dinámico no disponible, usando header estático');
+            });
+    }
     </script>
-  </body>
+</body>
 </html>
