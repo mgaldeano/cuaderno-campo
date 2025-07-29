@@ -33,49 +33,153 @@
           import('./header.js');
         });
     </script>
-    <main class="container mt-5">
-      <div class="card mb-4 p-4">
-        <hgroup>
-          <h2 class="titulo-principal">Cuarteles</h2>
-        </hgroup>
-        <form id="cuartel-form">
-          <fieldset>
-            <legend>Datos Principales</legend>
-            <label for="finca_id">Finca</label>
-            <select name="finca_id" id="finca_id" required>
-              <option value="">Seleccionar Finca...</option>
-            </select>
-            <label for="nombre_cuartel">Nombre del Cuartel</label>
-            <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del Cuartel" required />
-            <label for="superficie_cuartel">Superficie (ha)</label>
-            <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
-          </fieldset>
-          <fieldset>
-            <legend>Datos Secundarios</legend>
-            <label for="nro_viñedo">Nro. de Viñedo</label>
-            <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro. de Viñedo" />
-            <label for="provincia">Provincia</label>
-            <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
-            <label for="departamento">Departamento</label>
-            <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
-            <label for="especie">Especie</label>
-            <input type="text" name="especie" id="especie" placeholder="Especie" />
-          </fieldset>
-          <fieldset>
-            <legend>Variedades</legend>
-            <label for="variedades_cuartel">Variedades</label>
-            <select id="variedades_cuartel" multiple size="3">
-            <!-- Opciones generadas dinámicamente -->
-          </select>
-          <small>Puedes seleccionar hasta 3 Variedades</small>
-        </fieldset>
-        <button type="submit">Guardar Cuartel</button>
-        <button type="button" id="cancelEdit" style="display:none;">Cancelar</button>
-      </form>
-      <p id="status"></p>
+    <main class="container mt-4">
+      <!-- Header de página -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-1 text-primary font-weight-bold">
+                <i class="bi bi-tree text-primary me-2"></i>
+                Gestión de Cuarteles
+              </h1>
+              <p class="text-muted mb-0">Administra los lotes y variedades por finca</p>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="badge badge-light px-3 py-2" id="contador-cuarteles">0 cuarteles</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <h3>Cuarteles registrados</h3>
-      <ul id="cuarteles-list"></ul>
+      <!-- Formulario de cuartel -->
+      <div class="row mb-4">
+        <div class="col-lg-10 col-xl-8">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-plus-circle text-primary me-2"></i>
+                <span id="form-title">Nuevo Cuartel</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="cuartel-form">
+                <!-- Datos Principales -->
+                <div class="row mb-4">
+                  <div class="col-12">
+                    <h6 class="text-muted mb-3 d-flex align-items-center">
+                      <i class="bi bi-info-circle me-2"></i>Datos Principales
+                    </h6>
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label for="finca_id" class="form-label font-weight-medium">
+                      <i class="bi bi-house-door me-1"></i> Finca *
+                    </label>
+                    <select name="finca_id" id="finca_id" class="form-control form-control-lg" required style="border-radius: 8px; border: 2px solid #e9ecef;">
+                      <option value="">Seleccionar Finca...</option>
+                    </select>
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre_cuartel" class="form-label font-weight-medium">
+                      <i class="bi bi-tag me-1"></i> Nombre del Cuartel *
+                    </label>
+                    <input type="text" name="nombre" id="nombre_cuartel" class="form-control form-control-lg" 
+                           placeholder="Ej: Cuartel Norte" required style="border-radius: 8px; border: 2px solid #e9ecef;">
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label for="superficie_cuartel" class="form-label font-weight-medium">
+                      <i class="bi bi-rulers me-1"></i> Superficie (hectáreas)
+                    </label>
+                    <input type="number" name="superficie" id="superficie_cuartel" class="form-control" 
+                           placeholder="0.00" step="0.01" min="0" style="border-radius: 8px; border: 2px solid #e9ecef;">
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label for="nro_viñedo" class="form-label font-weight-medium">
+                      <i class="bi bi-123 me-1"></i> Nro. de Viñedo
+                    </label>
+                    <input type="text" name="nro_viñedo" id="nro_viñedo" class="form-control" 
+                           placeholder="Opcional" style="border-radius: 8px; border: 2px solid #e9ecef;">
+                  </div>
+                </div>
+
+                <!-- Datos Secundarios -->
+                <div class="row mb-4">
+                  <div class="col-12">
+                    <h6 class="text-muted mb-3 d-flex align-items-center">
+                      <i class="bi bi-gear me-2"></i>Datos Adicionales
+                    </h6>
+                  </div>
+                  
+                  <div class="col-md-12 mb-3">
+                    <label for="especie" class="form-label font-weight-medium">
+                      <i class="bi bi-flower1 me-1"></i> Especie
+                    </label>
+                    <input type="text" name="especie" id="especie" class="form-control" 
+                           placeholder="Ej: Vitis vinifera" style="border-radius: 8px; border: 2px solid #e9ecef;">
+                  </div>
+                </div>
+
+                <!-- Variedades -->
+                <div class="row mb-4">
+                  <div class="col-12">
+                    <h6 class="text-muted mb-3 d-flex align-items-center">
+                      <i class="bi bi-collection me-2"></i>Variedades <small class="text-muted">(máximo 3)</small>
+                    </h6>
+                    <select id="variedades_cuartel" multiple size="4" class="form-control" style="border-radius: 8px; border: 2px solid #e9ecef;">
+                      <!-- Opciones generadas dinámicamente -->
+                    </select>
+                    <small class="form-text text-muted mt-2">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples variedades
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px; font-weight: 500;">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="btn-text">Guardar Cuartel</span>
+                  </button>
+                  <button type="button" id="cancelEdit" class="btn btn-outline-secondary" style="display:none; border-radius: 8px;">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                  </button>
+                </div>
+              </form>
+              
+              <!-- Estado/Mensajes -->
+              <div id="status" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de cuarteles -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-list-ul text-primary me-2"></i>
+                Cuarteles Registrados
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div id="cuarteles-list" class="list-group list-group-flush">
+                <!-- Lista dinámica -->
+              </div>
+              <div id="empty-state" class="text-center py-5" style="display: none;">
+                <i class="bi bi-tree" style="font-size: 3rem; color: #dee2e6;"></i>
+                <p class="text-muted mt-3 mb-0">No hay cuarteles registrados</p>
+                <small class="text-muted">Agrega tu primer cuartel usando el formulario de arriba</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
     <script type="module">
     import { supabase } from "./supabaseClient.js";
@@ -88,20 +192,57 @@
       const form = document.getElementById("cuartel-form");
       const status = document.getElementById("status");
       const lista = document.getElementById("cuarteles-list");
+      const emptyState = document.querySelector("#empty-state");
+      const contador = document.querySelector("#contador-cuarteles");
+      const formTitle = document.querySelector("#form-title");
+      const btnText = document.querySelector("#btn-text");
+      const cancelEditBtn = document.getElementById("cancelEdit");
+      
       const fincaSelect = document.getElementById("finca_id");
       const nombreInput = document.getElementById("nombre_cuartel");
       const superficieInput = document.getElementById("superficie_cuartel");
       const nroViñedoInput = document.getElementById("nro_viñedo");
-      const provinciaInput = document.getElementById("provincia");
-      const departamentoInput = document.getElementById("departamento");
       const especieInput = document.getElementById("especie");
       const variedadInput = document.getElementById("variedad");
       const variedadesSelect = document.getElementById("variedades_cuartel");
-      const cancelEditBtn = document.getElementById("cancelEdit");
 
       let editId = null;
       let fincasMap = {};
       let variedadesMap = {};
+
+      // Función para mostrar mensajes con estilo
+      function mostrarMensaje(mensaje, tipo = 'info') {
+        const clases = {
+          'success': 'alert-success',
+          'error': 'alert-danger', 
+          'warning': 'alert-warning',
+          'info': 'alert-info'
+        };
+        status.innerHTML = `<div class="alert ${clases[tipo]} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+          ${mensaje}
+          <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+          </button>
+        </div>`;
+      }
+
+      // Función para resetear formulario
+      function resetearFormulario() {
+        form.reset();
+        editId = null;
+        formTitle.textContent = "Nuevo Cuartel";
+        btnText.textContent = "Guardar Cuartel";
+        cancelEditBtn.style.display = "none";
+        status.innerHTML = "";
+        
+        // Limpiar selecciones de variedades
+        Array.from(variedadesSelect.options).forEach(opt => {
+          opt.selected = false;
+        });
+      }
+
+      // Cancelar edición
+      cancelEditBtn.addEventListener('click', resetearFormulario);
 
       // Obtener usuario actual
       // user ya está definido globalmente arriba
@@ -110,7 +251,7 @@
       async function cargarFincas() {
         const { data, error } = await supabase
           .from("fincas")
-          .select("id, nombre_finca")
+          .select("id, nombre_finca, provincia, departamento")
           .eq("usuario_id", userId);
 
         fincaSelect.innerHTML = '<option value="">Seleccionar finca...</option>';
@@ -121,7 +262,11 @@
           return;
         }
         data.forEach(f => {
-          fincasMap[f.id] = f.nombre_finca;
+          fincasMap[f.id] = {
+            nombre: f.nombre_finca,
+            provincia: f.provincia,
+            departamento: f.departamento
+          };
           const opt = document.createElement("option");
           opt.value = f.id;
           opt.textContent = f.nombre_finca;
@@ -168,77 +313,151 @@
         const { data, error } = await supabase
           .from("cuarteles")
           .select("*")
-          .in("finca_id", Object.keys(fincasMap));
+          .in("finca_id", Object.keys(fincasMap))
+          .order('created_at', { ascending: false });
 
         if (error) {
-          status.textContent = "❌ Error cargando cuarteles";
-          status.className = "error";
+          mostrarMensaje("❌ Error cargando cuarteles: " + error.message, 'error');
           return;
         }
+        
+        // Actualizar contador
+        contador.textContent = `${data.length} cuartel${data.length !== 1 ? 'es' : ''}`;
+        
+        // Mostrar empty state si no hay cuarteles
+        if (data.length === 0) {
+          lista.style.display = 'none';
+          emptyState.style.display = 'block';
+          return;
+        }
+        
+        lista.style.display = 'block';
+        emptyState.style.display = 'none';
         lista.innerHTML = "";
+        
         for (const c of data) {
           const variedadesIds = await obtenerVariedadesCuartel(c.id);
           const variedadesNombres = variedadesIds.map(id => variedadesMap[id]).filter(Boolean);
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <span class="cuartel-info">
-              <strong>${c.nombre}</strong>
-              <small class="info-secundaria">Finca: ${fincasMap[c.finca_id] || '-'}</small>
-              ${c.superficie ? `<small class="info-secundaria">Superficie: ${c.superficie} ha</small>` : ""}
-              ${c.nro_viñedo ? `<small class="info-secundaria">Viñedo: ${c.nro_viñedo}</small>` : ""}
-              ${c.provincia ? `<small class="info-secundaria">Provincia: ${c.provincia}</small>` : ""}
-              ${c.departamento ? `<small class="info-secundaria">Departamento: ${c.departamento}</small>` : ""}
-              ${c.especie ? `<small class="info-secundaria">Especie: ${c.especie}</small>` : ""}
-              ${variedadesNombres.length ? `<small class="info-secundaria">Variedades: ${variedadesNombres.join(", ")}</small>` : ""}
-            </span>
-            <span class="cuartel-actions">
-              <button data-id="${c.id}" class="edit btn-small">Editar</button>
-              <button data-id="${c.id}" class="delete btn-small">Eliminar</button>
-            </span>
+          const fincaInfo = fincasMap[c.finca_id];
+          
+          const cuartelItem = document.createElement("div");
+          cuartelItem.className = "list-group-item border-0 py-3";
+          cuartelItem.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-2">
+                  <h6 class="mb-0 font-weight-bold text-primary">${c.nombre}</h6>
+                  <span class="badge badge-light ml-2">#${c.id}</span>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <small class="text-muted d-flex align-items-center mb-1">
+                      <i class="bi bi-house-door me-1"></i>
+                      <strong>Finca:</strong> ${fincaInfo ? fincaInfo.nombre : '-'}
+                    </small>
+                  </div>
+                  ${c.superficie ? `
+                    <div class="col-md-6">
+                      <small class="text-muted d-flex align-items-center mb-1">
+                        <i class="bi bi-rulers me-1"></i>
+                        <strong>Superficie:</strong> ${c.superficie} ha
+                      </small>
+                    </div>
+                  ` : ''}
+                  ${c.nro_viñedo ? `
+                    <div class="col-md-6">
+                      <small class="text-muted d-flex align-items-center mb-1">
+                        <i class="bi bi-123 me-1"></i>
+                        <strong>Viñedo:</strong> ${c.nro_viñedo}
+                      </small>
+                    </div>
+                  ` : ''}
+                  ${fincaInfo && (fincaInfo.provincia || fincaInfo.departamento) ? `
+                    <div class="col-md-6">
+                      <small class="text-muted d-flex align-items-center mb-1">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        <strong>Ubicación:</strong> ${fincaInfo.provincia || ''} ${fincaInfo.departamento ? (fincaInfo.provincia ? ', ' + fincaInfo.departamento : fincaInfo.departamento) : ''}
+                      </small>
+                    </div>
+                  ` : ''}
+                  ${c.especie ? `
+                    <div class="col-md-6">
+                      <small class="text-muted d-flex align-items-center mb-1">
+                        <i class="bi bi-flower1 me-1"></i>
+                        <strong>Especie:</strong> ${c.especie}
+                      </small>
+                    </div>
+                  ` : ''}
+                  ${variedadesNombres.length ? `
+                    <div class="col-12">
+                      <small class="text-muted d-flex align-items-start">
+                        <i class="bi bi-collection me-1 mt-1"></i>
+                        <span><strong>Variedades:</strong> ${variedadesNombres.map(v => `<span class="badge badge-secondary mr-1">${v}</span>`).join('')}</span>
+                      </small>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-id="${c.id}" data-action="edit" style="border-radius: 6px 0 0 6px;">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-id="${c.id}" data-action="delete" style="border-radius: 0 6px 6px 0;">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
           `;
-          li.classList.add("cuartel-item");
-          lista.appendChild(li);
+          lista.appendChild(cuartelItem);
         }
 
-        // Editar cuartel
-        lista.querySelectorAll(".edit").forEach(btn => {
-          btn.onclick = async () => {
-            editId = btn.dataset.id;
-            const cuartel = data.find(c => c.id == editId);
+        // Event listeners para editar y eliminar
+        lista.addEventListener('click', async (e) => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          
+          const id = btn.dataset.id;
+          const action = btn.dataset.action;
+          const cuartel = data.find(c => c.id == id);
+          
+          if (action === 'edit') {
+            editId = id;
             fincaSelect.value = cuartel.finca_id;
             nombreInput.value = cuartel.nombre;
             superficieInput.value = cuartel.superficie || "";
             nroViñedoInput.value = cuartel.nro_viñedo || "";
-            provinciaInput.value = cuartel.provincia || "";
-            departamentoInput.value = cuartel.departamento || "";
             especieInput.value = cuartel.especie || "";
+            
             // Cargar variedades seleccionadas
             const variedadesIds = await obtenerVariedadesCuartel(editId);
             Array.from(variedadesSelect.options).forEach(opt => {
               opt.selected = variedadesIds.includes(Number(opt.value));
             });
-            status.textContent = "Editando cuartel #" + editId;
-            status.className = "warn";
-            cancelEditBtn.style.display = "";
-          };
-        });
-
-        // Eliminar cuartel
-        lista.querySelectorAll(".delete").forEach(btn => {
-          btn.onclick = async () => {
-            const id = btn.dataset.id;
-            if (!confirm("¿Seguro que deseas eliminar este cuartel?")) return;
+            
+            formTitle.textContent = "Editar Cuartel";
+            btnText.textContent = "Actualizar Cuartel";
+            cancelEditBtn.style.display = "inline-block";
+            
+            // Scroll al formulario
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            nombreInput.focus();
+            
+            mostrarMensaje(`✏️ Editando cuartel: ${cuartel.nombre}`, 'info');
+            
+          } else if (action === 'delete') {
+            if (!confirm(`¿Estás seguro de eliminar el cuartel "${cuartel.nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
+            
+            // Eliminar relaciones de variedades primero
             await supabase.from("cuartel_variedades").delete().eq("cuartel_id", id);
+            
             const { error } = await supabase.from("cuarteles").delete().eq("id", id);
             if (error) {
-              status.textContent = "❌ Error al eliminar";
-              status.className = "error";
+              mostrarMensaje("❌ Error al eliminar cuartel: " + error.message, 'error');
             } else {
-              status.textContent = "✅ Cuartel eliminado";
-              status.className = "success";
+              mostrarMensaje(`✅ Cuartel "${cuartel.nombre}" eliminado correctamente`, 'success');
+              cargarCuarteles();
             }
-            cargarCuarteles();
-          };
+          }
         });
       }
 
@@ -259,8 +478,6 @@
         const nombre = nombreInput.value;
         const superficie = superficieInput.value ? Number(superficieInput.value) : null;
         const nro_viñedo = nroViñedoInput.value || null;
-        const provincia = provinciaInput.value || null;
-        const departamento = departamentoInput.value || null;
         const especie = especieInput.value || null;
         const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions)
           .map(opt => opt.value)
@@ -273,7 +490,7 @@
           // Editar cuartel
           const { error } = await supabase
             .from("cuarteles")
-            .update({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
+            .update({ finca_id, nombre, superficie, nro_viñedo, especie })
             .eq("id", editId);
           if (error) {
             status.textContent = "❌ Error al editar cuartel";
@@ -290,7 +507,7 @@
           // Crear cuartel
           const { data, error } = await supabase
             .from("cuarteles")
-            .insert({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
+            .insert({ finca_id, nombre, superficie, nro_viñedo, especie })
             .select();
           if (error || !data || !data[0]) {
             status.textContent = "❌ Error al guardar cuartel";

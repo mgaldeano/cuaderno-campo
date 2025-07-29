@@ -2,32 +2,64 @@
 
 
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light mui-card w-100 mb-4" style="border-radius:0 0 12px 12px;">
-  <a class="navbar-brand d-flex align-items-center" href="index.html">
-    <img id="org-logo" src="logo.png" height="24" style="max-width:60px;max-height:24px;margin-right:8px;object-fit:contain;"> 
-    <span id="org-nombre">Organización</span>
-  </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav mr-auto" id="navbar-menu">
-      <li class="nav-item"><a class="nav-link" href="index.html">Panel</a></li>
-      <li class="nav-item dropdown" id="nav-gestion">
-        <a class="nav-link dropdown-toggle" href="#" id="gestionDropdown" data-toggle="dropdown">Gestión</a>
-        <div class="dropdown-menu" id="gestion-dropdown-menu">
-          <a class="dropdown-item" href="fincas.html">Fincas</a>
-          <a class="dropdown-item" href="cuarteles.html">Cuarteles</a>
-          <a class="dropdown-item" href="tareas.html">Tareas</a>
-          <a class="dropdown-item" href="operadores.html">Operadores</a>
-        </div>
-      </li>
-      <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes</a></li>
-      <li class="nav-item"><a class="nav-link" href="usuarios.html">Usuarios</a></li>
-      <li class="nav-item d-none" id="nav-informe-visita"><a class="nav-link" href="informe_visita.html">Informe de Ingeniero</a></li>
-    </ul>
-    <span class="navbar-text ml-auto" id="navbar-user">Bienvenido, <i>Usuario</i></span>
-    <a href="#" id="logoutBtn" class="btn btn-sm ml-3" role="button" style="background:var(--color-primary);color:#fff;font-size:1em;font-weight:500;box-shadow:0 2px 4px #0001;border-radius:6px;border:none;">Cerrar sesión</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm w-100 mb-4" style="border-radius: 0 0 16px 16px; border-bottom: 3px solid var(--color-primary);">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="index.html" style="font-weight: 500; font-size: 1.3rem; text-decoration: none;">
+      <img id="org-logo" src="logo.png" height="36" style="max-width:90px;max-height:36px;margin-right:12px;object-fit:contain;border-radius:6px;"> 
+      <span id="org-nombre" style="color: var(--color-primary);">Organización</span>
+    </a>
+    
+    <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarNav" style="padding: 0.5rem;">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto" id="navbar-menu">
+        <li class="nav-item dropdown" id="nav-gestion">
+          <a class="nav-link dropdown-toggle font-weight-medium" href="#" id="gestionDropdown" data-toggle="dropdown" style="color: #495057; padding: 0.75rem 1rem;">
+            <i class="bi bi-grid-3x3-gap me-1"></i> Gestión
+          </a>
+          <div class="dropdown-menu shadow-lg border-0" id="gestion-dropdown-menu" style="border-radius: 12px; margin-top: 8px;">
+            <a class="dropdown-item d-flex align-items-center py-2" href="fincas.html">
+              <i class="bi bi-house-door text-success me-2"></i> Fincas
+            </a>
+            <a class="dropdown-item d-flex align-items-center py-2" href="cuarteles.html">
+              <i class="bi bi-tree text-primary me-2"></i> Cuarteles
+            </a>
+            <a class="dropdown-item d-flex align-items-center py-2" href="tareas.html">
+              <i class="bi bi-journal-check text-info me-2"></i> Tareas
+            </a>
+            <a class="dropdown-item d-flex align-items-center py-2" href="operadores.html">
+              <i class="bi bi-people text-warning me-2"></i> Operadores
+            </a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link font-weight-medium" href="reportes.html" style="color: #495057; padding: 0.75rem 1rem;">
+            <i class="bi bi-bar-chart me-1"></i> Reportes
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link font-weight-medium" href="usuarios.html" style="color: #495057; padding: 0.75rem 1rem;">
+            <i class="bi bi-person-gear me-1"></i> Usuarios
+          </a>
+        </li>
+        <li class="nav-item d-none" id="nav-informe-visita">
+          <a class="nav-link font-weight-medium" href="informe_visita.html" style="color: #495057; padding: 0.75rem 1rem;">
+            <i class="bi bi-clipboard-check me-1"></i> Informe de Ingeniero
+          </a>
+        </li>
+      </ul>
+      
+      <div class="d-flex align-items-center">
+        <span class="navbar-text mr-3" id="navbar-user" style="font-size: 0.9rem; color: #6c757d;">
+          <i class="bi bi-person-circle me-1"></i> Bienvenido, <strong id="user-name">Usuario</strong>
+        </span>
+        <a href="#" id="logoutBtn" class="btn btn-outline-danger btn-sm d-flex align-items-center" style="border-radius: 8px; font-weight: 500;">
+          <i class="bi bi-box-arrow-right me-1"></i> Salir
+        </a>
+      </div>
+    </div>
   </div>
 </nav>
 
