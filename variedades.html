@@ -4,24 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ABM Variedades</title>
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <!-- Bootstrap Select -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- PicoCSS (opcional) -->
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
-    <!-- Google Fonts Roboto -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
-    <!-- Tu CSS personalizado -->
-    <link rel="stylesheet" href="estilos.css">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Select JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- Google Fonts Roboto -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- Tu CSS personalizado -->
+  <link rel="stylesheet" href="estilos.css">
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     .tabla-variedades-boton {
       font-size: 0.85em;
@@ -79,102 +71,326 @@
         import('./header.js');
       });
   </script>
-  <main class="container">
-    <h2 class="titulo-principal">Gestión de Variedades</h2>
-    <form id="form-variedad" style="display:flex; gap:1em; flex-wrap:wrap; align-items:end;">
-      <input type="hidden" id="variedad-id" />
-      <div>
-        <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" required />
+  <main class="container py-4">
+    <!-- Header Section -->
+    <div class="container-fluid bg-light py-3 mb-4">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="h3 mb-1 text-primary font-weight-bold">
+              <i class="bi bi-grape text-success me-2"></i>
+              Gestión de Variedades
+            </h1>
+            <p class="text-muted mb-0">Administra las variedades de cultivos y plantas</p>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="badge badge-secondary badge-lg me-3" id="contador-variedades">0 variedades</span>
+            <button class="btn btn-success btn-sm" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#formulario-variedad" aria-expanded="false" aria-controls="formulario-variedad" id="toggle-form-btn">
+              <i class="bi bi-plus-circle me-1"></i> Agregar Variedad
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="color">Color</label>
-        <select id="color" required>
-          <option value="">- Seleccione -</option>
-          <option value="tinta">Tinta</option>
-          <option value="blanca">Blanca</option>
-          <option value="rosada">Rosada</option>
-        </select>
+    </div>
+
+    <!-- Formulario Colapsable -->
+    <div class="collapse mb-4" id="formulario-variedad">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-plus-circle text-success me-2"></i>
+                <span id="form-title">Nueva Variedad</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="form-variedad">
+                <input type="hidden" id="variedad-id" />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label font-weight-medium">
+                      <i class="bi bi-tag me-1"></i> Nombre de la variedad *
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required />
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="color" class="form-label font-weight-medium">
+                      <i class="bi bi-palette me-1"></i> Color *
+                    </label>
+                    <select class="form-select" id="color" name="color" required>
+                      <option value="">- Seleccione -</option>
+                      <option value="tinta">Tinta</option>
+                      <option value="blanca">Blanca</option>
+                      <option value="rosada">Rosada</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="tipo_destino" class="form-label font-weight-medium">
+                      <i class="bi bi-target me-1"></i> Tipo/Destino *
+                    </label>
+                    <select class="form-select" id="tipo_destino" name="tipo_destino" required>
+                      <option value="">- Seleccione -</option>
+                      <option value="mostera">Mostera</option>
+                      <option value="tinto">Tinto</option>
+                      <option value="blanco">Blanco</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-success btn-lg px-4" id="guardar">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="btn-text">Guardar Variedad</span>
+                  </button>
+                  <button type="button" id="cancelar" class="btn btn-outline-secondary" style="display:none;">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="tipo_destino">Tipo/Destino</label>
-        <select id="tipo_destino" required>
-          <option value="">- Seleccione -</option>
-          <option value="mostera">Mostera</option>
-          <option value="tinto">Tinto</option>
-          <option value="blanco">Blanco</option>
-          <option value="otro">Otro</option>
-        </select>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-hover" id="tabla-variedades">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Color</th>
+              <th>Tipo/Destino</th>
+              <th style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <button type="submit" id="guardar">Guardar</button>
-      <button type="button" id="cancelar" style="display:none;">Cancelar</button>
-    </form>
-    <p id="status"></p>
-    <table id="tabla-variedades" style="margin-top:1em;"></table>
+    </div>
+
+    <div id="status"></div>
   </main>
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    
     const form = document.getElementById('form-variedad');
     const status = document.getElementById('status');
     const tabla = document.getElementById('tabla-variedades');
     const cancelarBtn = document.getElementById('cancelar');
-    async function cargarVariedades() {
-      const { data, error } = await supabase.from('variedades').select('*').order('nombre');
-      if (error) { status.textContent = 'Error al cargar variedades'; return; }
-      let html = `<thead><tr><th>Nombre</th><th>Color</th><th>Tipo/Destino</th><th>Acciones</th></tr></thead><tbody>`;
-      data.forEach(v => {
-        html += `<tr>
-          <td>${v.nombre}</td>
-          <td>${v.color||''}</td>
-          <td>${v.tipo_destino||''}</td>
-          <td>
-            <button type='button' data-id='${v.id}' class='editar tabla-variedades-boton'>✎</button>
-            <button type='button' data-id='${v.id}' class='borrar tabla-variedades-boton' style='color:red;'>🗑</button>
-          </td>
-        </tr>`;
-      });
-      html += '</tbody>';
-      tabla.innerHTML = html;
-      tabla.querySelectorAll('.editar').forEach(btn => btn.onclick = () => editarVariedad(btn.dataset.id));
-      tabla.querySelectorAll('.borrar').forEach(btn => btn.onclick = () => borrarVariedad(btn.dataset.id));
+    const toggleBtn = document.getElementById('toggle-form-btn');
+    const formulario = document.getElementById('formulario-variedad');
+
+    // Función para mostrar mensajes con estilo Bootstrap
+    function mostrarStatus(mensaje, tipo = 'info') {
+      const alertClass = tipo === 'success' ? 'alert-success' : 
+                        tipo === 'error' ? 'alert-danger' : 
+                        tipo === 'warning' ? 'alert-warning' : 'alert-info';
+      
+      const icon = tipo === 'success' ? 'bi-check-circle' : 
+                  tipo === 'error' ? 'bi-exclamation-triangle' : 
+                  tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+      
+      status.innerHTML = `
+        <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+          <i class="bi ${icon} me-2"></i>
+          <div>${mensaje}</div>
+        </div>
+      `;
+      
+      // Auto-ocultar después de 5 segundos si es éxito
+      if (tipo === 'success') {
+        setTimeout(() => {
+          status.innerHTML = '';
+        }, 5000);
+      }
     }
+
+    // Función para actualizar contador
+    function actualizarContador(cantidad) {
+      const contador = document.getElementById('contador-variedades');
+      if (contador) {
+        contador.textContent = `${cantidad} variedad${cantidad !== 1 ? 'es' : ''}`;
+        contador.className = cantidad > 0 ? 'badge badge-success badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+      }
+    }
+
+    // Toggle del formulario
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        setTimeout(() => {
+          const isVisible = formulario.classList.contains('show');
+          toggleBtn.innerHTML = isVisible ? 
+            '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario' : 
+            '<i class="bi bi-plus-circle me-1"></i> Agregar Variedad';
+        }, 150);
+      });
+    }
+
+    async function cargarVariedades() {
+      try {
+        mostrarStatus('Cargando variedades...', 'info');
+        const { data, error } = await supabase.from('variedades').select('*').order('nombre');
+        if (error) { 
+          mostrarStatus('Error al cargar variedades: ' + error.message, 'error');
+          return; 
+        }
+        
+        // Actualizar contador
+        actualizarContador(data.length);
+        
+        if (data.length === 0) {
+          tabla.querySelector('tbody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay variedades registradas. <strong>Agrega la primera!</strong></td></tr>';
+          status.innerHTML = '';
+          return;
+        }
+
+        let html = '';
+        data.forEach(v => {
+          const colorBadge = v.color ? `<span class="badge badge-${v.color === 'tinta' ? 'dark' : v.color === 'blanca' ? 'light text-dark' : 'warning'}">${v.color}</span>` : 'No especificado';
+          const tipoBadge = v.tipo_destino ? `<span class="badge badge-info">${v.tipo_destino}</span>` : 'No especificado';
+          
+          html += `<tr>
+            <td><strong>${v.nombre}</strong></td>
+            <td>${colorBadge}</td>
+            <td>${tipoBadge}</td>
+            <td>
+              <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-primary" onclick="editarVariedad(${v.id})">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="borrarVariedad(${v.id}, '${v.nombre}')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        });
+        
+        tabla.querySelector('tbody').innerHTML = html;
+        status.innerHTML = '';
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    }
+
     form.onsubmit = async e => {
       e.preventDefault();
       const id = document.getElementById('variedad-id').value;
       const nombre = document.getElementById('nombre').value.trim();
       const color = document.getElementById('color').value;
       const tipo_destino = document.getElementById('tipo_destino').value;
-      if (!nombre || !color || !tipo_destino) { status.textContent = 'Complete todos los campos.'; return; }
-      status.textContent = 'Guardando...';
-      if (id) {
-        const { error } = await supabase.from('variedades').update({ nombre, color, tipo_destino }).eq('id', id);
-        if (error) { status.textContent = 'Error al actualizar'; return; }
-      } else {
-        const { error } = await supabase.from('variedades').insert([{ nombre, color, tipo_destino }]);
-        if (error) { status.textContent = 'Error al crear'; return; }
+      
+      if (!nombre || !color || !tipo_destino) { 
+        mostrarStatus('Complete todos los campos requeridos', 'warning'); 
+        return; 
       }
-      form.reset();
-      cancelarBtn.style.display = 'none';
-      status.textContent = 'Guardado';
-      cargarVariedades();
+      
+      mostrarStatus('Guardando variedad...', 'info');
+      
+      try {
+        if (id) {
+          const { error } = await supabase.from('variedades').update({ nombre, color, tipo_destino }).eq('id', id);
+          if (error) { 
+            mostrarStatus('Error al actualizar variedad: ' + error.message, 'error'); 
+            return; 
+          }
+          mostrarStatus('Variedad actualizada correctamente', 'success');
+        } else {
+          const { error } = await supabase.from('variedades').insert([{ nombre, color, tipo_destino }]);
+          if (error) { 
+            mostrarStatus('Error al crear variedad: ' + error.message, 'error'); 
+            return; 
+          }
+          mostrarStatus('Variedad creada correctamente', 'success');
+        }
+        
+        form.reset();
+        cancelarBtn.style.display = 'none';
+        document.getElementById('form-title').textContent = 'Nueva Variedad';
+        document.getElementById('btn-text').textContent = 'Guardar Variedad';
+        cargarVariedades();
+        
+        // Ocultar el formulario después de agregar (solo si es nuevo)
+        if (!id) {
+          const collapseEl = document.getElementById('formulario-variedad');
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: false });
+          bsCollapse.hide();
+          
+          // Actualizar texto del botón
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Variedad';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
     };
-    async function editarVariedad(id) {
-      const { data, error } = await supabase.from('variedades').select('*').eq('id', id).single();
-      if (error) { status.textContent = 'Error al cargar variedad'; return; }
-      document.getElementById('variedad-id').value = data.id;
-      document.getElementById('nombre').value = data.nombre;
-      document.getElementById('color').value = data.color||'';
-      document.getElementById('tipo_destino').value = data.tipo_destino||'';
-      cancelarBtn.style.display = '';
-    }
-    async function borrarVariedad(id) {
-      if (!confirm('¿Borrar variedad?')) return;
-      const { error } = await supabase.from('variedades').delete().eq('id', id);
-      if (error) { status.textContent = 'Error al borrar'; return; }
-      status.textContent = 'Borrado';
-      cargarVariedades();
-    }
-    cancelarBtn.onclick = () => { form.reset(); cancelarBtn.style.display = 'none'; status.textContent = ''; };
+
+    window.editarVariedad = async function(id) {
+      try {
+        const { data, error } = await supabase.from('variedades').select('*').eq('id', id).single();
+        if (error) { 
+          mostrarStatus('Error al cargar variedad: ' + error.message, 'error'); 
+          return; 
+        }
+        
+        document.getElementById('variedad-id').value = data.id;
+        document.getElementById('nombre').value = data.nombre;
+        document.getElementById('color').value = data.color || '';
+        document.getElementById('tipo_destino').value = data.tipo_destino || '';
+        document.getElementById('form-title').textContent = 'Editar Variedad';
+        document.getElementById('btn-text').textContent = 'Actualizar Variedad';
+        cancelarBtn.style.display = 'inline-block';
+        
+        // Mostrar el formulario si está oculto
+        const collapseEl = document.getElementById('formulario-variedad');
+        if (!collapseEl.classList.contains('show')) {
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: true });
+          bsCollapse.show();
+          
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    window.borrarVariedad = async function(id, nombre) {
+      if (!confirm(`¿Está seguro de eliminar la variedad "${nombre}"?`)) return;
+      
+      try {
+        mostrarStatus('Eliminando variedad...', 'info');
+        const { error } = await supabase.from('variedades').delete().eq('id', id);
+        if (error) { 
+          mostrarStatus('Error al eliminar variedad: ' + error.message, 'error'); 
+          return; 
+        }
+        mostrarStatus('Variedad eliminada correctamente', 'success');
+        cargarVariedades();
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    cancelarBtn.onclick = () => { 
+      form.reset(); 
+      cancelarBtn.style.display = 'none'; 
+      document.getElementById('form-title').textContent = 'Nueva Variedad';
+      document.getElementById('btn-text').textContent = 'Guardar Variedad';
+      status.innerHTML = ''; 
+    };
+
+    // Cargar variedades al inicio
     cargarVariedades();
   </script>
 </body>
