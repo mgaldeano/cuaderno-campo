@@ -1,3 +1,15 @@
+/* ===== ESPACIADO DE ICONOS ===== */
+/* Clase para iconos en listas que necesitan más espacio */
+.icon-spacing {
+  margin-right: 0.5rem !important;
+}
+
+/* Específico para iconos en pequeños elementos de texto */
+.text-muted .bi {
+  margin-right: 0.5rem;
+}
+
+/* ===== COMPONENTES REUTILIZABLES ===== */
 .mui-card {
   position: relative;
 }

@@ -111,7 +111,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" id="busqueda-cuarteles" 
-                           placeholder="Buscar cuarteles por nombre, finca, especie..."
+                           placeholder="Buscar cuarteles por nombre, finca, especie o variedad..."
                            autocomplete="off">
                     <button class="btn btn-outline-secondary" type="button" id="limpiar-busqueda">
                         <i class="bi bi-x-circle"></i>
@@ -304,13 +304,30 @@
                     console.log('✅ Usuario autenticado:', user.email);
                     mostrarMensaje('✅ Conectado a Supabase como: ' + user.email, 'success');
                     return true;
+                } else {
+                    console.warn('❌ No hay usuario autenticado, redirigiendo al login...');
+                    window.location.href = 'login.html';
+                    return false;
                 }
+            } else {
+                console.warn('❌ Supabase no disponible, redirigiendo al login...');
+                window.location.href = 'login.html';
+                return false;
             }
         } catch (error) {
-            console.warn('⚠️ Supabase no disponible:', error.message);
-            mostrarMensaje('⚠️ Modo demo - Supabase no disponible', 'warning');
+            console.warn('⚠️ Error conectando con Supabase:', error.message);
+            
+            // En desarrollo local, permitir modo demo
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
+                console.log('🎭 Modo demo activado para desarrollo local');
+                mostrarMensaje('⚠️ Modo demo - Desarrollo local', 'warning');
+                return false; // false = modo demo
+            } else {
+                // En producción, redirigir al login
+                window.location.href = 'login.html';
+                return false;
+            }
         }
-        return false;
     }
 
     function mostrarMensaje(mensaje, tipo = 'info') {
@@ -580,27 +597,30 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
-                            <h6 class="mb-0 font-weight-bold text-primary">${cuartel.nombre}</h6>
-                            <span class="badge badge-light ml-2">#${cuartel.id}</span>
-                            ${cuartel.superficie ? `<span class="badge badge-secondary ml-1">${cuartel.superficie} ha</span>` : ''}
-                            ${cuartel.nro_viñedo ? `<span class="badge badge-info ml-1">${cuartel.nro_viñedo}</span>` : ''}
+                            <h6 class="mb-0 font-weight-bold text-primary">
+                                ${cuartel.nombre}
+                                <small class="text-muted font-weight-normal ml-2">
+                                    en ${cuartel.fincas?.nombre_finca || 'Finca no especificada'}
+                                </small>
+                            </h6>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center mb-2">
+                            <span class="badge badge-light mr-2">#${cuartel.id}</span>
+                            ${cuartel.superficie ? `<span class="badge badge-secondary mr-2">${cuartel.superficie} ha</span>` : ''}
+                            ${cuartel.nro_viñedo ? `<span class="badge badge-info mr-2">${cuartel.nro_viñedo}</span>` : ''}
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <small class="text-muted d-flex align-items-center mb-1">
-                                    <i class="bi bi-geo-alt me-1"></i>
-                                    ${cuartel.fincas?.nombre_finca || 'Finca no especificada'}
-                                </small>
                                 ${cuartel.especie ? `
                                     <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="bi bi-flower1 me-1"></i>
+                                        <i class="bi bi-flower1 mr-2"></i>
                                         ${cuartel.especie}
                                     </small>
                                 ` : ''}
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-flex align-items-center mb-1">
-                                    <i class="bi bi-collection me-1"></i>
+                                    <i class="bi bi-collection mr-2"></i>
                                     ${variedadesText}
                                 </small>
                             </div>
@@ -715,6 +735,23 @@
         if (!nombreInput.value.trim()) {
             mostrarMensaje('⚠️ El nombre del cuartel es obligatorio', 'warning');
             nombreInput.focus();
+            return;
+        }
+        
+        // Verificar duplicados en la misma finca
+        const nombreCuartel = nombreInput.value.trim();
+        const fincaId = parseInt(fincaSelect.value);
+        const cuartelDuplicado = cuartelesOriginales.find(c => 
+            c.nombre.toLowerCase() === nombreCuartel.toLowerCase() && 
+            c.finca_id === fincaId && 
+            (!editId || c.id !== editId)
+        );
+        
+        if (cuartelDuplicado) {
+            const nombreFinca = fincasData.find(f => f.id === fincaId)?.nombre_finca || 'esta finca';
+            mostrarMensaje(`⚠️ Ya existe un cuartel llamado "${nombreCuartel}" en ${nombreFinca}. Por favor, elige un nombre diferente.`, 'warning');
+            nombreInput.focus();
+            nombreInput.select();
             return;
         }
         
@@ -844,7 +881,7 @@
         }
         
         // Mostrar confirmación
-        if (confirm(`¿Estás seguro de que deseas eliminar el cuartel "${cuartel.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+        if (confirm(`¿Estás seguro de que deseas eliminar el cuartel "${cuartel.nombre}" de la finca "${cuartel.fincas?.nombre_finca || 'Desconocida'}"?\n\nEsta acción no se puede deshacer.`)) {
             eliminarCuartelConfirmado(id);
         }
     }

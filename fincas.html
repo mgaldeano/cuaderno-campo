@@ -289,13 +289,30 @@
                     console.log('✅ Usuario autenticado:', user.email);
                     mostrarMensaje('✅ Conectado a Supabase como: ' + user.email, 'success');
                     return true;
+                } else {
+                    console.warn('❌ No hay usuario autenticado, redirigiendo al login...');
+                    window.location.href = 'login.html';
+                    return false;
                 }
+            } else {
+                console.warn('❌ Supabase no disponible, redirigiendo al login...');
+                window.location.href = 'login.html';
+                return false;
             }
         } catch (error) {
-            console.warn('⚠️ Supabase no disponible:', error.message);
-            mostrarMensaje('⚠️ Modo demo - Supabase no disponible', 'warning');
+            console.warn('⚠️ Error conectando con Supabase:', error.message);
+            
+            // En desarrollo local, permitir modo demo
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
+                console.log('🎭 Modo demo activado para desarrollo local');
+                mostrarMensaje('⚠️ Modo demo - Desarrollo local', 'warning');
+                return false; // false = modo demo
+            } else {
+                // En producción, redirigir al login
+                window.location.href = 'login.html';
+                return false;
+            }
         }
-        return false;
     }
 
     function mostrarMensaje(mensaje, tipo = 'info') {
@@ -449,7 +466,7 @@
                             ${finca.provincia || finca.departamento ? `
                                 <div class="col-md-6">
                                     <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="bi bi-geo-alt me-1"></i>
+                                        <i class="bi bi-geo-alt mr-2"></i>
                                         ${finca.provincia || ''} ${finca.departamento ? (finca.provincia ? ', ' + finca.departamento : finca.departamento) : ''}
                                     </small>
                                 </div>
@@ -457,7 +474,7 @@
                             ${finca.direccion ? `
                                 <div class="col-md-6">
                                     <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="bi bi-map me-1"></i>
+                                        <i class="bi bi-map mr-2"></i>
                                         ${finca.direccion}
                                     </small>
                                 </div>

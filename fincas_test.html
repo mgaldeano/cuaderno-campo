@@ -207,6 +207,9 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('=== PÁGINA TEST CARGADA ===');
       
+      // Cargar header dinámico
+      cargarHeaderTest();
+      
       const toggleBtn = document.getElementById('toggle-form-btn');
       const formulario = document.getElementById('formulario-finca');
       
@@ -224,6 +227,41 @@
       
       console.log('Test setup completo');
     });
+    
+    function cargarHeaderTest() {
+      fetch('header.html')
+        .then(response => response.text())
+        .then(html => {
+          const headerContainer = document.getElementById('header-container');
+          if (headerContainer) {
+            headerContainer.innerHTML = html;
+            console.log('✅ Header test cargado');
+            
+            // Simular usuario demo para testing
+            setTimeout(() => {
+              const userName = document.getElementById('user-name');
+              const navbarUser = document.getElementById('navbar-user');
+              
+              if (userName) {
+                userName.textContent = 'Usuario Test';
+              }
+              
+              if (navbarUser) {
+                const roleSpan = document.createElement('span');
+                roleSpan.className = 'user-role';
+                roleSpan.style.cssText = 'color:#28a745; font-size:0.85em; margin-left:0.5em; font-weight:normal;';
+                roleSpan.textContent = '(test mode)';
+                navbarUser.appendChild(roleSpan);
+              }
+              
+              console.log('✅ Usuario test configurado en header');
+            }, 100);
+          }
+        })
+        .catch(error => {
+          console.warn('Error cargando header:', error);
+        });
+    }
   </script>
   
   <footer class="container mt-5"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
