@@ -69,11 +69,15 @@ async function mostrarHeaderInfo(user) {
     if (navInforme) navInforme.classList.remove("d-none");
     const gestionMenu = document.getElementById("gestion-dropdown-menu");
     if (gestionMenu) {
-      gestionMenu.innerHTML += `<a class='dropdown-item' href='fitosanitarios.html'>Gestionar Fitosanitarios</a>`;
-      gestionMenu.innerHTML += `<a class='dropdown-item' href='fertilizantes.html'>Gestionar Fertilizantes</a>`;
-      gestionMenu.innerHTML += `<a class='dropdown-item' href='metodos_de_aplicacion.html'>Métodos de Aplicación</a>`;
-      gestionMenu.innerHTML += `<a class='dropdown-item' href='variedades.html'>Gestionar Variedades</a>`;
-      gestionMenu.innerHTML += `<a class='dropdown-item' href='especies.html'>Gestionar Especies</a>`;
+      // Agregar divider y opciones de gestión avanzada solo si no existen ya
+      if (!gestionMenu.querySelector('.dropdown-item[href="fitosanitarios.html"]')) {
+        gestionMenu.innerHTML += `<div class="dropdown-divider"></div>`;
+        gestionMenu.innerHTML += `<a class='dropdown-item' href='fitosanitarios.html'>Gestionar Fitosanitarios</a>`;
+        gestionMenu.innerHTML += `<a class='dropdown-item' href='fertilizantes.html'>Gestionar Fertilizantes</a>`;
+        gestionMenu.innerHTML += `<a class='dropdown-item' href='metodos_de_aplicacion.html'>Métodos de Aplicación</a>`;
+        gestionMenu.innerHTML += `<a class='dropdown-item' href='variedades.html'>Gestionar Variedades</a>`;
+        gestionMenu.innerHTML += `<a class='dropdown-item' href='especies.html'>Gestionar Especies</a>`;
+      }
     }
   }
 }
