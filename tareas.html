@@ -14,6 +14,37 @@
     <link rel="stylesheet" href="estilos.css">
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      .task-card {
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+      }
+      
+      .task-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-color: #dee2e6;
+      }
+      
+      .task-icon {
+        transition: transform 0.3s ease;
+      }
+      
+      .task-card:hover .task-icon {
+        transform: scale(1.1);
+      }
+      
+      .card-title {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      .card-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+    </style>
   </head>
   <body>
     <div id="header-container"></div>
@@ -31,24 +62,125 @@
           import('./header.js');
         });
     </script>
-        </ul>
-        <span class="navbar-text ml-auto" id="navbar-user">Bienvenido, <i>Usuario</i></span>
-      </div>
-    </nav>
 
-    <main class="container mt-5">
-      <div class="card mb-4 p-4 text-center">
-        <h2 class="titulo-principal mb-2" style="font-weight:500; color:#1976d2;">¿Qué tarea desea registrar?</h2>
-        <h5 class="mb-0" style="color:#555;">Seleccione el tipo de tarea a cargar</h5>
+    <main class="container py-4">
+      <!-- Header Section -->
+      <div class="container-fluid bg-light py-3 mb-4">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-1 text-primary font-weight-bold">
+                <i class="bi bi-clipboard-check text-success me-2"></i>
+                Gestión de Tareas
+              </h1>
+              <p class="text-muted mb-0">Seleccione el tipo de tarea a registrar</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card mb-4 p-4">
-        <ul>
-          <li><a href="riego.html">Registrar Riego</a></li>
-          <li><a href="labores-suelo.html">Registrar Labores de Suelo</a></li>
-          <li><a href="aplicacion-agroquimicos.html">Registrar Aplicación de Agroquímicos</a></li>
-          <li><a href="fertilizacion.html">Registrar Fertilización</a></li>
-          <!-- Agrega aquí más tareas futuras -->
-        </ul>
+
+      <!-- Grid de Tareas -->
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0 task-card">
+            <div class="card-body text-center p-4">
+              <div class="task-icon mb-3">
+                <i class="bi bi-droplet-half text-primary" style="font-size: 2.5rem;"></i>
+              </div>
+              <h5 class="card-title">Riego</h5>
+              <p class="card-text text-muted">Registrar actividades de riego y control de humedad</p>
+              <a href="riego.html" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>
+                Registrar Riego
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0 task-card">
+            <div class="card-body text-center p-4">
+              <div class="task-icon mb-3">
+                <i class="bi bi-tools text-warning" style="font-size: 2.5rem;"></i>
+              </div>
+              <h5 class="card-title">Labores de Suelo</h5>
+              <p class="card-text text-muted">Registrar trabajos de preparación y mantenimiento del suelo</p>
+              <a href="labores-suelo.html" class="btn btn-warning btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>
+                Registrar Labor
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0 task-card">
+            <div class="card-body text-center p-4">
+              <div class="task-icon mb-3">
+                <i class="bi bi-shield-check text-success" style="font-size: 2.5rem;"></i>
+              </div>
+              <h5 class="card-title">Agroquímicos</h5>
+              <p class="card-text text-muted">Registrar aplicaciones de fitosanitarios y químicos</p>
+              <a href="aplicacion-agroquimicos.html" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>
+                Registrar Aplicación
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0 task-card">
+            <div class="card-body text-center p-4">
+              <div class="task-icon mb-3">
+                <i class="bi bi-flower3 text-info" style="font-size: 2.5rem;"></i>
+              </div>
+              <h5 class="card-title">Fertilización</h5>
+              <p class="card-text text-muted">Registrar aplicaciones de fertilizantes y nutrientes</p>
+              <a href="fertilizacion.html" class="btn btn-info btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>
+                Registrar Fertilización
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximamente -->
+      <div class="mt-5">
+        <h4 class="text-muted mb-3">
+          <i class="bi bi-clock me-2"></i>
+          Próximamente
+        </h4>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card border-secondary">
+              <div class="card-body text-center">
+                <i class="bi bi-eye text-secondary mb-2" style="font-size: 1.5rem;"></i>
+                <h6 class="card-title text-secondary">Monitoreo de Plagas</h6>
+                <small class="text-muted">En desarrollo</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-secondary">
+              <div class="card-body text-center">
+                <i class="bi bi-scissors text-secondary mb-2" style="font-size: 1.5rem;"></i>
+                <h6 class="card-title text-secondary">Poda y Mantenimiento</h6>
+                <small class="text-muted">En desarrollo</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-secondary">
+              <div class="card-body text-center">
+                <i class="bi bi-clipboard-data text-secondary mb-2" style="font-size: 1.5rem;"></i>
+                <h6 class="card-title text-secondary">Análisis de Suelo</h6>
+                <small class="text-muted">En desarrollo</small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
