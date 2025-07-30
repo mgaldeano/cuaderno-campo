@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ABM Especies</title>
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -189,10 +189,10 @@
             <td><strong>${e.nombre}</strong></td>
             <td>
               <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-outline-primary" onclick="editarEspecie(${e.id})">
+                <button class="btn btn-sm btn-outline-primary" onclick="editarEspecie('${e.id}')">
                   <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="borrarEspecie(${e.id}, '${e.nombre}')">
+                <button class="btn btn-sm btn-outline-danger" onclick="borrarEspecie('${e.id}', '${e.nombre}')">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
@@ -220,12 +220,39 @@
       
       try {
         if (id) {
-          const { error } = await supabase.from('especies').update({ nombre }).eq('id', id);
-          if (error) { 
-            mostrarStatus('Error al actualizar especie: ' + error.message, 'error'); 
-            return; 
+          // 🔄 ESTRATEGIA DUAL: UPDATE directo + RPC fallback
+          console.log('🔄 Actualizando especie:', id, nombre);
+          
+          let { data, error } = await supabase
+            .from('especies')
+            .update({ nombre })
+            .eq('id', id)
+            .select();
+          
+          console.log('Resultado UPDATE directo:', { data, error });
+          
+          // Si UPDATE directo falla o no retorna datos, usar RPC
+          if (error || !data || data.length === 0) {
+            console.log('⚠️ UPDATE directo falló, intentando con RPC...');
+            
+            const rpcResult = await supabase.rpc('actualizar_especie', {
+              especie_id: id,
+              nuevo_nombre: nombre
+            });
+            
+            console.log('Resultado RPC:', rpcResult);
+            
+            if (rpcResult.error) {
+              mostrarStatus('Error al actualizar especie (RPC): ' + rpcResult.error.message, 'error'); 
+              return; 
+            }
+            
+            console.log('✅ Actualización exitosa con RPC');
+            mostrarStatus('Especie actualizada correctamente (RPC)', 'success');
+          } else {
+            console.log('✅ Actualización exitosa directa');
+            mostrarStatus('Especie actualizada correctamente', 'success');
           }
-          mostrarStatus('Especie actualizada correctamente', 'success');
         } else {
           const { error } = await supabase.from('especies').insert([{ nombre }]);
           if (error) { 
@@ -295,12 +322,40 @@
       
       try {
         mostrarStatus('Eliminando especie...', 'info');
-        const { error } = await supabase.from('especies').delete().eq('id', id);
-        if (error) { 
-          mostrarStatus('Error al eliminar especie: ' + error.message, 'error'); 
-          return; 
+        
+        // 🔄 ESTRATEGIA DUAL: DELETE directo + RPC fallback
+        console.log('🗑️ Eliminando especie:', id, nombre);
+        
+        let { data, error } = await supabase
+          .from('especies')
+          .delete()
+          .eq('id', id)
+          .select();
+        
+        console.log('Resultado DELETE directo:', { data, error });
+        
+        // Si DELETE directo falla o no retorna datos, usar RPC
+        if (error || !data || data.length === 0) {
+          console.log('⚠️ DELETE directo falló, intentando con RPC...');
+          
+          const rpcResult = await supabase.rpc('eliminar_especie', {
+            especie_id: id
+          });
+          
+          console.log('Resultado RPC eliminación:', rpcResult);
+          
+          if (rpcResult.error) {
+            mostrarStatus('Error al eliminar especie (RPC): ' + rpcResult.error.message, 'error'); 
+            return; 
+          }
+          
+          console.log('✅ Eliminación exitosa con RPC');
+          mostrarStatus('Especie eliminada correctamente (RPC)', 'success');
+        } else {
+          console.log('✅ Eliminación exitosa directa');
+          mostrarStatus('Especie eliminada correctamente', 'success');
         }
-        mostrarStatus('Especie eliminada correctamente', 'success');
+        
         cargarEspecies();
       } catch (error) {
         mostrarStatus('Error de conexión: ' + error.message, 'error');

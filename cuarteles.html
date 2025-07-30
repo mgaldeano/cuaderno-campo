@@ -179,25 +179,30 @@
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="especie" class="form-label font-weight-bold">
-                                <i class="bi bi-flower1 text-danger me-1"></i>
-                                Especie
-                            </label>
-                            <input type="text" class="form-control" id="especie" 
-                                   placeholder="Ej: Vitis vinifera">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="especie_id" class="form-label font-weight-bold">
+                                    <i class="bi bi-flower1 text-danger me-1"></i>
+                                    Especie *
+                                </label>
+                                <select class="form-select" id="especie_id" required>
+                                    <option value="">- Seleccione una especie -</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="variedades_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-collection text-secondary me-1"></i>
+                                    Variedades <small class="text-muted">(máximo 3)</small>
+                                </label>
+                                <select id="variedades_cuartel" multiple size="4" class="form-control">
+                                    <option value="" disabled>Primero seleccione una especie</option>
+                                </select>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Las variedades se filtran según la especie seleccionada
+                                </small>
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="variedades_cuartel" class="form-label font-weight-bold">
-                                <i class="bi bi-collection text-secondary me-1"></i>
-                                Variedades <small class="text-muted">(máximo 3)</small>
-                            </label>
-                            <select id="variedades_cuartel" multiple size="4" class="form-control">
-                                <!-- Opciones generadas dinámicamente -->
-                            </select>
-                            <small class="form-text text-muted mt-2">
-                                <i class="bi bi-info-circle me-1"></i>
                                 Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples variedades
                             </small>
                         </div>
@@ -260,6 +265,7 @@
     let cuartelesData = [];
     let cuartelesOriginales = []; // Para búsqueda
     let fincasData = [];
+    let especiesData = [];
     let variedadesData = [];
     let editId = null;
 
@@ -362,6 +368,7 @@
             if (supabase && currentUser) {
                 await Promise.all([
                     cargarFincas(),
+                    cargarEspecies(),
                     cargarVariedades(),
                     cargarCuarteles()
                 ]);
@@ -394,25 +401,108 @@
         llenarSelectFincas();
     }
 
+    // 🌱 CARGAR ESPECIES
+    async function cargarEspecies() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("especies")
+                .select("*")
+                .order('nombre');
+
+            if (error) throw error;
+            especiesData = data;
+        } else {
+            especiesData = [
+                { id: 1, nombre: "Vitis vinifera" },
+                { id: 2, nombre: "Olea europaea" },
+                { id: 3, nombre: "Malus domestica" }
+            ];
+        }
+        
+        llenarSelectEspecies();
+    }
+
     async function cargarVariedades() {
         if (supabase && currentUser) {
             const { data, error } = await supabase
                 .from("variedades")
-                .select("*")
+                .select(`
+                    id, 
+                    nombre, 
+                    color, 
+                    tipo_destino,
+                    especie_id,
+                    especies(nombre)
+                `)
                 .order('nombre');
 
             if (error) throw error;
             variedadesData = data;
         } else {
             variedadesData = [
-                { id: 1, nombre: "Malbec" },
-                { id: 2, nombre: "Cabernet Sauvignon" },
-                { id: 3, nombre: "Chardonnay" },
-                { id: 4, nombre: "Syrah" }
+                { id: 1, nombre: "Malbec", especie_id: 1 },
+                { id: 2, nombre: "Cabernet Sauvignon", especie_id: 1 },
+                { id: 3, nombre: "Chardonnay", especie_id: 1 },
+                { id: 4, nombre: "Syrah", especie_id: 1 }
             ];
         }
         
-        llenarSelectVariedades();
+        // No llenar select aún - se llena cuando se selecciona especie
+    }
+
+    // 🌱 LLENAR SELECT DE ESPECIES
+    function llenarSelectEspecies() {
+        const selectEspecies = document.getElementById('especie_id');
+        if (!selectEspecies) return;
+        
+        selectEspecies.innerHTML = '<option value="">- Seleccione una especie -</option>';
+        
+        especiesData.forEach(especie => {
+            const option = document.createElement('option');
+            option.value = especie.id;
+            option.textContent = especie.nombre;
+            selectEspecies.appendChild(option);
+        });
+        
+        // Configurar evento para filtrar variedades
+        selectEspecies.onchange = function() {
+            filtrarVariedadesPorEspecie(this.value);
+        };
+    }
+
+    // 🔄 FILTRAR VARIEDADES POR ESPECIE
+    function filtrarVariedadesPorEspecie(especieId) {
+        const selectVariedades = document.getElementById('variedades_cuartel');
+        if (!selectVariedades) return;
+        
+        selectVariedades.innerHTML = '';
+        
+        if (!especieId) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.disabled = true;
+            option.textContent = 'Primero seleccione una especie';
+            selectVariedades.appendChild(option);
+            return;
+        }
+        
+        const variedadesFiltradas = variedadesData.filter(v => v.especie_id == especieId);
+        
+        if (variedadesFiltradas.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.disabled = true;
+            option.textContent = 'No hay variedades para esta especie';
+            selectVariedades.appendChild(option);
+            return;
+        }
+        
+        variedadesFiltradas.forEach(variedad => {
+            const option = document.createElement('option');
+            option.value = variedad.id;
+            option.textContent = variedad.nombre;
+            selectVariedades.appendChild(option);
+        });
     }
 
     async function cargarCuarteles() {
@@ -426,8 +516,9 @@
                     .select(`
                         *,
                         fincas!inner(nombre_finca, usuario_id),
+                        especies(nombre),
                         cuartel_variedades(
-                            variedades(nombre)
+                            variedades(nombre, especies(nombre))
                         )
                     `)
                     .eq("fincas.usuario_id", currentUser.id)
@@ -720,7 +811,7 @@
         const nombreInput = document.getElementById('nombre_cuartel');
         const superficieInput = document.getElementById('superficie_cuartel');
         const nroViñedoInput = document.getElementById('nro_viñedo');
-        const especieInput = document.getElementById('especie');
+        const especieSelect = document.getElementById('especie_id');
         const variedadesSelect = document.getElementById('variedades_cuartel');
         
         // Validaciones básicas
@@ -733,6 +824,12 @@
         if (!nombreInput.value.trim()) {
             mostrarMensaje('⚠️ El nombre del cuartel es obligatorio', 'warning');
             nombreInput.focus();
+            return;
+        }
+
+        if (!especieSelect.value) {
+            mostrarMensaje('⚠️ Debes seleccionar una especie', 'warning');
+            especieSelect.focus();
             return;
         }
         
@@ -754,12 +851,14 @@
         }
         
         // Preparar datos
+        const especieSeleccionada = especiesData.find(e => e.id == especieSelect.value);
         const datos = {
             finca_id: parseInt(fincaSelect.value),
             nombre: nombreInput.value.trim(),
             superficie: superficieInput.value ? parseFloat(superficieInput.value) : null,
             nro_viñedo: nroViñedoInput.value.trim() || null,
-            especie: especieInput.value.trim() || null,
+            especie: especieSeleccionada ? especieSeleccionada.nombre : null, // Guardar nombre por compatibilidad
+            especie_id: especieSelect.value ? parseInt(especieSelect.value) : null, // Nueva columna
             variedades: Array.from(variedadesSelect.selectedOptions).map(opt => parseInt(opt.value))
         };
         
@@ -803,7 +902,8 @@
                     nombre: datos.nombre,
                     superficie: datos.superficie,
                     nro_viñedo: datos.nro_viñedo,
-                    especie: datos.especie
+                    especie: datos.especie, // Mantener por compatibilidad
+                    especie_id: datos.especie_id // Nueva columna
                 })
                 .select()
                 .single();
@@ -861,7 +961,78 @@
 
     async function actualizarCuartel(datos) {
         console.log('✏️ Actualizando cuartel:', datos);
-        mostrarMensaje('🔄 Función de actualizar cuarteles se implementará próximamente', 'info');
+        
+        try {
+            if (supabase && currentUser) {
+                // 🔄 ESTRATEGIA DUAL: UPDATE directo + RPC fallback
+                console.log('🔄 Actualizando cuartel en Supabase:', datos.id);
+                
+                // Preparar datos para actualización
+                const updateData = {
+                    finca_id: datos.finca_id,
+                    nombre: datos.nombre,
+                    superficie: datos.superficie || null,
+                    nro_viñedo: datos.nro_vinedo || null,
+                    especie: datos.especie || null,
+                    especie_id: datos.especie_id || null
+                };
+                
+                let { data, error } = await supabase
+                    .from('cuarteles')
+                    .update(updateData)
+                    .eq('id', datos.id)
+                    .select();
+                
+                console.log('Resultado UPDATE directo:', { data, error });
+                
+                // Si UPDATE directo falla o no retorna datos, usar RPC
+                if (error || !data || data.length === 0) {
+                    console.log('⚠️ UPDATE directo falló, intentando con RPC...');
+                    
+                    const rpcResult = await supabase.rpc('actualizar_cuartel', {
+                        cuartel_id: datos.id,
+                        nueva_finca_id: datos.finca_id,
+                        nuevo_nombre: datos.nombre,
+                        nueva_superficie: datos.superficie || null,
+                        nuevo_nro_vinedo: datos.nro_vinedo || null,
+                        nueva_especie: datos.especie || null,
+                        nueva_especie_id: datos.especie_id || null
+                    });
+                    
+                    console.log('Resultado RPC:', rpcResult);
+                    
+                    if (rpcResult.error) {
+                        throw new Error('Error al actualizar cuartel (RPC): ' + rpcResult.error.message);
+                    }
+                    
+                    console.log('✅ Actualización exitosa con RPC');
+                    mostrarMensaje('✅ Cuartel actualizado correctamente (RPC)', 'success');
+                } else {
+                    console.log('✅ Actualización exitosa directa');
+                    mostrarMensaje('✅ Cuartel actualizado correctamente', 'success');
+                }
+                
+                // Recargar datos
+                await cargarCuarteles();
+                
+            } else {
+                console.log('✏️ Actualizando en modo demo...');
+                // Actualizar en modo demo
+                const index = cuartelesData.findIndex(c => c.id === datos.id);
+                if (index !== -1) {
+                    cuartelesData[index] = { ...cuartelesData[index], ...datos };
+                    cuartelesOriginales[index] = { ...cuartelesOriginales[index], ...datos };
+                    
+                    mostrarMensaje('✅ Cuartel actualizado exitosamente (modo demo)', 'success');
+                    renderizarCuarteles();
+                    actualizarContador();
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Error actualizando cuartel:', error);
+            mostrarMensaje('❌ Error actualizando cuartel: ' + error.message, 'error');
+        }
     }
 
     function editarCuartel(id) {
@@ -957,6 +1128,15 @@
         // Resetear formulario
         const form = document.getElementById('cuartel-form');
         if (form) form.reset();
+        
+        // Resetear selects específicos
+        const especieSelect = document.getElementById('especie_id');
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        
+        if (especieSelect) especieSelect.value = '';
+        if (variedadesSelect) {
+            variedadesSelect.innerHTML = '<option value="" disabled>Primero seleccione una especie</option>';
+        }
         
         // Resetear estado de edición
         editId = null;
