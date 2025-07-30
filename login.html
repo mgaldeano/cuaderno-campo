@@ -292,10 +292,12 @@
     // Función para mostrar mensajes
     function showMessage(message, type = 'error') {
       const alertClass = type === 'success' ? 'alert-success' : 
-                        type === 'warning' ? 'alert-warning' : 'alert-danger';
+                        type === 'warning' ? 'alert-warning' : 
+                        type === 'info' ? 'alert-info' : 'alert-danger';
       
       const icon = type === 'success' ? 'check-circle' : 
-                  type === 'warning' ? 'exclamation-triangle' : 'exclamation-triangle';
+                  type === 'warning' ? 'exclamation-triangle' : 
+                  type === 'info' ? 'info-circle' : 'exclamation-triangle';
       
       messageContainer.innerHTML = `
         <div class="alert ${alertClass} alert-custom d-flex align-items-center" role="alert">
@@ -304,11 +306,11 @@
         </div>
       `;
       
-      // Auto-ocultar mensajes de éxito
-      if (type === 'success') {
+      // Auto-ocultar mensajes de éxito e info
+      if (type === 'success' || type === 'info') {
         setTimeout(() => {
           messageContainer.innerHTML = '';
-        }, 5000);
+        }, type === 'info' ? 3000 : 5000);
       }
     }
 
@@ -355,33 +357,81 @@
     // Cargar organizaciones
     async function cargarOrganizaciones() {
       try {
+        console.log('🔄 Cargando organizaciones...');
+        
+        // Verificar que el elemento existe
+        const orgSelect = document.getElementById('register-organization');
+        if (!orgSelect) {
+          console.error('❌ Elemento register-organization no encontrado');
+          return;
+        }
+        
+        console.log('✅ Elemento encontrado:', orgSelect);
+        
         const { data: organizaciones, error } = await supabase
           .from("organizaciones")
           .select("id, nombre")
           .order('nombre');
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Error Supabase:', error);
+          throw error;
+        }
+        
+        console.log('📊 Organizaciones obtenidas:', organizaciones?.length || 0);
         
         // Limpiar y poblar select
-        organizationSelect.innerHTML = '';
-        organizaciones.forEach(org => {
-          const option = document.createElement("option");
-          option.value = org.id;
-          option.textContent = org.nombre;
-          organizationSelect.appendChild(option);
-        });
+        orgSelect.innerHTML = '';
+        
+        if (!organizaciones || organizaciones.length === 0) {
+          orgSelect.innerHTML = '<option value="">No hay organizaciones disponibles</option>';
+          console.warn('⚠️ No se encontraron organizaciones');
+        } else {
+          organizaciones.forEach((org, index) => {
+            const option = document.createElement("option");
+            option.value = org.id;
+            option.textContent = org.nombre;
+            orgSelect.appendChild(option);
+            console.log(`➕ Organización ${index + 1}: ${org.nombre} (ID: ${org.id})`);
+          });
+        }
+        
+        // Verificar que jQuery y Bootstrap Select estén disponibles
+        if (typeof $ === 'undefined') {
+          console.error('❌ jQuery no está disponible');
+          return;
+        }
+        
+        if (typeof $.fn.selectpicker === 'undefined') {
+          console.error('❌ Bootstrap Select no está disponible');
+          return;
+        }
+        
+        // Destruir instancia previa si existe
+        if ($(orgSelect).hasClass('selectpicker')) {
+          $(orgSelect).selectpicker('destroy');
+        }
         
         // Inicializar Bootstrap Select
-        $(organizationSelect).selectpicker({
+        $(orgSelect).selectpicker({
           liveSearch: true,
           style: 'btn-outline-secondary',
           title: 'Seleccione su organización...',
-          noneSelectedText: 'Ninguna organización seleccionada'
+          noneSelectedText: 'Ninguna organización seleccionada',
+          noneResultsText: 'No se encontraron organizaciones'
         });
         
+        console.log('✅ Bootstrap Select inicializado correctamente');
+        
       } catch (error) {
-        console.error('Error cargando organizaciones:', error);
+        console.error('❌ Error cargando organizaciones:', error);
         showMessage('Error al cargar organizaciones. Inténtelo más tarde.', 'error');
+        
+        // Fallback: mostrar mensaje en el select
+        const orgSelect = document.getElementById('register-organization');
+        if (orgSelect) {
+          orgSelect.innerHTML = '<option value="">Error cargando organizaciones</option>';
+        }
       }
     }
 
@@ -578,22 +628,71 @@
 
     // Inicialización
     document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 DOM cargado, iniciando aplicación...');
+      
       // Verificar si ya está logueado
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          console.log('👤 Usuario ya logueado, redirigiendo...');
           window.location.href = "index.html";
           return;
         }
       } catch (error) {
-        console.log('No hay sesión activa');
+        console.log('ℹ️ No hay sesión activa');
       }
       
-      // Cargar organizaciones
-      await cargarOrganizaciones();
+      // Esperar a que jQuery esté disponible
+      const waitForJQuery = () => {
+        return new Promise((resolve) => {
+          if (typeof $ !== 'undefined' && typeof $.fn.selectpicker !== 'undefined') {
+            console.log('✅ jQuery y Bootstrap Select disponibles');
+            resolve();
+          } else {
+            console.log('⏳ Esperando jQuery y Bootstrap Select...');
+            setTimeout(() => waitForJQuery().then(resolve), 100);
+          }
+        });
+      };
       
-      // Focus en el primer campo
-      document.getElementById('login-email').focus();
+      // Esperar a jQuery y luego cargar organizaciones
+      await waitForJQuery();
+      
+      // Pequeño delay adicional para asegurar que todo esté listo
+      setTimeout(async () => {
+        console.log('📊 Cargando organizaciones...');
+        await cargarOrganizaciones();
+        
+        // Focus en el primer campo
+        const emailInput = document.getElementById('login-email');
+        if (emailInput) {
+          emailInput.focus();
+          console.log('🎯 Focus establecido en email');
+        }
+      }, 200);
+    });
+    
+    // También manejar cuando jQuery esté completamente listo
+    $(document).ready(async function() {
+      console.log('📚 jQuery completamente listo');
+      
+      // Si las organizaciones no se cargaron en DOMContentLoaded, intentar aquí
+      const orgSelect = document.getElementById('register-organization');
+      if (orgSelect && orgSelect.children.length <= 1) { // Solo tiene placeholder
+        console.log('🔄 Reintentando carga de organizaciones...');
+        await cargarOrganizaciones();
+      }
+      
+      // Event listener para recargar organizaciones
+      const reloadBtn = document.getElementById('reload-organizations');
+      if (reloadBtn) {
+        reloadBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          console.log('🔄 Recarga manual de organizaciones solicitada');
+          showMessage('Recargando organizaciones...', 'info');
+          await cargarOrganizaciones();
+        });
+      }
     });
     
   </script>
@@ -711,6 +810,13 @@
             </label>
           </div>
           <div class="form-check">
+            <input class="form-check-input" type="radio" name="rol" id="rol-ingeniero" value="ingeniero">
+            <label class="form-check-label" for="rol-ingeniero">
+              <i class="bi bi-gear-wide-connected me-2"></i>Ingeniero
+              <small class="d-block text-muted">Ingeniero agrónomo, asesor técnico o consultor</small>
+            </label>
+          </div>
+          <div class="form-check">
             <input class="form-check-input" type="radio" name="rol" id="rol-operador" value="operador">
             <label class="form-check-label" for="rol-operador">
               <i class="bi bi-tools me-2"></i>Operario
@@ -725,7 +831,14 @@
           </label>
           <select name="organizacion_id" id="register-organization" class="form-select selectpicker" 
                   data-live-search="true" title="Seleccione su organización..." required>
+            <option value="">Cargando organizaciones...</option>
           </select>
+          <div class="form-text">
+            <small>
+              ¿No ve su organización? 
+              <a href="#" id="reload-organizations" style="color: #1976d2;">Recargar lista</a>
+            </small>
+          </div>
         </div>
         
         <div class="row">
