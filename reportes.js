@@ -1,4 +1,8 @@
 // Versión: v0.4.8-dev | Última actualización: 26/07/2025
+
+// Importar Supabase
+import { supabase } from "./supabaseClient.js";
+
 // --- Función para generar el reporte de riegos ---
 async function generarReporteRiegos({ finca_id = [], cuartel_id = [], operador_id = [], desde, hasta }) {
   // Construir filtros dinámicos
