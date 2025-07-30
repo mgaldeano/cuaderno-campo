@@ -858,12 +858,17 @@
             superficie: superficieInput.value ? parseFloat(superficieInput.value) : null,
             nro_viñedo: nroViñedoInput.value.trim() || null,
             especie: especieSeleccionada ? especieSeleccionada.nombre : null, // Guardar nombre por compatibilidad
-            especie_id: especieSelect.value ? parseInt(especieSelect.value) : null, // Nueva columna
+            especie_id: especieSelect.value || null, // UUID directo, no parseInt
             variedades: Array.from(variedadesSelect.selectedOptions).map(opt => parseInt(opt.value))
         };
         
         // Preparar UI para guardado
-        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitBtn = document.querySelector('#formulario-cuartel button[type="submit"]');
+        if (!submitBtn) {
+            console.error('❌ No se encontró el botón submit');
+            return;
+        }
+        
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>' + (editId ? 'Actualizando...' : 'Guardando...');
         submitBtn.disabled = true;
@@ -974,7 +979,7 @@
                     superficie: datos.superficie || null,
                     nro_viñedo: datos.nro_vinedo || null,
                     especie: datos.especie || null,
-                    especie_id: datos.especie_id || null
+                    especie_id: datos.especie_id || null // UUID directo
                 };
                 
                 let { data, error } = await supabase
@@ -996,7 +1001,7 @@
                         nueva_superficie: datos.superficie || null,
                         nuevo_nro_vinedo: datos.nro_vinedo || null,
                         nueva_especie: datos.especie || null,
-                        nueva_especie_id: datos.especie_id || null
+                        nueva_especie_id: datos.especie_id || null // UUID directo
                     });
                     
                     console.log('Resultado RPC:', rpcResult);
@@ -1037,7 +1042,55 @@
 
     function editarCuartel(id) {
         console.log('✏️ Editando cuartel con ID:', id);
-        mostrarMensaje('✏️ Función de editar cuarteles se implementará próximamente', 'info');
+        
+        try {
+            // Buscar el cuartel en los datos
+            const cuartel = cuartelesData.find(c => c.id === id);
+            if (!cuartel) {
+                mostrarMensaje('❌ Cuartel no encontrado', 'error');
+                return;
+            }
+            
+            console.log('📝 Datos del cuartel a editar:', cuartel);
+            
+            // Mostrar el formulario
+            const formulario = document.getElementById('formulario-cuartel');
+            const toggleBtn = document.getElementById('toggle-form-btn');
+            const submitBtn = document.querySelector('#formulario-cuartel button[type="submit"]');
+            
+            formulario.style.display = 'block';
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+            }
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-pencil me-1"></i> Actualizar Cuartel';
+            }
+            
+            // Llenar los campos del formulario
+            document.getElementById('finca_id').value = cuartel.finca_id || '';
+            document.getElementById('nombre_cuartel').value = cuartel.nombre || '';
+            document.getElementById('superficie_cuartel').value = cuartel.superficie || '';
+            document.getElementById('nro_viñedo').value = cuartel.nro_viñedo || '';
+            document.getElementById('especie_id').value = cuartel.especie_id || '';
+            
+            // Establecer el ID de edición para el formulario
+            editId = id;
+            
+            // Trigger del cambio de especie para cargar variedades
+            const especieSelect = document.getElementById('especie_id');
+            if (especieSelect.value) {
+                especieSelect.dispatchEvent(new Event('change'));
+            }
+            
+            // Scroll hacia el formulario
+            formulario.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            mostrarMensaje('📝 Editando cuartel: ' + cuartel.nombre, 'info');
+            
+        } catch (error) {
+            console.error('❌ Error al editar cuartel:', error);
+            mostrarMensaje('❌ Error al editar cuartel: ' + error.message, 'error');
+        }
     }
 
     function eliminarCuartel(id) {
@@ -1072,21 +1125,52 @@
                     throw new Error('No tienes permisos para eliminar este cuartel');
                 }
                 
-                // Eliminar relaciones de variedades
+                // 🔄 ESTRATEGIA DUAL: DELETE directo + RPC fallback
+                console.log('🗑️ Eliminando cuartel:', id);
+                
+                // Eliminar relaciones de variedades primero
                 await supabase
                     .from("cuartel_variedades")
                     .delete()
                     .eq("cuartel_id", id);
                 
-                // Eliminar el cuartel
-                const { error } = await supabase
+                // Intentar DELETE directo
+                let { data, error } = await supabase
                     .from("cuarteles")
                     .delete()
-                    .eq("id", id);
+                    .eq("id", id)
+                    .select();
                 
-                if (error) throw error;
+                console.log('Resultado DELETE directo:', { data, error });
                 
-                mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                // Si DELETE directo falla, no hay RPC de eliminación implementada aún
+                // pero podemos agregar logs detallados
+                if (error) {
+                    console.error('❌ DELETE directo falló:', error);
+                    throw new Error('Error al eliminar cuartel: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    console.log('⚠️ DELETE no retornó datos, pero puede haber funcionado');
+                    // Verificar si realmente se eliminó
+                    const { data: checkData, error: checkError2 } = await supabase
+                        .from("cuarteles")
+                        .select("id")
+                        .eq("id", id)
+                        .single();
+                    
+                    if (checkError2 && checkError2.code === 'PGRST116') {
+                        // Error PGRST116 significa "no rows returned" = eliminación exitosa
+                        console.log('✅ Eliminación confirmada (registro no encontrado)');
+                        mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                    } else {
+                        throw new Error('No se pudo confirmar la eliminación del cuartel');
+                    }
+                } else {
+                    console.log('✅ Eliminación exitosa directa');
+                    mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                }
+                
                 console.log('✅ Cuartel eliminado de Supabase');
                 
                 // Recargar datos
