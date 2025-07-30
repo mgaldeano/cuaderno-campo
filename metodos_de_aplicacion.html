@@ -298,14 +298,24 @@
         
         try {
           if (id.startsWith('nuevo-')) {
+            console.log('➕ Insertando nuevo método:', values);
             const { error } = await supabase.from('metodos_de_aplicacion').insert([values]);
-            if (error) throw error;
+            if (error) {
+              console.error('❌ Error en INSERT:', error);
+              throw error;
+            }
+            console.log('✅ Método insertado correctamente');
             showStatus('Método agregado correctamente', 'success');
           } else {
+            console.log('✏️ Actualizando método ID:', id, 'con datos:', values);
             const { error } = await supabase.from('metodos_de_aplicacion')
               .update(values)
               .eq('id', isNaN(Number(id)) ? id : Number(id));
-            if (error) throw error;
+            if (error) {
+              console.error('❌ Error en UPDATE:', error);
+              throw error;
+            }
+            console.log('✅ Método actualizado correctamente');
             showStatus('Método actualizado correctamente', 'success');
           }
           editingId = null;

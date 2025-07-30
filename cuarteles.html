@@ -518,7 +518,7 @@
                         fincas!inner(nombre_finca, usuario_id),
                         especies(nombre),
                         cuartel_variedades(
-                            variedades(nombre, especies(nombre))
+                            variedades(id, nombre, especies(nombre))
                         )
                     `)
                     .eq("fincas.usuario_id", currentUser.id)
@@ -859,7 +859,7 @@
             nro_viñedo: nroViñedoInput.value.trim() || null,
             especie: especieSeleccionada ? especieSeleccionada.nombre : null, // Guardar nombre por compatibilidad
             especie_id: especieSelect.value || null, // UUID directo, no parseInt
-            variedades: Array.from(variedadesSelect.selectedOptions).map(opt => parseInt(opt.value))
+            variedades: Array.from(variedadesSelect.selectedOptions).map(opt => opt.value) // Mantener como UUID, no parseInt
         };
         
         // Preparar UI para guardado
@@ -917,16 +917,22 @@
             
             // Agregar variedades si existen
             if (datos.variedades.length > 0) {
-                const variedadesInsert = datos.variedades.map(variedadId => ({
-                    cuartel_id: cuartel.id,
-                    variedad_id: variedadId
+                const variedadesToInsert = datos.variedades.map(variedadId => ({
+                    cuartel_id: cuartel.id, // BIGINT del cuartel
+                    variedad_id: variedadId // UUID de la variedad (ya es UUID)
                 }));
+                
+                console.log('🌱 Insertando variedades para nuevo cuartel (UUIDs directos):', variedadesToInsert);
                 
                 const { error: varError } = await supabase
                     .from("cuartel_variedades")
-                    .insert(variedadesInsert);
+                    .insert(variedadesToInsert);
                 
-                if (varError) console.warn('Error agregando variedades:', varError);
+                if (varError) {
+                    console.warn('⚠️ Error agregando variedades:', varError);
+                } else {
+                    console.log('✅ Variedades del nuevo cuartel insertadas correctamente');
+                }
             }
             
             mostrarMensaje('✅ Cuartel creado exitosamente', 'success');
@@ -977,7 +983,7 @@
                     finca_id: datos.finca_id,
                     nombre: datos.nombre,
                     superficie: datos.superficie || null,
-                    nro_viñedo: datos.nro_vinedo || null,
+                    nro_viñedo: datos.nro_viñedo || null, // ✅ Corregido: usar nro_viñedo consistentemente
                     especie: datos.especie || null,
                     especie_id: datos.especie_id || null // UUID directo
                 };
@@ -999,7 +1005,7 @@
                         nueva_finca_id: datos.finca_id,
                         nuevo_nombre: datos.nombre,
                         nueva_superficie: datos.superficie || null,
-                        nuevo_nro_vinedo: datos.nro_vinedo || null,
+                        nuevo_nro_vinedo: datos.nro_viñedo || null, // ✅ Corregido: usar nro_viñedo
                         nueva_especie: datos.especie || null,
                         nueva_especie_id: datos.especie_id || null // UUID directo
                     });
@@ -1011,11 +1017,49 @@
                     }
                     
                     console.log('✅ Actualización exitosa con RPC');
-                    mostrarMensaje('✅ Cuartel actualizado correctamente (RPC)', 'success');
                 } else {
                     console.log('✅ Actualización exitosa directa');
-                    mostrarMensaje('✅ Cuartel actualizado correctamente', 'success');
                 }
+
+                // ⭐ ACTUALIZAR VARIEDADES DEL CUARTEL
+                if (datos.variedades && Array.isArray(datos.variedades)) {
+                    console.log('🌱 Actualizando variedades del cuartel:', datos.variedades);
+                    
+                    // 1. Eliminar variedades existentes
+                    const { error: deleteError } = await supabase
+                        .from("cuartel_variedades")
+                        .delete()
+                        .eq('cuartel_id', datos.id); // datos.id es BIGINT del cuartel
+                    
+                    if (deleteError) {
+                        console.warn('⚠️ Error eliminando variedades existentes:', deleteError);
+                        // No fallar completamente, continuar
+                    }
+                    
+                    // 2. Insertar nuevas variedades si hay seleccionadas
+                    if (datos.variedades.length > 0) {
+                        const variedadesToInsert = datos.variedades.map(variedadId => ({
+                            cuartel_id: parseInt(datos.id), // BIGINT del cuartel
+                            variedad_id: variedadId // UUID de la variedad (ya es UUID)
+                        }));
+                        
+                        console.log('🌱 Insertando variedades (UUIDs directos):', variedadesToInsert);
+                        
+                        const { error: insertError } = await supabase
+                            .from("cuartel_variedades")
+                            .insert(variedadesToInsert);
+                        
+                        if (insertError) {
+                            console.error('⚠️ Error insertando variedades:', insertError);
+                            // No fallar el cuartel completo por las variedades
+                            mostrarMensaje('⚠️ Cuartel actualizado, pero hubo un problema con las variedades: ' + insertError.message, 'warning');
+                        } else {
+                            console.log('✅ Variedades actualizadas correctamente');
+                        }
+                    }
+                }
+                
+                mostrarMensaje('✅ Cuartel actualizado correctamente', 'success');
                 
                 // Recargar datos
                 await cargarCuarteles();
@@ -1079,7 +1123,13 @@
             // Trigger del cambio de especie para cargar variedades
             const especieSelect = document.getElementById('especie_id');
             if (especieSelect.value) {
+                // Disparar el evento para cargar variedades
                 especieSelect.dispatchEvent(new Event('change'));
+                
+                // Preseleccionar variedades después de un pequeño delay para que se carguen
+                setTimeout(() => {
+                    preseleccionarVariedades(cuartel);
+                }, 200);
             }
             
             // Scroll hacia el formulario
@@ -1091,6 +1141,39 @@
             console.error('❌ Error al editar cuartel:', error);
             mostrarMensaje('❌ Error al editar cuartel: ' + error.message, 'error');
         }
+    }
+
+    // Función para preseleccionar variedades en el formulario de edición
+    function preseleccionarVariedades(cuartel) {
+        console.log('🌱 Preseleccionando variedades actuales:', cuartel.cuartel_variedades);
+        
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        if (!variedadesSelect) {
+            console.warn('⚠️ No se encontró el select de variedades');
+            return;
+        }
+        
+        // Limpiar selecciones actuales
+        Array.from(variedadesSelect.options).forEach(option => {
+            option.selected = false;
+        });
+        
+        // Obtener IDs de variedades que tiene el cuartel
+        const variedadesActuales = cuartel.cuartel_variedades?.map(cv => cv.variedades?.id).filter(Boolean) || [];
+        console.log('🔍 IDs de variedades a seleccionar:', variedadesActuales);
+        
+        // Seleccionar las variedades correspondientes
+        variedadesActuales.forEach(variedadId => {
+            const option = variedadesSelect.querySelector(`option[value="${variedadId}"]`);
+            if (option) {
+                option.selected = true;
+                console.log(`✅ Variedad seleccionada: ${option.textContent} (${variedadId})`);
+            } else {
+                console.warn(`⚠️ No se encontró opción para variedad ID: ${variedadId}`);
+            }
+        });
+        
+        console.log(`🌱 ${variedadesActuales.length} variedades preseleccionadas`);
     }
 
     function eliminarCuartel(id) {
