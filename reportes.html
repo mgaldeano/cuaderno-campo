@@ -128,68 +128,6 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- jsPDF para exportar a PDF -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script type="module">
-    // Reporte de tareas: campos usados según la base de datos actual
-    // id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
-    }
-      const contenedor = document.querySelector("#reportes-resultado");
-
-      async function cargarReporte() {
-        const { data, error } = await supabase
-          .from("tareas")
-          .select("id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs")
-          .order("fecha", { ascending: false });
-
-        if (error) {
-          contenedor.innerHTML = "<p>❌ Error al cargar el reporte</p>";
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          contenedor.innerHTML = "<p>No hay tareas registradas aún.</p>";
-          return;
-        }
-
-        const tabla = document.createElement("table");
-        tabla.innerHTML = `
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Tipo de Tarea</th>
-              <th>Cuartel</th>
-              <th>Duración (min)</th>
-              <th>Cant. Agua</th>
-              <th>Observaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data
-              .map(
-                t => `
-              <tr>
-                <td>${t.fecha ?? "-"}</td>
-                <td>${t.tipo_tarea_old ?? "-"}</td>
-                <td>${t.cuartel_id ?? "-"}</td>
-                <td>${t.duracion ?? "-"}</td>
-                <td>${t.cant_agua ?? "-"}</td>
-                <td>${t.obs ?? ""}</td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        `;
-        contenedor.innerHTML = "";
-        contenedor.appendChild(tabla);
-      }
-
-      cargarReporte();
-    </script>
   </head>
   <body>
     <div id="header-container"></div>
@@ -204,109 +142,123 @@
             <div>
               <h1 class="h3 mb-1 text-primary font-weight-bold">
                 <i class="bi bi-graph-up text-primary me-2"></i>
-                Reportes y Análisis
+                Reportes de Riegos
               </h1>
-              <p class="text-muted mb-0">Genere reportes detallados de sus actividades agrícolas</p>
+              <p class="text-muted mb-0">Genere reportes detallados de riegos por finca o por regador</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Formulario de Filtros -->
-      <div class="row">
+      <!-- Selector de Tipo de Reporte -->
+      <div class="row mb-4">
         <div class="col-12">
           <div class="card shadow-sm border-0" style="border-radius: 16px;">
             <div class="card-header bg-white border-0 pt-4 pb-0">
               <h5 class="card-title mb-0 d-flex align-items-center">
                 <i class="bi bi-funnel text-primary me-2"></i>
-                <span>Configuración del Reporte</span>
+                <span>Tipo de Reporte</span>
               </h5>
             </div>
             <div class="card-body p-4">
-              <form id="reportes-filtros" class="mb-0">
-                <div class="row mb-4">
-                  <div class="col-md-6">
-                    <label for="tipo-reporte" class="form-label font-weight-medium">
-                      <i class="bi bi-file-earmark-bar-graph me-1"></i> Tipo de Reporte *
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="tipo-reporte" class="form-label font-weight-medium">
+                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Seleccione el tipo de reporte
+                  </label>
+                  <select id="tipo-reporte" class="form-select">
+                    <option value="finca" selected>📊 Riegos por Finca</option>
+                    <option value="regador">👤 Riegos por Regador</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Filtros para Riegos por Finca -->
+      <div id="filtros-finca" class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-geo-alt text-primary me-2"></i>
+                <span>Filtros - Riegos por Finca</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="form-finca">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label for="finca-select" class="form-label font-weight-medium">
+                      <i class="bi bi-geo-alt me-1"></i> Fincas *
                     </label>
-                    <select id="tipo-reporte" class="form-select" required>
-                      <option value="riegos">📊 Riegos realizados</option>
-                      <option value="riegos-regador">👤 Riegos por regador</option>
-                      <option value="agroquimicos">🧪 Aplicaciones de agroquímicos</option>
-                      <option value="fertilizaciones">🌱 Fertilizaciones</option>
-                      <option value="labores">🚜 Labores de suelo</option>
-                      <option value="bpa">✅ Normas BPA (auditoría)</option>
+                    <select id="finca-select" class="form-select selectpicker" multiple
+                            title="Seleccione fincas..." data-live-search="true" data-actions-box="true">
+                    </select>
+                    <div class="form-text">Se generará un reporte por cada finca seleccionada</div>
+                  </div>
+                  <div class="col-md-3">
+                    <label for="fecha-desde-finca" class="form-label font-weight-medium">
+                      <i class="bi bi-calendar-event me-1"></i> Desde
+                    </label>
+                    <input type="date" id="fecha-desde-finca" class="form-control" value="2000-01-01" />
+                  </div>
+                  <div class="col-md-3">
+                    <label for="fecha-hasta-finca" class="form-label font-weight-medium">
+                      <i class="bi bi-calendar-check me-1"></i> Hasta
+                    </label>
+                    <input type="date" id="fecha-hasta-finca" class="form-control" />
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="bi bi-play-circle me-1"></i> Generar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Filtros para Riegos por Regador -->
+      <div id="filtros-regador" class="row mb-4" style="display: none;">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-person text-primary me-2"></i>
+                <span>Filtros - Riegos por Regador</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="form-regador">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label for="regador-select" class="form-label font-weight-medium">
+                      <i class="bi bi-person me-1"></i> Regador(es) *
+                    </label>
+                    <select id="regador-select" class="form-select selectpicker" multiple
+                            title="Seleccione regador(es)..." data-live-search="true">
                     </select>
                   </div>
-                </div>
-
-                <!-- Filtros generales -->
-                <div id="filtros-generales">
-                  <div class="row mb-4">
-                    <div class="col-md-6">
-                      <label for="finca-reporte" class="form-label font-weight-medium">
-                        <i class="bi bi-geo-alt me-1"></i> Fincas
-                      </label>
-                      <div class="mb-2">
-                        <button type="button" id="finca-todo" class="btn btn-sm btn-outline-primary me-2">Seleccionar Todo</button>
-                        <button type="button" id="finca-nada" class="btn btn-sm btn-outline-secondary">Deseleccionar Todo</button>
-                      </div>
-                      <select id="finca-reporte" class="form-select selectpicker" multiple 
-                              title="Seleccione fincas..." data-live-search="true">
-                      </select>
-                      <div class="form-text">Filtra por fincas seleccionadas</div>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="cuartel-reporte" class="form-label font-weight-medium">
-                        <i class="bi bi-grid me-1"></i> Cuarteles
-                      </label>
-                      <div class="mb-2">
-                        <button type="button" id="cuartel-todo" class="btn btn-sm btn-outline-primary me-2">Seleccionar Todo</button>
-                        <button type="button" id="cuartel-nada" class="btn btn-sm btn-outline-secondary">Deseleccionar Todo</button>
-                      </div>
-                      <select id="cuartel-reporte" class="form-select selectpicker" multiple 
-                              title="Seleccione cuarteles..." data-live-search="true">
-                      </select>
-                      <div class="form-text">Filtra por cuarteles seleccionados</div>
-                    </div>
+                  <div class="col-md-3">
+                    <label for="fecha-desde-regador" class="form-label font-weight-medium">
+                      <i class="bi bi-calendar-event me-1"></i> Desde
+                    </label>
+                    <input type="date" id="fecha-desde-regador" class="form-control" value="2000-01-01" />
                   </div>
-
-                  <div class="row mb-4">
-                    <div class="col-md-6">
-                      <label for="fecha-desde" class="form-label font-weight-medium">
-                        <i class="bi bi-calendar-event me-1"></i> Fecha Desde
-                      </label>
-                      <input type="date" id="fecha-desde" class="form-control" value="2000-01-01" />
-                      <div class="form-text">Filtra registros desde esta fecha</div>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="fecha-hasta" class="form-label font-weight-medium">
-                        <i class="bi bi-calendar-check me-1"></i> Fecha Hasta
-                      </label>
-                      <input type="date" id="fecha-hasta" class="form-control" />
-                      <div class="form-text">Filtra registros hasta esta fecha</div>
-                    </div>
+                  <div class="col-md-3">
+                    <label for="fecha-hasta-regador" class="form-label font-weight-medium">
+                      <i class="bi bi-calendar-check me-1"></i> Hasta
+                    </label>
+                    <input type="date" id="fecha-hasta-regador" class="form-control" />
                   </div>
-                </div>
-
-                <!-- Contenedores para filtros específicos según rol -->
-                <div id="filtros-productor" style="display:none;"></div>
-                <div id="filtros-operador" style="display:none;"></div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                  <button type="submit" class="btn btn-primary btn-lg px-4">
-                    <i class="bi bi-play-circle me-2"></i>
-                    Generar Reporte
-                  </button>
-                  <div>
-                    <button id="exportar-excel" type="button" class="btn btn-success me-2">
-                      <i class="bi bi-file-earmark-excel me-1"></i> Excel
-                    </button>
-                    <button id="exportar-csv" type="button" class="btn btn-info me-2">
-                      <i class="bi bi-filetype-csv me-1"></i> CSV
-                    </button>
-                    <button id="exportar-pdf" type="button" class="btn btn-danger">
-                      <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="bi bi-play-circle me-1"></i> Generar
                     </button>
                   </div>
                 </div>
@@ -317,22 +269,35 @@
       </div>
 
       <!-- Resultados del Reporte -->
-      <div class="row mt-4">
+      <div class="row">
         <div class="col-12">
           <div class="card shadow-sm border-0" style="border-radius: 16px;">
             <div class="card-header bg-white border-0 pt-4 pb-0">
-              <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="bi bi-table text-primary me-2"></i>
-                <span>Resultados del Reporte</span>
-                <span class="badge bg-primary ms-2" id="total-registros">0</span>
-              </h5>
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 d-flex align-items-center">
+                  <i class="bi bi-table text-primary me-2"></i>
+                  <span>Resultados del Reporte</span>
+                  <span class="badge bg-primary ms-2" id="total-registros">0</span>
+                </h5>
+                <div>
+                  <button id="exportar-excel" type="button" class="btn btn-success btn-sm me-2">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                  </button>
+                  <button id="exportar-csv" type="button" class="btn btn-info btn-sm me-2">
+                    <i class="bi bi-filetype-csv me-1"></i> CSV
+                  </button>
+                  <button id="exportar-pdf" type="button" class="btn btn-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                  </button>
+                </div>
+              </div>
             </div>
             <div class="card-body p-4">
               <div id="reportes-resultado">
                 <div class="text-center py-5 text-muted">
                   <i class="bi bi-graph-up-arrow fs-1 mb-3 d-block"></i>
-                  <h5>Configure los filtros y genere su reporte</h5>
-                  <p>Seleccione el tipo de reporte y configure los filtros para comenzar</p>
+                  <h5>Seleccione un tipo de reporte y configure los filtros</h5>
+                  <p>Los resultados aparecerán aquí una vez que genere el reporte</p>
                 </div>
               </div>
             </div>
@@ -346,7 +311,6 @@
       <br>
       <small id="footer-version" style="color:#888;"></small>
     </footer>
-    <script type="module" src="reportes.js"></script>
     
     <!-- Script para Bootstrap Select en reportes -->
     <script type="module">
@@ -363,60 +327,66 @@
           import('./header.js');
         });
 
-      // Variables globales para almacenar datos
-      let todasLasFincas = [];
-      let todosLosCuarteles = [];
-
       $(document).ready(function() {
         // Configurar fecha hasta como hoy
         const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('fecha-hasta').value = hoy;
+        document.getElementById('fecha-hasta-finca').value = hoy;
+        document.getElementById('fecha-hasta-regador').value = hoy;
 
         // Inicializar Bootstrap Select
         $('.selectpicker').selectpicker({
           actionsBox: true,
-          selectAllText: 'Todas',
-          deselectAllText: 'Ninguna',
+          selectAllText: 'Seleccionar todas',
+          deselectAllText: 'Deseleccionar todas',
           countSelectedText: function(numSelected, numTotal) {
-            return numSelected + ' de ' + numTotal + ' seleccionadas';
+            if (numSelected == 1) {
+              return numSelected + ' finca seleccionada';
+            } else {
+              return numSelected + ' fincas seleccionadas';
+            }
           },
           selectedTextFormat: 'count > 2',
           liveSearch: true,
           liveSearchPlaceholder: 'Buscar...',
-          noneSelectedText: 'Seleccione opciones...',
+          noneSelectedText: 'Seleccione fincas...',
           style: 'btn-outline-secondary'
         });
 
-        // Cargar opciones iniciales
-        cargarFincasReporte();
+        // Cargar datos iniciales
+        cargarFincas();
+        cargarRegadores();
 
-        // Configurar botones de todo/nada
-        $('#finca-todo').on('click', function() {
-          $('#finca-reporte').selectpicker('selectAll');
-          $('#finca-reporte').trigger('changed.bs.select');
-        });
-        
-        $('#finca-nada').on('click', function() {
-          $('#finca-reporte').selectpicker('deselectAll');
-          $('#finca-reporte').trigger('changed.bs.select');
-        });
-        
-        $('#cuartel-todo').on('click', function() {
-          $('#cuartel-reporte').selectpicker('selectAll');
-        });
-        
-        $('#cuartel-nada').on('click', function() {
-          $('#cuartel-reporte').selectpicker('deselectAll');
+        // Configurar cambio de tipo de reporte
+        $('#tipo-reporte').change(function() {
+          const tipo = $(this).val();
+          if (tipo === 'finca') {
+            $('#filtros-finca').show();
+            $('#filtros-regador').hide();
+          } else {
+            $('#filtros-finca').hide();
+            $('#filtros-regador').show();
+          }
         });
 
-        // Configurar evento para cascada fincas → cuarteles
-        $('#finca-reporte').on('changed.bs.select', function() {
-          cargarCuartelesReporte();
+        // Configurar formularios
+        $('#form-finca').submit(function(e) {
+          e.preventDefault();
+          generarReporteFinca();
         });
+
+        $('#form-regador').submit(function(e) {
+          e.preventDefault();
+          generarReporteRegador();
+        });
+        
+        // Event listeners para botones de exportación
+        $('#exportar-excel').click(exportarExcel);
+        $('#exportar-csv').click(exportarCSV);
+        $('#exportar-pdf').click(exportarPDF);
       });
 
-      // Función para cargar fincas en el reporte
-      async function cargarFincasReporte() {
+      // Función para cargar fincas
+      async function cargarFincas() {
         try {
           const { data: fincas, error } = await supabase
             .from('fincas')
@@ -425,18 +395,31 @@
           
           if (error) throw error;
           
-          todasLasFincas = fincas || [];
-          
-          // Limpiar y repoblar el selector
-          const selector = $('#finca-reporte');
+          const selector = $('#finca-select');
           selector.empty();
           
-          todasLasFincas.forEach(finca => {
+          fincas.forEach(finca => {
             selector.append(`<option value="${finca.id}">${finca.nombre_finca}</option>`);
           });
           
-          // Refrescar Bootstrap Select
-          selector.selectpicker('refresh');
+          // Reconfiguramos el selectpicker con los textos en español
+          selector.selectpicker('destroy').selectpicker({
+            actionsBox: true,
+            selectAllText: 'Seleccionar todas',
+            deselectAllText: 'Deseleccionar todas',
+            countSelectedText: function(numSelected, numTotal) {
+              if (numSelected == 1) {
+                return numSelected + ' finca seleccionada';
+              } else {
+                return numSelected + ' fincas seleccionadas';
+              }
+            },
+            selectedTextFormat: 'count > 2',
+            liveSearch: true,
+            liveSearchPlaceholder: 'Buscar...',
+            noneSelectedText: 'Seleccione fincas...',
+            style: 'btn-outline-secondary'
+          });
           
         } catch (error) {
           console.error('Error cargando fincas:', error);
@@ -444,72 +427,551 @@
         }
       }
 
-      // Función para cargar cuarteles según fincas seleccionadas
-      async function cargarCuartelesReporte() {
+      // Función para cargar regadores
+      async function cargarRegadores() {
         try {
-          const fincasSeleccionadas = $('#finca-reporte').val();
-          
-          // Limpiar selector de cuarteles
-          const selector = $('#cuartel-reporte');
-          selector.empty();
-          
-          if (!fincasSeleccionadas || fincasSeleccionadas.length === 0) {
-            selector.selectpicker('refresh');
-            return;
-          }
-          
-          // Obtener cuarteles de las fincas seleccionadas
-          const { data: cuarteles, error } = await supabase
-            .from('cuarteles')
-            .select('*')
-            .in('finca_id', fincasSeleccionadas)
-            .order('nombre');
+          const { data: regadores, error } = await supabase
+            .from('aplicadores_operarios')
+            .select('id, nombre, apellido')
+            .order('apellido', { ascending: true })
+            .order('nombre', { ascending: true });
           
           if (error) throw error;
           
-          // Usar Map para eliminar duplicados por ID
-          const cuartelesMap = new Map();
-          cuarteles.forEach(cuartel => {
-            cuartelesMap.set(cuartel.id, cuartel);
+          const selector = $('#regador-select');
+          selector.empty();
+          
+          regadores.forEach(regador => {
+            const nombreCompleto = `${regador.apellido || ''}, ${regador.nombre}`.replace(/^, /, '');
+            selector.append(`<option value="${regador.id}">${nombreCompleto}</option>`);
           });
           
-          todosLosCuarteles = Array.from(cuartelesMap.values());
-          
-          // Poblar selector con cuarteles únicos
-          todosLosCuarteles.forEach(cuartel => {
-            selector.append(`<option value="${cuartel.id}">${cuartel.nombre}</option>`);
+          // Reconfiguramos el selectpicker para el selector de regadores
+          selector.selectpicker('destroy').selectpicker({
+            actionsBox: true,
+            selectAllText: 'Seleccionar todos',
+            deselectAllText: 'Deseleccionar todos',
+            countSelectedText: function(numSelected, numTotal) {
+              if (numSelected == 1) {
+                return numSelected + ' regador seleccionado';
+              } else {
+                return numSelected + ' regadores seleccionados';
+              }
+            },
+            selectedTextFormat: 'count > 2',
+            liveSearch: true,
+            liveSearchPlaceholder: 'Buscar regador...',
+            noneSelectedText: 'Seleccione regador(es)...',
+            style: 'btn-outline-secondary'
           });
-          
-          // Refrescar Bootstrap Select
-          selector.selectpicker('refresh');
           
         } catch (error) {
-          console.error('Error cargando cuarteles:', error);
-          alert('Error al cargar los cuarteles: ' + error.message);
+          console.error('Error cargando regadores:', error);
+          alert('Error al cargar los regadores: ' + error.message);
         }
       }
 
-      // Hacer funciones globales disponibles
-      window.cargarFincasReporte = cargarFincasReporte;
-      window.cargarCuartelesReporte = cargarCuartelesReporte;
-    </script>
-    
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {
-        const tipoReporte = document.getElementById('tipo-reporte');
-        const filtrosGenerales = document.getElementById('filtros-generales');
-        if (tipoReporte) {
-          tipoReporte.addEventListener('change', (e) => {
-            if (e.target.value === 'riegos-regador') {
-              if (filtrosGenerales) filtrosGenerales.style.display = 'none';
-              if (window.renderRiegosPorRegadorUI) window.renderRiegosPorRegadorUI();
-            } else {
-              if (filtrosGenerales) filtrosGenerales.style.display = '';
-              window.location.reload(); // recarga para mostrar el filtro estándar
-            }
-          });
+      // Función para generar reporte por finca
+      async function generarReporteFinca() {
+        const fincaIds = $('#finca-select').val();
+        const desde = $('#fecha-desde-finca').val();
+        const hasta = $('#fecha-hasta-finca').val();
+
+        if (!fincaIds || fincaIds.length === 0) {
+          alert('Por favor, seleccione al menos una finca');
+          return;
         }
-      });
+
+        try {
+          // Cargar datos de referencia primero
+          const [fincasResult, cuartelesResult, aplicadoresResult] = await Promise.all([
+            supabase.from('fincas').select('id, nombre_finca'),
+            supabase.from('cuarteles').select('id, nombre'),
+            supabase.from('aplicadores_operarios').select('id, nombre, apellido')
+          ]);
+
+          const fincasMap = {};
+          fincasResult.data?.forEach(f => fincasMap[f.id] = f.nombre_finca);
+          
+          const cuartelesMap = {};
+          cuartelesResult.data?.forEach(c => cuartelesMap[c.id] = c.nombre);
+          
+          const aplicadoresMap = {};
+          aplicadoresResult.data?.forEach(a => {
+            aplicadoresMap[a.id] = `${a.apellido || ''}, ${a.nombre}`.replace(/^, /, '');
+          });
+
+          // Consultar riegos para las fincas seleccionadas
+          let query = supabase
+            .from('riegos')
+            .select('id, fecha, horas_riego, volumen_agua, observaciones, objetivo, finca_id, cuartel_id, operador_id')
+            .in('finca_id', fincaIds);
+
+          if (desde) query = query.gte('fecha', desde);
+          if (hasta) query = query.lte('fecha', hasta);
+
+          const { data: riegos, error } = await query.order('fecha', { ascending: false });
+
+          if (error) throw error;
+
+          // Mapear los datos
+          const riegosConDatos = riegos.map(riego => ({
+            ...riego,
+            fincas: { nombre_finca: fincasMap[riego.finca_id] || '-' },
+            cuarteles: { nombre: cuartelesMap[riego.cuartel_id] || '-' },
+            aplicadores_operarios: riego.operador_id ? {
+              nombre: aplicadoresMap[riego.operador_id]?.split(', ')[1] || '',
+              apellido: aplicadoresMap[riego.operador_id]?.split(', ')[0] || ''
+            } : null
+          }));
+
+          mostrarResultados(riegosConDatos, 'finca');
+
+        } catch (error) {
+          console.error('Error generando reporte:', error);
+          alert('Error al generar el reporte: ' + error.message);
+        }
+      }
+
+      // Función para generar reporte por regador
+      async function generarReporteRegador() {
+        const regadorIds = $('#regador-select').val();
+        const desde = $('#fecha-desde-regador').val();
+        const hasta = $('#fecha-hasta-regador').val();
+
+        if (!regadorIds || regadorIds.length === 0) {
+          alert('Por favor, seleccione al menos un regador');
+          return;
+        }
+
+        try {
+          // Cargar datos de referencia primero
+          const [fincasResult, cuartelesResult, aplicadoresResult] = await Promise.all([
+            supabase.from('fincas').select('id, nombre_finca'),
+            supabase.from('cuarteles').select('id, nombre'),
+            supabase.from('aplicadores_operarios').select('id, nombre, apellido')
+          ]);
+
+          const fincasMap = {};
+          fincasResult.data?.forEach(f => fincasMap[f.id] = f.nombre_finca);
+          
+          const cuartelesMap = {};
+          cuartelesResult.data?.forEach(c => cuartelesMap[c.id] = c.nombre);
+          
+          const aplicadoresMap = {};
+          aplicadoresResult.data?.forEach(a => {
+            aplicadoresMap[a.id] = `${a.apellido || ''}, ${a.nombre}`.replace(/^, /, '');
+          });
+
+          // Consultar riegos para los regadores seleccionados
+          let query = supabase
+            .from('riegos')
+            .select('id, fecha, horas_riego, volumen_agua, observaciones, objetivo, finca_id, cuartel_id, operador_id')
+            .in('operador_id', regadorIds);
+
+          if (desde) query = query.gte('fecha', desde);
+          if (hasta) query = query.lte('fecha', hasta);
+
+          const { data: riegos, error } = await query.order('fecha', { ascending: false });
+
+          if (error) throw error;
+
+          // Mapear los datos
+          const riegosConDatos = riegos.map(riego => ({
+            ...riego,
+            fincas: { nombre_finca: fincasMap[riego.finca_id] || '-' },
+            cuarteles: { nombre: cuartelesMap[riego.cuartel_id] || '-' },
+            aplicadores_operarios: riego.operador_id ? {
+              nombre: aplicadoresMap[riego.operador_id]?.split(', ')[1] || '',
+              apellido: aplicadoresMap[riego.operador_id]?.split(', ')[0] || ''
+            } : null
+          }));
+
+          mostrarResultados(riegosConDatos, 'regador');
+
+        } catch (error) {
+          console.error('Error generando reporte:', error);
+          alert('Error al generar el reporte: ' + error.message);
+        }
+      }
+
+      // Función para mostrar resultados
+      function mostrarResultados(datos, tipo) {
+        const contenedor = $('#reportes-resultado');
+        
+        if (!datos || datos.length === 0) {
+          contenedor.html(`
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-info-circle fs-1 mb-3 d-block"></i>
+              <h5>No se encontraron registros</h5>
+              <p>No hay riegos registrados para los filtros seleccionados</p>
+            </div>
+          `);
+          $('#total-registros').text('0');
+          return;
+        }
+
+        $('#total-registros').text(datos.length);
+
+        // Si es reporte por finca, agrupar por finca
+        if (tipo === 'finca') {
+          // Agrupar datos por finca
+          const datosPorFinca = {};
+          datos.forEach(riego => {
+            const nombreFinca = riego.fincas?.nombre_finca || 'Sin finca';
+            if (!datosPorFinca[nombreFinca]) {
+              datosPorFinca[nombreFinca] = [];
+            }
+            datosPorFinca[nombreFinca].push(riego);
+          });
+
+          // Generar HTML para cada finca
+          const sectionesHTML = Object.keys(datosPorFinca).map(nombreFinca => {
+            const riegosFinca = datosPorFinca[nombreFinca];
+            return `
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0">
+                    <i class="bi bi-geo-alt-fill me-2"></i>
+                    ${nombreFinca}
+                  </h5>
+                  <small>${riegosFinca.length} registro(s) de riego</small>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Cuartel</th>
+                          <th>Regador</th>
+                          <th>Horas</th>
+                          <th>Volumen (L)</th>
+                          <th>Objetivo</th>
+                          <th>Observaciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${riegosFinca.map(riego => `
+                          <tr>
+                            <td>${riego.fecha || '-'}</td>
+                            <td>${riego.cuarteles?.nombre || '-'}</td>
+                            <td>${riego.aplicadores_operarios ? 
+                              `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '-'}</td>
+                            <td>${riego.horas_riego || '-'}</td>
+                            <td>${riego.volumen_agua || '-'}</td>
+                            <td>${riego.objetivo || '-'}</td>
+                            <td>${riego.observaciones || '-'}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          contenedor.html(sectionesHTML);
+        } else {
+          // Reporte por regador - tabla única
+          const tabla = `
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Finca</th>
+                    <th>Cuartel</th>
+                    <th>Regador</th>
+                    <th>Horas</th>
+                    <th>Volumen (L)</th>
+                    <th>Objetivo</th>
+                    <th>Observaciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${datos.map(riego => `
+                    <tr>
+                      <td>${riego.fecha || '-'}</td>
+                      <td>${riego.fincas?.nombre_finca || '-'}</td>
+                      <td>${riego.cuarteles?.nombre || '-'}</td>
+                      <td>${riego.aplicadores_operarios ? 
+                        `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '-'}</td>
+                      <td>${riego.horas_riego || '-'}</td>
+                      <td>${riego.volumen_agua || '-'}</td>
+                      <td>${riego.objetivo || '-'}</td>
+                      <td>${riego.observaciones || '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+
+          contenedor.html(tabla);
+        }
+        
+        // Guardar datos para exportación
+        window.ultimoReporte = datos;
+        window.ultimoTipo = tipo;
+      }
+
+      // Funciones de exportación
+      function exportarExcel() {
+        if (!window.ultimoReporte || window.ultimoReporte.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        const datos = window.ultimoReporte.map(riego => ({
+          'Fecha': riego.fecha || '',
+          'Finca': riego.fincas?.nombre_finca || '',
+          'Cuartel': riego.cuarteles?.nombre || '',
+          'Regador': riego.aplicadores_operarios ? 
+            `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '',
+          'Horas': riego.horas_riego || '',
+          'Volumen (L)': riego.volumen_agua || '',
+          'Objetivo': riego.objetivo || '',
+          'Observaciones': riego.observaciones || ''
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(datos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Riegos');
+        
+        const nombreArchivo = `reporte_riegos_${window.ultimoTipo}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, nombreArchivo);
+      }
+
+      function exportarCSV() {
+        if (!window.ultimoReporte || window.ultimoReporte.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        const headers = ['Fecha', 'Finca', 'Cuartel', 'Regador', 'Horas', 'Volumen (L)', 'Objetivo', 'Observaciones'];
+        const csvContent = [
+          headers.join(','),
+          ...window.ultimoReporte.map(riego => [
+            riego.fecha || '',
+            `"${riego.fincas?.nombre_finca || ''}"`,
+            `"${riego.cuarteles?.nombre || ''}"`,
+            `"${riego.aplicadores_operarios ? 
+              `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : ''}"`,
+            riego.horas_riego || '',
+            riego.volumen_agua || '',
+            `"${riego.objetivo || ''}"`,
+            `"${riego.observaciones || ''}"`
+          ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `reporte_riegos_${window.ultimoTipo}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      async function exportarPDF() {
+        if (!window.ultimoReporte || window.ultimoReporte.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        try {
+          // Obtener datos de la organización y usuario actual
+          const [orgResult, userResult] = await Promise.all([
+            supabase.from('organizaciones').select('nombre').limit(1).single(),
+            supabase.auth.getUser()
+          ]);
+
+          const nombreOrganizacion = orgResult.data?.nombre || 'Organización';
+          const { data: { user } } = userResult;
+          
+          // Obtener datos del productor
+          let nombreProductor = 'Productor';
+          if (user) {
+            const { data: perfilData } = await supabase
+              .from('usuarios')
+              .select('nombre, apellido')
+              .eq('id', user.id)
+              .single();
+            
+            if (perfilData) {
+              nombreProductor = `${perfilData.apellido || ''}, ${perfilData.nombre || ''}`.replace(/^, /, '');
+            }
+          }
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          
+          // Configurar encabezado con logo y datos de la organización
+          let yPosition = 20;
+          
+          // Espacio para logo (aunque no podemos cargarlo dinámicamente en PDF)
+          doc.setFontSize(18);
+          doc.setFont(undefined, 'bold');
+          doc.text(nombreOrganizacion, 20, yPosition);
+          
+          yPosition += 10;
+          doc.setFontSize(14);
+          doc.setFont(undefined, 'normal');
+          doc.text(`Productor: ${nombreProductor}`, 20, yPosition);
+          
+          yPosition += 15;
+          doc.setFontSize(16);
+          doc.setFont(undefined, 'bold');
+          doc.text(`Reporte de Riegos por ${window.ultimoTipo === 'finca' ? 'Finca' : 'Regador'}`, 20, yPosition);
+          
+          yPosition += 10;
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, 20, yPosition);
+          
+          yPosition += 15;
+
+          // Si es reporte por finca, agrupar por finca
+          if (window.ultimoTipo === 'finca') {
+            // Agrupar datos por finca
+            const datosPorFinca = {};
+            window.ultimoReporte.forEach(riego => {
+              const nombreFinca = riego.fincas?.nombre_finca || 'Sin finca';
+              if (!datosPorFinca[nombreFinca]) {
+                datosPorFinca[nombreFinca] = [];
+              }
+              datosPorFinca[nombreFinca].push(riego);
+            });
+
+            // Generar PDF agrupado por finca
+            Object.keys(datosPorFinca).forEach((nombreFinca, fincaIndex) => {
+              if (fincaIndex > 0 || yPosition > 100) {
+                doc.addPage();
+                yPosition = 20;
+              }
+
+              // Encabezado de finca
+              doc.setFontSize(14);
+              doc.setFont(undefined, 'bold');
+              doc.text(`📍 ${nombreFinca}`, 20, yPosition);
+              yPosition += 5;
+              
+              doc.setFontSize(10);
+              doc.setFont(undefined, 'normal');
+              doc.text(`${datosPorFinca[nombreFinca].length} registro(s) de riego`, 20, yPosition);
+              yPosition += 10;
+
+              // Headers de tabla para esta finca
+              const headers = ['Fecha', 'Cuartel', 'Regador', 'Horas', 'Volumen (L)', 'Objetivo', 'Observaciones'];
+              doc.setFontSize(8);
+              doc.setFont(undefined, 'bold');
+              let xPosition = 20;
+              const columnWidths = [25, 25, 30, 15, 20, 25, 35];
+              
+              headers.forEach((header, index) => {
+                doc.text(header, xPosition, yPosition);
+                xPosition += columnWidths[index];
+              });
+              
+              yPosition += 8;
+              doc.setFont(undefined, 'normal');
+
+              // Datos de la finca
+              datosPorFinca[nombreFinca].forEach(riego => {
+                if (yPosition > 270) {
+                  doc.addPage();
+                  yPosition = 20;
+                }
+                
+                xPosition = 20;
+                const rowData = [
+                  riego.fecha || '',
+                  riego.cuarteles?.nombre || '',
+                  riego.aplicadores_operarios ? 
+                    `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '',
+                  riego.horas_riego || '',
+                  riego.volumen_agua || '',
+                  riego.objetivo || '',
+                  riego.observaciones || ''
+                ];
+                
+                rowData.forEach((cell, index) => {
+                  const maxLength = index === 6 ? 20 : 12; // Observaciones pueden ser más largas
+                  const text = String(cell).substring(0, maxLength);
+                  doc.text(text, xPosition, yPosition);
+                  xPosition += columnWidths[index];
+                });
+                yPosition += 6;
+              });
+              
+              yPosition += 10; // Espacio entre fincas
+            });
+          } else {
+            // Reporte por regador - tabla única
+            const tableData = window.ultimoReporte.map(riego => [
+              riego.fecha || '',
+              riego.fincas?.nombre_finca || '',
+              riego.cuarteles?.nombre || '',
+              riego.aplicadores_operarios ? 
+                `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '',
+              riego.horas_riego || '',
+              riego.volumen_agua || '',
+              riego.objetivo || '',
+              riego.observaciones || ''
+            ]);
+
+            // Headers
+            const headers = ['Fecha', 'Finca', 'Cuartel', 'Regador', 'Horas', 'Volumen', 'Objetivo', 'Observaciones'];
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'bold');
+            let xPosition = 20;
+            const columnWidths = [22, 22, 22, 25, 15, 18, 22, 30];
+            
+            headers.forEach((header, index) => {
+              doc.text(header, xPosition, yPosition);
+              xPosition += columnWidths[index];
+            });
+            
+            yPosition += 8;
+            doc.setFont(undefined, 'normal');
+            
+            // Datos
+            tableData.forEach(row => {
+              if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 20;
+              }
+              
+              xPosition = 20;
+              row.forEach((cell, index) => {
+                const maxLength = index === 7 ? 18 : 12;
+                const text = String(cell).substring(0, maxLength);
+                doc.text(text, xPosition, yPosition);
+                xPosition += columnWidths[index];
+              });
+              yPosition += 6;
+            });
+          }
+
+          // Guardar PDF
+          const fechaHora = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+          doc.save(`${nombreOrganizacion}_Riegos_${window.ultimoTipo}_${nombreProductor}_${fechaHora}.pdf`);
+          
+        } catch (error) {
+          console.error('Error generando PDF:', error);
+          alert('Error al generar el PDF: ' + error.message);
+        }
+      }
+
+      // Hacer funciones globales
+      window.cargarFincas = cargarFincas;
+      window.cargarRegadores = cargarRegadores;
+      window.generarReporteFinca = generarReporteFinca;
+      window.generarReporteRegador = generarReporteRegador;
     </script>
   </body>
 </html>

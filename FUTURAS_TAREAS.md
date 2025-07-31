@@ -63,6 +63,34 @@
 # NOTA IMPORTANTE SOBRE REPORTES
 - Los reportes de Labores, Aplicaciones de Agroquímicos y Fertilizaciones requieren revisión y adaptación cuando las tablas correspondientes estén completas o cambie su estructura. Actualizar las funciones de consulta y visualización en reportes.js según los nuevos campos y relaciones.
 
+## PRÓXIMOS REPORTES A IMPLEMENTAR
+
+### Sistema de Reportes Completo
+Todos los reportes seguirán el mismo estilo y estructura que el sistema actual de reportes de riegos, con filtros de fecha desde/hasta y interfaz completamente en español.
+
+#### Reportes de Agroquímicos
+- **Aplicaciones de agroquímicos por finca**: Mostrar todas las aplicaciones de fitosanitarios agrupadas por finca, con detalles de producto, dosis, método de aplicación, operador, fecha, cuartel, objetivo y observaciones.
+- **Aplicaciones de agroquímicos por productor**: Reporte consolidado de todas las aplicaciones realizadas para un productor específico, agrupando por finca.
+
+#### Reportes de Fertilizaciones  
+- **Fertilizaciones por finca**: Aplicaciones de fertilizantes organizadas por finca, incluyendo producto, dosis, método, operador, fecha, cuartel y observaciones.
+- **Fertilizaciones por productor**: Vista consolidada de todas las fertilizaciones del productor.
+
+#### Reportes de Labores de Suelo
+- **Labores de suelo por finca**: Actividades de preparación, cultivo y mantenimiento del suelo por finca.
+- **Labores de suelo por productor**: Consolidado de labores para el productor.
+
+#### Informes Especiales
+- **Informes personalizados**: Reportes específicos que se definirán según necesidades particulares (BPA, auditorías, etc.).
+
+**Características comunes de todos los reportes:**
+- Interfaz en español
+- Filtros de fecha desde/hasta
+- Selección múltiple cuando aplique
+- Agrupación por finca con encabezados individuales
+- Exportación a CSV/Excel
+- Estilo consistente con el sistema actual de reportes de riegos
+
 ---
 
 
