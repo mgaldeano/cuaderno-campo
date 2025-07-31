@@ -1,4 +1,0 @@
-id,nombre_finca,usuario_id,created_at,direccion,superficie,provincia,departamento
-24,segunda,f6f45a75-ba2c-4191-b8ab-8e62e616530c,2025-07-26 22:14:28.478876+00,de lejos,55,,
-23,primera,f6f45a75-ba2c-4191-b8ab-8e62e616530c,2025-07-26 22:14:14.831646+00,nada,,mza,san martin
-30,Finca Tres ejemplo,f6f45a75-ba2c-4191-b8ab-8e62e616530c,2025-07-31 17:09:10.504826+00,Ruta,12,Mendoza,Lavalle
