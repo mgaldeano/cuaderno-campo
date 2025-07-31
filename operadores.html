@@ -53,11 +53,13 @@
     </script>
 
     <main class="container">
-      <hgroup class="mb-4">
-        <h2 class="mb-1">Gestión de Operadores</h2>
-        <h3 class="text-muted">Agregue, edite o elimine sus operarios y aplicadores</h3>
-      </hgroup>
-      <div class="row">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0 fw-bold text-primary" style="font-size:2rem; letter-spacing:0.02em;">Gestión de Operadores</h2>
+        <button id="toggle-form" class="btn btn-outline-secondary btn-sm" type="button">
+          <i class="bi bi-person-plus"></i> Agregar operador
+        </button>
+      </div>
+      <div id="form-container" class="row mb-2" style="display:none;">
         <div class="col-md-6">
           <form id="operador-form" class="mb-3">
             <div class="form-group mb-2">
@@ -253,6 +255,21 @@
               cargarOperadores();
             }
           }
+        }
+      });
+
+      // Mostrar/Ocultar formulario
+      const toggleFormBtn = document.getElementById("toggle-form");
+      const formContainer = document.getElementById("form-container");
+
+      // Mostrar/ocultar formulario de agregar operador
+      toggleFormBtn.addEventListener("click", () => {
+        if (formContainer.style.display === "none") {
+          formContainer.style.display = "block";
+          toggleFormBtn.innerHTML = '<i class="bi bi-x-circle"></i> Cerrar';
+        } else {
+          formContainer.style.display = "none";
+          toggleFormBtn.innerHTML = '<i class="bi bi-person-plus"></i> Agregar operador';
         }
       });
     </script>
