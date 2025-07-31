@@ -1,3 +1,7 @@
+# Futuras tareas agregadas (31/07/2025):
+- Limpieza de políticas RLS: eliminación de reglas redundantes en tablas fincas y cuarteles
+- Corrección de carga de fincas y cuarteles para roles admin, superadmin e ingeniero
+- Refactor de funciones cargarFincas y cargarCuarteles para mayor claridad y robustez
 ### Pendiente: Menú desplegable de Gestión (header)
 - Solucionar definitivamente el stacking y el parpadeo del menú desplegable sobre las tarjetas del dashboard en index.html.
 - El menú debe quedar siempre por encima de las tarjetas, sin parpadear ni perder el foco, y correctamente alineado.
