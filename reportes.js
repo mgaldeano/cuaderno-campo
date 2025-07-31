@@ -4,12 +4,11 @@
 import { supabase } from "./supabaseClient.js";
 
 // --- Función para generar el reporte de riegos ---
-async function generarReporteRiegos({ finca_id = [], cuartel_id = [], operador_id = [], desde, hasta }) {
+async function generarReporteRiegos({ finca_id = [], cuartel_id = [], desde, hasta }) {
   // Construir filtros dinámicos
-  let query = supabase.from('riegos').select('id, finca_id, cuartel_id, operador_id, fecha, maquinaria, horas_riego, volumen_agua, observaciones, labor, objetivo, variedad, especie, created_at');
+  let query = supabase.from('riegos').select('id, finca_id, cuartel_id, operador_id, fecha, maquinaria, horas_riego, volumen_agua, observaciones, labor, objetivo, labores, variedad, especie, created_at');
   if (finca_id && finca_id.length) query = query.in('finca_id', finca_id);
   if (cuartel_id && cuartel_id.length) query = query.in('cuartel_id', cuartel_id);
-  if (operador_id && operador_id.length) query = query.in('operador_id', operador_id);
   if (desde) query = query.gte('fecha', desde);
   if (hasta) query = query.lte('fecha', hasta);
   const { data, error } = await query.order('fecha', { ascending: false });
@@ -43,6 +42,7 @@ document.getElementById('exportar-excel').addEventListener('click', () => {
         Finca: r.Finca,
         Cuartel: r.Cuartel,
         Regador: r.Regador,
+        objetivo: r.objetivo,
         horas_riego: r.horas_riego,
         volumen_agua: r.volumen_agua,
         observaciones: r.observaciones
@@ -61,7 +61,7 @@ import { supabase } from "./supabaseClient.js";
 window.addEventListener('DOMContentLoaded', async () => {
   // --- Reporte de Riegos por Regador ---
   async function generarReporteRiegosPorRegador({ regador_id = [], desde, hasta }) {
-    let query = supabase.from('riegos').select('id, fecha, operador_id, finca_id, cuartel_id, horas_riego, volumen_agua, observaciones');
+    let query = supabase.from('riegos').select('id, fecha, operador_id, finca_id, cuartel_id, horas_riego, volumen_agua, observaciones, objetivo');
     if (regador_id && regador_id.length) query = query.in('operador_id', regador_id);
     if (desde) query = query.gte('fecha', desde);
     if (hasta) query = query.lte('fecha', hasta);
@@ -118,7 +118,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       fechaHastaInput.value = `${yyyy}-${mm}-${dd}`;
     }
     // Poblar regadores
-        // Poblar regadores solo con apellido y nombre
+        // Poblar regadores con apellido y nombre
         const regadorSelect = document.getElementById('regador-reporte');
         const regadores = Object.entries(window.operadoresMap || {}).map(([id, nombre]) => ({ id, nombre }));
         regadorSelect.innerHTML = regadores.length > 0
@@ -143,6 +143,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             <th>Regador</th>
             <th>Finca</th>
             <th>Cuartel</th>
+            <th>Objetivo</th>
             <th>Horas riego</th>
             <th>Volumen agua</th>
             <th>Observaciones</th>
@@ -155,6 +156,7 @@ window.addEventListener('DOMContentLoaded', async () => {
               <td>${r.Regador ?? '-'}</td>
               <td>${r.Finca ?? '-'}</td>
               <td>${r.Cuartel ?? '-'}</td>
+              <td>${r.objetivo ?? '-'}</td>
               <td>${r.horas_riego ?? '-'}</td>
               <td>${r.volumen_agua ?? '-'}</td>
               <td>${r.observaciones ?? ''}</td>
@@ -188,7 +190,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.cuartelesMap = {};
     (cuartelesData ?? []).forEach(c => { window.cuartelesMap[c.id] = c.nombre; });
     // Regadores
-    const { data: regadoresData } = await supabase.from('aplicadores_operarios').select('id, apellido, nombre');
+    const { data: regadoresData } = await supabase.from('aplicadores_operarios').select('id, nombre, apellido');
     window.operadoresMap = {};
     (regadoresData ?? []).forEach(o => { window.operadoresMap[o.id] = `${o.apellido ? o.apellido + ', ' : ''}${o.nombre}`; });
   }
@@ -199,7 +201,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   const tipoReporte = document.getElementById('tipo-reporte');
   const fincaSelect = document.getElementById('finca-reporte');
   const cuartelSelect = document.getElementById('cuartel-reporte');
-  // const regadorSelect = document.getElementById('regador-reporte');
   const fechaDesde = document.getElementById('fecha-desde');
   const fechaHasta = document.getElementById('fecha-hasta');
   const resultadoDiv = document.getElementById('reportes-resultado');
@@ -215,7 +216,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     filtrosForm.appendChild(verInformeBtn);
   }
 
-  // Botones seleccionar todo/nada para finca, cuartel y regador
+  // Botones seleccionar todo/nada para finca y cuartel
   function setCheckboxes(container, checked) {
     Array.from(container.querySelectorAll('input[type="checkbox"]')).forEach(cb => {
       cb.checked = checked;
@@ -233,12 +234,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   const cuartelNadaBtn = document.getElementById('cuartel-nada');
   if (cuartelNadaBtn) cuartelNadaBtn.addEventListener('click', () => setCheckboxes(cuartelSelect, false));
-
-  const regadorTodoBtn = document.getElementById('regador-todo');
-  if (regadorTodoBtn) regadorTodoBtn.addEventListener('click', () => setCheckboxes(regadorSelect, true));
-
-  const regadorNadaBtn = document.getElementById('regador-nada');
-  if (regadorNadaBtn) regadorNadaBtn.addEventListener('click', () => setCheckboxes(regadorSelect, false));
 
   // Validar login
   const { data: { user } } = await supabase.auth.getUser();
@@ -332,6 +327,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           <th>Finca</th>
           <th>Cuartel</th>
           <th>Regador</th>
+          <th>Objetivo</th>
           <th>Horas riego</th>
           <th>Volumen agua</th>
           <th>Observaciones</th>
@@ -344,6 +340,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             <td>${r.Finca ?? '-'}</td>
             <td>${r.Cuartel ?? '-'}</td>
             <td>${r.Regador ?? '-'}</td>
+            <td>${r.objetivo ?? '-'}</td>
             <td>${r.horas_riego ?? '-'}</td>
             <td>${r.volumen_agua ?? '-'}</td>
             <td>${r.observaciones ?? ''}</td>
@@ -369,12 +366,13 @@ document.getElementById('exportar-csv').addEventListener('click', () => {
   let datos = ultimoReporte;
   let columnas = Object.keys(datos[0]);
   if (ultimoTipo === 'riegos') {
-    columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'horas_riego', 'volumen_agua', 'observaciones'];
+    columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'objetivo', 'horas_riego', 'volumen_agua', 'observaciones'];
     datos = datos.map(r => ({
       fecha: r.fecha,
       Finca: r.Finca,
       Cuartel: r.Cuartel,
       Regador: r.Regador,
+      objetivo: r.objetivo,
       horas_riego: r.horas_riego,
       volumen_agua: r.volumen_agua,
       observaciones: r.observaciones
@@ -405,7 +403,7 @@ document.getElementById('exportar-pdf').addEventListener('click', async () => {
     doc.setFontSize(12);
     doc.text(`Reporte: ${ultimoTipo} (${new Date().toLocaleDateString()})`, 10, y);
     y += 10;
-    let columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'horas_riego', 'volumen_agua', 'observaciones'];
+    let columnas = ['fecha', 'Finca', 'Cuartel', 'Regador', 'objetivo', 'horas_riego', 'volumen_agua', 'observaciones'];
     doc.text(columnas.join(' | '), 10, y);
     y += 10;
     ultimoReporte.forEach(r => {
@@ -422,7 +420,7 @@ document.getElementById('exportar-pdf').addEventListener('click', async () => {
   }
 });
 
-// Botones seleccionar todo/nada para finca, cuartel y regador
+// Botones seleccionar todo/nada para finca y cuartel
 
 function actualizarFooterVersion() {
   window.setTimeout(() => {

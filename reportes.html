@@ -16,7 +16,12 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="estilos.css">
-    
+    <!-- jQuery (necesario para Bootstrap Select) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Select JS - versión beta para Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
     <style>
       /* Personalización Bootstrap Select para Bootstrap 5 */
       .bootstrap-select .dropdown-menu {
@@ -104,18 +109,87 @@
       .bootstrap-select.open .bs-actionsbox {
         display: block !important;
       }
+
+      .btn-compact {
+        font-size:0.95em !important;
+        height:1.5em !important;
+        width:auto !important;
+        min-width:1.5em !important;
+        padding:0 !important;
+        background:#f5f5f5 !important;
+        border:1px solid #bbb !important;
+        color:#222 !important;
+        border-radius:4px !important;
+        box-shadow:none !important;
+        display:inline-block !important;
+      }
     </style>
-    
-    <!-- jQuery (necesario para Bootstrap Select) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Select JS - versión beta para Bootstrap 5 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
     <!-- SheetJS para exportar a Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- jsPDF para exportar a PDF -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script type="module">
+    // Reporte de tareas: campos usados según la base de datos actual
+    // id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs
+    import { supabase } from "./supabaseClient.js";
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "login.html";
+      throw new Error("No autorizado");
+    }
+      const contenedor = document.querySelector("#reportes-resultado");
+
+      async function cargarReporte() {
+        const { data, error } = await supabase
+          .from("tareas")
+          .select("id, tipo_tarea_old, fecha, cuartel_id, duracion, cant_agua, obs")
+          .order("fecha", { ascending: false });
+
+        if (error) {
+          contenedor.innerHTML = "<p>❌ Error al cargar el reporte</p>";
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          contenedor.innerHTML = "<p>No hay tareas registradas aún.</p>";
+          return;
+        }
+
+        const tabla = document.createElement("table");
+        tabla.innerHTML = `
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo de Tarea</th>
+              <th>Cuartel</th>
+              <th>Duración (min)</th>
+              <th>Cant. Agua</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data
+              .map(
+                t => `
+              <tr>
+                <td>${t.fecha ?? "-"}</td>
+                <td>${t.tipo_tarea_old ?? "-"}</td>
+                <td>${t.cuartel_id ?? "-"}</td>
+                <td>${t.duracion ?? "-"}</td>
+                <td>${t.cant_agua ?? "-"}</td>
+                <td>${t.obs ?? ""}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        `;
+        contenedor.innerHTML = "";
+        contenedor.appendChild(tabla);
+      }
+
+      cargarReporte();
+    </script>
   </head>
   <body>
     <div id="header-container"></div>
@@ -173,6 +247,10 @@
                       <label for="finca-reporte" class="form-label font-weight-medium">
                         <i class="bi bi-geo-alt me-1"></i> Fincas
                       </label>
+                      <div class="mb-2">
+                        <button type="button" id="finca-todo" class="btn btn-sm btn-outline-primary me-2">Seleccionar Todo</button>
+                        <button type="button" id="finca-nada" class="btn btn-sm btn-outline-secondary">Deseleccionar Todo</button>
+                      </div>
                       <select id="finca-reporte" class="form-select selectpicker" multiple 
                               title="Seleccione fincas..." data-live-search="true">
                       </select>
@@ -182,6 +260,10 @@
                       <label for="cuartel-reporte" class="form-label font-weight-medium">
                         <i class="bi bi-grid me-1"></i> Cuarteles
                       </label>
+                      <div class="mb-2">
+                        <button type="button" id="cuartel-todo" class="btn btn-sm btn-outline-primary me-2">Seleccionar Todo</button>
+                        <button type="button" id="cuartel-nada" class="btn btn-sm btn-outline-secondary">Deseleccionar Todo</button>
+                      </div>
                       <select id="cuartel-reporte" class="form-select selectpicker" multiple 
                               title="Seleccione cuarteles..." data-live-search="true">
                       </select>
@@ -253,50 +335,6 @@
                   <p>Seleccione el tipo de reporte y configure los filtros para comenzar</p>
                 </div>
               </div>
-              
-              <!-- Controles de paginación -->
-              <div id="paginacion-container" class="d-flex justify-content-between align-items-center mt-4" style="display: none !important;">
-                <div class="d-flex align-items-center">
-                  <label for="registros-por-pagina" class="form-label me-2 mb-0">Registros por página:</label>
-                  <select id="registros-por-pagina" class="form-select form-select-sm" style="width: auto;">
-                    <option value="10">10</option>
-                    <option value="25" selected>25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                  </select>
-                </div>
-                
-                <div class="d-flex align-items-center">
-                  <span id="info-pagina" class="me-3 text-muted"></span>
-                  <nav aria-label="Paginación de reportes">
-                    <ul class="pagination pagination-sm mb-0">
-                      <li class="page-item" id="btn-primera">
-                        <button class="page-link" onclick="irAPagina(1)">
-                          <i class="bi bi-chevron-double-left"></i>
-                        </button>
-                      </li>
-                      <li class="page-item" id="btn-anterior">
-                        <button class="page-link" onclick="irAPaginaAnterior()">
-                          <i class="bi bi-chevron-left"></i>
-                        </button>
-                      </li>
-                      <li class="page-item active" id="btn-actual">
-                        <span class="page-link" id="numero-pagina">1</span>
-                      </li>
-                      <li class="page-item" id="btn-siguiente">
-                        <button class="page-link" onclick="irAPaginaSiguiente()">
-                          <i class="bi bi-chevron-right"></i>
-                        </button>
-                      </li>
-                      <li class="page-item" id="btn-ultima">
-                        <button class="page-link" onclick="irAUltimaPagina()">
-                          <i class="bi bi-chevron-double-right"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -304,21 +342,18 @@
     </main>
 
     <footer class="container">
-      <small><a href="privacidad.html">Privacidad</a> • <a href="terminos-condiciones.html">Términos</a></small>
+      <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
       <br>
       <small id="footer-version" style="color:#888;"></small>
     </footer>
-
-    <!-- Script principal de reportes -->
+    <script type="module" src="reportes.js"></script>
+    
+    <!-- Script para Bootstrap Select en reportes -->
     <script type="module">
       import { supabase } from "./supabaseClient.js";
       
-      // Verificar autenticación
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "login.html";
-        throw new Error("No autorizado");
-      }
+      // Hacer supabase disponible globalmente
+      window.supabase = supabase;
       
       // Cargar header
       fetch('header.html')
@@ -331,16 +366,7 @@
       // Variables globales para almacenar datos
       let todasLasFincas = [];
       let todosLosCuarteles = [];
-      
-      // Variables de paginación
-      let datosCompletos = [];
-      let paginaActual = 1;
-      let registrosPorPagina = 25;
-      let totalPaginas = 0;
 
-      const contenedor = document.querySelector("#reportes-resultado");
-
-      // Inicialización después de que DOM esté listo
       $(document).ready(function() {
         // Configurar fecha hasta como hoy
         const hoy = new Date().toISOString().split('T')[0];
@@ -364,25 +390,28 @@
         // Cargar opciones iniciales
         cargarFincasReporte();
 
+        // Configurar botones de todo/nada
+        $('#finca-todo').on('click', function() {
+          $('#finca-reporte').selectpicker('selectAll');
+          $('#finca-reporte').trigger('changed.bs.select');
+        });
+        
+        $('#finca-nada').on('click', function() {
+          $('#finca-reporte').selectpicker('deselectAll');
+          $('#finca-reporte').trigger('changed.bs.select');
+        });
+        
+        $('#cuartel-todo').on('click', function() {
+          $('#cuartel-reporte').selectpicker('selectAll');
+        });
+        
+        $('#cuartel-nada').on('click', function() {
+          $('#cuartel-reporte').selectpicker('deselectAll');
+        });
+
         // Configurar evento para cascada fincas → cuarteles
         $('#finca-reporte').on('changed.bs.select', function() {
           cargarCuartelesReporte();
-        });
-
-        // Configurar formulario
-        document.getElementById('reportes-filtros').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const tipoReporte = document.getElementById('tipo-reporte').value;
-          await generarReportePorTipo(tipoReporte);
-        });
-        
-        // Configurar evento para cambio de registros por página
-        document.getElementById('registros-por-pagina').addEventListener('change', function() {
-          registrosPorPagina = parseInt(this.value);
-          paginaActual = 1;
-          if (datosCompletos.length > 0) {
-            mostrarPagina();
-          }
         });
       });
 
@@ -391,8 +420,7 @@
         try {
           const { data: fincas, error } = await supabase
             .from('fincas')
-            .select('id, nombre_finca, direccion, usuario_id')
-            .eq('usuario_id', user.id)
+            .select('id, nombre_finca')
             .order('nombre_finca');
           
           if (error) throw error;
@@ -403,12 +431,8 @@
           const selector = $('#finca-reporte');
           selector.empty();
           
-          // Agregar opción "Todas"
-          selector.append(`<option value="todas">Todas las fincas</option>`);
-          
           todasLasFincas.forEach(finca => {
-            const displayName = finca.nombre_finca || `Finca ${finca.id}`;
-            selector.append(`<option value="${finca.id}">${displayName}</option>`);
+            selector.append(`<option value="${finca.id}">${finca.nombre_finca}</option>`);
           });
           
           // Refrescar Bootstrap Select
@@ -416,6 +440,7 @@
           
         } catch (error) {
           console.error('Error cargando fincas:', error);
+          alert('Error al cargar las fincas: ' + error.message);
         }
       }
 
@@ -428,62 +453,31 @@
           const selector = $('#cuartel-reporte');
           selector.empty();
           
-          // Agregar opción "Todos"
-          selector.append(`<option value="todos">Todos los cuarteles</option>`);
-          
-          let cuarteles = [];
-          
           if (!fincasSeleccionadas || fincasSeleccionadas.length === 0) {
             selector.selectpicker('refresh');
             return;
           }
           
-          // Si se seleccionó "todas", obtener todas las fincas del usuario
-          if (fincasSeleccionadas.includes('todas')) {
-            const { data: todasFincas } = await supabase
-              .from('fincas')
-              .select('id, nombre_finca')
-              .eq('usuario_id', user.id);
-            
-            const fincaIds = todasFincas?.map(f => f.id) || [];
-            
-            const { data: cuartelesData, error } = await supabase
-              .from('cuarteles')
-              .select('id, nombre, finca_id, fincas(nombre_finca)')
-              .in('finca_id', fincaIds)
-              .order('nombre');
-            
-            if (error) throw error;
-            cuarteles = cuartelesData || [];
-          } else {
-            // Filtrar "todas" de la selección
-            const fincaIds = fincasSeleccionadas.filter(id => id !== 'todas');
-            
-            if (fincaIds.length > 0) {
-              const { data: cuartelesData, error } = await supabase
-                .from('cuarteles')
-                .select('id, nombre, finca_id, fincas(nombre_finca)')
-                .in('finca_id', fincaIds)
-                .order('nombre');
-              
-              if (error) throw error;
-              cuarteles = cuartelesData || [];
-            }
-          }
+          // Obtener cuarteles de las fincas seleccionadas
+          const { data: cuarteles, error } = await supabase
+            .from('cuarteles')
+            .select('*')
+            .in('finca_id', fincasSeleccionadas)
+            .order('nombre');
           
-          // Filtrar duplicados
-          const cuartelesUnicos = cuarteles.filter((cuartel, index, self) => 
-            index === self.findIndex(c => c.id === cuartel.id)
-          );
+          if (error) throw error;
           
-          todosLosCuarteles = cuartelesUnicos;
+          // Usar Map para eliminar duplicados por ID
+          const cuartelesMap = new Map();
+          cuarteles.forEach(cuartel => {
+            cuartelesMap.set(cuartel.id, cuartel);
+          });
           
-          // Poblar selector con cuarteles únicos mostrando finca + cuartel
-          cuartelesUnicos.forEach(cuartel => {
-            const nombreCuartel = cuartel.nombre || `Cuartel ${cuartel.id}`;
-            const nombreFinca = cuartel.fincas?.nombre_finca || 'Sin finca';
-            const displayName = `${nombreFinca} - ${nombreCuartel}`;
-            selector.append(`<option value="${cuartel.id}">${displayName}</option>`);
+          todosLosCuarteles = Array.from(cuartelesMap.values());
+          
+          // Poblar selector con cuarteles únicos
+          todosLosCuarteles.forEach(cuartel => {
+            selector.append(`<option value="${cuartel.id}">${cuartel.nombre}</option>`);
           });
           
           // Refrescar Bootstrap Select
@@ -491,254 +485,31 @@
           
         } catch (error) {
           console.error('Error cargando cuarteles:', error);
-        }
-      }
-
-      // Función para generar reportes según el tipo
-      async function generarReportePorTipo(tipo) {
-        try {
-          contenedor.innerHTML = `
-            <div class="text-center py-5">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
-              </div>
-              <p class="mt-3">Generando reporte de ${tipo}...</p>
-            </div>
-          `;
-
-          let data, error;
-          let columns = [];
-          let title = '';
-
-          switch(tipo) {
-            case 'riegos':
-              ({ data, error } = await supabase
-                .from("riegos")
-                .select("id, fecha, finca_id, cuartel_id, horas_riego, volumen_agua, observaciones")
-                .order("fecha", { ascending: false }));
-              columns = [
-                { key: 'fecha', label: 'Fecha', icon: 'calendar3', format: 'date' },
-                { key: 'finca_id', label: 'Finca ID', icon: 'geo-alt' },
-                { key: 'cuartel_id', label: 'Cuartel ID', icon: 'grid' },
-                { key: 'horas_riego', label: 'Horas', icon: 'clock' },
-                { key: 'volumen_agua', label: 'Volumen (L)', icon: 'droplet' },
-                { key: 'observaciones', label: 'Observaciones', icon: 'chat-text', format: 'truncate' }
-              ];
-              title = 'Riegos Realizados';
-              break;
-
-            case 'riegos-regador':
-              ({ data, error } = await supabase
-                .from("riegos")
-                .select("id, fecha, operador_id, finca_id, cuartel_id, horas_riego, volumen_agua")
-                .order("fecha", { ascending: false }));
-              columns = [
-                { key: 'fecha', label: 'Fecha', icon: 'calendar3', format: 'date' },
-                { key: 'operador_id', label: 'Regador ID', icon: 'person' },
-                { key: 'finca_id', label: 'Finca ID', icon: 'geo-alt' },
-                { key: 'cuartel_id', label: 'Cuartel ID', icon: 'grid' },
-                { key: 'horas_riego', label: 'Horas', icon: 'clock' },
-                { key: 'volumen_agua', label: 'Volumen (L)', icon: 'droplet' }
-              ];
-              title = 'Riegos por Regador';
-              break;
-
-            case 'agroquimicos':
-              // Mostrar mensaje de funcionalidad futura
-              contenedor.innerHTML = `
-                <div class="text-center py-5 text-muted">
-                  <i class="bi bi-tools fs-1 mb-3 d-block"></i>
-                  <h5>Funcionalidad en desarrollo</h5>
-                  <p>El reporte de aplicaciones de agroquímicos estará disponible próximamente</p>
-                </div>
-              `;
-              document.getElementById('paginacion-container').style.display = 'none';
-              return;
-
-            case 'fertilizaciones':
-              // Mostrar datos de fertilizantes como sustituto temporal
-              ({ data, error } = await supabase
-                .from("fertilizantes")
-                .select("id, producto, formula, n, p, k")
-                .order("producto"));
-              columns = [
-                { key: 'producto', label: 'Producto', icon: 'flower1' },
-                { key: 'formula', label: 'Fórmula', icon: 'calculator' },
-                { key: 'n', label: 'N %', icon: 'arrow-up' },
-                { key: 'p', label: 'P %', icon: 'arrow-right' },
-                { key: 'k', label: 'K %', icon: 'arrow-down' }
-              ];
-              title = 'Fertilizantes Disponibles';
-              break;
-
-            case 'labores':
-              // Mostrar mensaje de funcionalidad futura
-              contenedor.innerHTML = `
-                <div class="text-center py-5 text-muted">
-                  <i class="bi bi-tools fs-1 mb-3 d-block"></i>
-                  <h5>Funcionalidad en desarrollo</h5>
-                  <p>El reporte de labores de suelo estará disponible próximamente</p>
-                </div>
-              `;
-              document.getElementById('paginacion-container').style.display = 'none';
-              return;
-
-            case 'bpa':
-              // Mostrar mensaje de funcionalidad futura
-              contenedor.innerHTML = `
-                <div class="text-center py-5 text-muted">
-                  <i class="bi bi-award fs-1 mb-3 d-block"></i>
-                  <h5>Funcionalidad en desarrollo</h5>
-                  <p>El reporte de normas BPA estará disponible próximamente</p>
-                </div>
-              `;
-              document.getElementById('paginacion-container').style.display = 'none';
-              return;
-
-            default:
-              throw new Error('Tipo de reporte no reconocido');
-          }
-
-          if (error) throw error;
-
-          if (!data || data.length === 0) {
-            contenedor.innerHTML = `
-              <div class="text-center py-5 text-muted">
-                <i class="bi bi-inbox fs-1 mb-3 d-block"></i>
-                <h5>No hay datos para ${title}</h5>
-                <p>No se encontraron registros para este tipo de reporte</p>
-              </div>
-            `;
-            document.getElementById('paginacion-container').style.display = 'none';
-            return;
-          }
-
-          // Guardar datos completos y configurar paginación
-          datosCompletos = data;
-          window.columnas = columns; // Hacer columnas globales para paginación
-          paginaActual = 1;
-          registrosPorPagina = parseInt(document.getElementById('registros-por-pagina').value);
-          totalPaginas = Math.ceil(datosCompletos.length / registrosPorPagina);
-
-          // Actualizar contador total
-          const totalElement = document.getElementById('total-registros');
-          if (totalElement) {
-            totalElement.textContent = datosCompletos.length;
-          }
-
-          // Mostrar primera página
-          mostrarPagina();
-
-          // Mostrar controles de paginación si hay más de una página
-          const paginacionContainer = document.getElementById('paginacion-container');
-          if (totalPaginas > 1) {
-            paginacionContainer.style.display = 'flex';
-          } else {
-            paginacionContainer.style.display = 'none';
-          }
-
-        } catch (err) {
-          console.error('Error generando reporte:', err);
-          contenedor.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-              <i class="bi bi-exclamation-triangle me-2"></i>
-              <strong>Error:</strong> ${err.message}
-            </div>
-          `;
-          document.getElementById('paginacion-container').style.display = 'none';
+          alert('Error al cargar los cuarteles: ' + error.message);
         }
       }
 
       // Hacer funciones globales disponibles
       window.cargarFincasReporte = cargarFincasReporte;
       window.cargarCuartelesReporte = cargarCuartelesReporte;
-      window.generarReportePorTipo = generarReportePorTipo;
-
-      // Funciones de paginación
-      function mostrarPagina() {
-        const inicio = (paginaActual - 1) * registrosPorPagina;
-        const fin = inicio + registrosPorPagina;
-        const datosPagina = datosCompletos.slice(inicio, fin);
-
-        // Generar tabla con datos de la página actual
-        const tabla = document.createElement("table");
-        tabla.className = "table table-hover";
-        tabla.innerHTML = `
-          <thead class="table-primary">
-            <tr>
-              ${window.columnas.map(col => `<th><i class="bi bi-${col.icon} me-1"></i>${col.label}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${datosPagina.map(row => `
-              <tr>
-                ${window.columnas.map(col => {
-                  let value = row[col.key];
-                  if (col.format === 'date' && value) {
-                    value = new Date(value).toLocaleDateString('es-ES');
-                  } else if (col.format === 'badge' && value) {
-                    value = `<span class="badge bg-info">${value}</span>`;
-                  } else if (col.format === 'truncate' && value) {
-                    value = `<span class="text-truncate" style="max-width: 200px;" title="${value}">${value}</span>`;
-                  } else if (!value) {
-                    value = '-';
-                  }
-                  return `<td>${value}</td>`;
-                }).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        `;
-        
-        contenedor.innerHTML = "";
-        contenedor.appendChild(tabla);
-
-        // Actualizar información de página
-        actualizarInfoPaginacion();
-      }
-
-      function actualizarInfoPaginacion() {
-        const inicio = (paginaActual - 1) * registrosPorPagina + 1;
-        const fin = Math.min(paginaActual * registrosPorPagina, datosCompletos.length);
-        
-        document.getElementById('info-pagina').textContent = 
-          `Mostrando ${inicio}-${fin} de ${datosCompletos.length} registros`;
-        
-        document.getElementById('numero-pagina').textContent = paginaActual;
-        
-        // Habilitar/deshabilitar botones
-        document.getElementById('btn-primera').classList.toggle('disabled', paginaActual === 1);
-        document.getElementById('btn-anterior').classList.toggle('disabled', paginaActual === 1);
-        document.getElementById('btn-siguiente').classList.toggle('disabled', paginaActual === totalPaginas);
-        document.getElementById('btn-ultima').classList.toggle('disabled', paginaActual === totalPaginas);
-      }
-
-      // Funciones globales de navegación
-      window.irAPagina = function(pagina) {
-        if (pagina >= 1 && pagina <= totalPaginas) {
-          paginaActual = pagina;
-          mostrarPagina();
+    </script>
+    
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const tipoReporte = document.getElementById('tipo-reporte');
+        const filtrosGenerales = document.getElementById('filtros-generales');
+        if (tipoReporte) {
+          tipoReporte.addEventListener('change', (e) => {
+            if (e.target.value === 'riegos-regador') {
+              if (filtrosGenerales) filtrosGenerales.style.display = 'none';
+              if (window.renderRiegosPorRegadorUI) window.renderRiegosPorRegadorUI();
+            } else {
+              if (filtrosGenerales) filtrosGenerales.style.display = '';
+              window.location.reload(); // recarga para mostrar el filtro estándar
+            }
+          });
         }
-      };
-
-      window.irAPaginaAnterior = function() {
-        if (paginaActual > 1) {
-          paginaActual--;
-          mostrarPagina();
-        }
-      };
-
-      window.irAPaginaSiguiente = function() {
-        if (paginaActual < totalPaginas) {
-          paginaActual++;
-          mostrarPagina();
-        }
-      };
-
-      window.irAUltimaPagina = function() {
-        paginaActual = totalPaginas;
-        mostrarPagina();
-      };
+      });
     </script>
   </body>
 </html>

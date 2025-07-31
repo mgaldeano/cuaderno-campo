@@ -1,0 +1,2680 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reportes | Cuaderno de Campo</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Select - versión compatible con Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Google Fonts Roboto -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="estilos.css">
+    
+    <style>
+      /* Personalización Bootstrap Select para Bootstrap 5 */
+      .bootstrap-select .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: 1px solid #dee2e6;
+      }
+      
+      .bootstrap-select .dropdown-menu li a {
+        padding: 8px 16px 8px 40px !important;
+        font-family: 'Roboto', sans-serif;
+        transition: all 0.2s ease;
+      }
+      
+      .bootstrap-select .dropdown-menu li a span.check-mark {
+        left: 12px;
+        color: #0d6efd;
+        font-size: 1.1em;
+        font-weight: bold;
+      }
+      
+      .bootstrap-select .dropdown-menu li.selected a {
+        background-color: #e7f3ff;
+        color: #0d6efd;
+        font-weight: 500;
+      }
+      
+      .bootstrap-select .dropdown-menu li a:hover {
+        background-color: #f8f9fa;
+      }
+      
+      .bootstrap-select .dropdown-menu li.selected a:hover {
+        background-color: #d1ecf1;
+      }
+      
+      .bootstrap-select > .dropdown-toggle {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+        font-family: 'Roboto', sans-serif;
+      }
+      
+      .bootstrap-select > .dropdown-toggle:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+      
+      /* Botones de acciones (Seleccionar todas/ninguna) */
+      .bootstrap-select .bs-actionsbox {
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        margin-bottom: 2px;
+      }
+      
+      .bootstrap-select .bs-actionsbox .btn-group {
+        width: 100%;
+        display: flex;
+        gap: 4px;
+      }
+      
+      .bootstrap-select .bs-actionsbox .btn-group button {
+        font-size: 11px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #0d6efd;
+        background: #ffffff;
+        color: #0d6efd;
+        font-weight: 600;
+        flex: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+      }
+      
+      .bootstrap-select .bs-actionsbox .btn-group button:hover {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+      }
+      
+      /* Asegurar que el actionsBox siempre sea visible */
+      .bootstrap-select.open .bs-actionsbox {
+        display: block !important;
+      }
+    </style>
+    
+    <!-- jQuery (necesario para Bootstrap Select) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Select JS - versión beta para Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+    <!-- SheetJS para exportar a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF para exportar a PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <!-- jsPDF AutoTable para tablas en PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+  </head>
+  <body>
+    <div id="header-container"></div>
+
+    <!-- Navegación dinámica: se carga desde header.html en #header-container -->
+
+    <main class="container py-4">
+      <!-- Header Section -->
+      <div class="container-fluid bg-light py-3 mb-4">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-1 text-primary font-weight-bold">
+                <i class="bi bi-graph-up text-primary me-2"></i>
+                Reportes y Análisis
+              </h1>
+              <p class="text-muted mb-0">Genere reportes detallados de sus actividades agrícolas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Filtros -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-funnel text-primary me-2"></i>
+                <span>Configuración del Reporte</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="reportes-filtros" class="mb-0">
+                <div class="row mb-4">
+                  <div class="col-md-6">
+                    <label for="tipo-reporte" class="form-label font-weight-medium">
+                      <i class="bi bi-file-earmark-bar-graph me-1"></i> Tipo de Reporte *
+                    </label>
+                    <select id="tipo-reporte" class="form-select" required>
+                      <option value="riegos">📊 Riegos realizados</option>
+                      <option value="riegos-regador">👤 Riegos por regador</option>
+                      <option value="agroquimicos">🧪 Aplicaciones de agroquímicos</option>
+                      <option value="fertilizaciones">🌱 Fertilizaciones</option>
+                      <option value="labores">🚜 Labores de suelo</option>
+                      <option value="bpa">✅ Normas BPA (auditoría)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Filtros generales (Riegos realizados) -->
+                <div id="filtros-riegos" style="display:none;">
+                  <div class="row mb-4">
+                    <div class="col-md-6">
+                      <label for="finca-reporte" class="form-label font-weight-medium">
+                        <i class="bi bi-geo-alt me-1"></i> Fincas
+                      </label>
+                      <select id="finca-reporte" class="form-select selectpicker" multiple 
+                              title="Seleccione fincas..." data-live-search="true">
+                      </select>
+                      <div class="form-text">Filtra por fincas seleccionadas</div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="cuartel-reporte" class="form-label font-weight-medium">
+                        <i class="bi bi-grid me-1"></i> Cuarteles
+                      </label>
+                      <select id="cuartel-reporte" class="form-select selectpicker" multiple 
+                              title="Seleccione cuarteles..." data-live-search="true">
+                      </select>
+                      <div class="form-text">Filtra por cuarteles seleccionados</div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-4">
+                    <div class="col-md-6">
+                      <label for="fecha-desde" class="form-label font-weight-medium">
+                        <i class="bi bi-calendar-event me-1"></i> Fecha Desde
+                      </label>
+                      <input type="date" id="fecha-desde" class="form-control" value="2000-01-01" />
+                      <div class="form-text">Filtra registros desde esta fecha</div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="fecha-hasta" class="form-label font-weight-medium">
+                        <i class="bi bi-calendar-check me-1"></i> Fecha Hasta
+                      </label>
+                      <input type="date" id="fecha-hasta" class="form-control" />
+                      <div class="form-text">Filtra registros hasta esta fecha</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Filtros específicos para Riegos por regador -->
+                <div id="filtros-riegos-regador" style="display:none;">
+                  <div class="row mb-4">
+                    <div class="col-md-6">
+                      <label for="regador-reporte" class="form-label font-weight-medium">
+                        <i class="bi bi-person me-1"></i> Regadores
+                      </label>
+                      <select id="regador-reporte" class="form-select selectpicker" multiple 
+                              title="Seleccione regadores..." data-live-search="true">
+                      </select>
+                      <div class="form-text">Filtra por regadores que realizaron riegos</div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-4">
+                    <div class="col-md-6">
+                      <label for="fecha-desde-regador" class="form-label font-weight-medium">
+                        <i class="bi bi-calendar-event me-1"></i> Fecha Desde
+                      </label>
+                      <input type="date" id="fecha-desde-regador" class="form-control" value="2000-01-01" />
+                      <div class="form-text">Filtra registros desde esta fecha</div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="fecha-hasta-regador" class="form-label font-weight-medium">
+                        <i class="bi bi-calendar-check me-1"></i> Fecha Hasta
+                      </label>
+                      <input type="date" id="fecha-hasta-regador" class="form-control" />
+                      <div class="form-text">Filtra registros hasta esta fecha</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contenedores para filtros específicos según rol -->
+                <div id="filtros-productor" style="display:none;"></div>
+                <div id="filtros-operador" style="display:none;"></div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-play-circle me-2"></i>
+                    Generar Reporte
+                  </button>
+                  <div>
+                    <button id="exportar-excel" type="button" class="btn btn-success me-2">
+                      <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </button>
+                    <button id="exportar-csv" type="button" class="btn btn-info me-2">
+                      <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </button>
+                    <button id="exportar-pdf" type="button" class="btn btn-danger">
+                      <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados del Reporte -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-table text-primary me-2"></i>
+                <span>Resultados del Reporte</span>
+                <span class="badge bg-primary ms-2" id="total-registros">0</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <div id="reportes-resultado">
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-graph-up-arrow fs-1 mb-3 d-block"></i>
+                  <h5>Configure los filtros y genere su reporte</h5>
+                  <p>Seleccione el tipo de reporte y configure los filtros para comenzar</p>
+                </div>
+              </div>
+              
+              <!-- Controles de paginación -->
+              <div id="paginacion-container" class="d-flex justify-content-between align-items-center mt-4" style="display: none !important;">
+                <div class="d-flex align-items-center">
+                  <label for="registros-por-pagina" class="form-label me-2 mb-0">Registros por página:</label>
+                  <select id="registros-por-pagina" class="form-select form-select-sm" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <span id="info-pagina" class="me-3 text-muted"></span>
+                  <nav aria-label="Paginación de reportes">
+                    <ul class="pagination pagination-sm mb-0">
+                      <li class="page-item" id="btn-primera">
+                        <button class="page-link" onclick="irAPagina(1)">
+                          <i class="bi bi-chevron-double-left"></i>
+                        </button>
+                      </li>
+                      <li class="page-item" id="btn-anterior">
+                        <button class="page-link" onclick="irAPaginaAnterior()">
+                          <i class="bi bi-chevron-left"></i>
+                        </button>
+                      </li>
+                      <li class="page-item active" id="btn-actual">
+                        <span class="page-link" id="numero-pagina">1</span>
+                      </li>
+                      <li class="page-item" id="btn-siguiente">
+                        <button class="page-link" onclick="irAPaginaSiguiente()">
+                          <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </li>
+                      <li class="page-item" id="btn-ultima">
+                        <button class="page-link" onclick="irAUltimaPagina()">
+                          <i class="bi bi-chevron-double-right"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="container">
+      <small><a href="privacidad.html">Privacidad</a> • <a href="terminos-condiciones.html">Términos</a></small>
+      <br>
+      <small id="footer-version" style="color:#888;"></small>
+    </footer>
+
+    <!-- Script principal de reportes -->
+    <script type="module">
+      import { supabase } from "./supabaseClient.js";
+      
+      // Verificar autenticación
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "login.html";
+        throw new Error("No autorizado");
+      }
+      
+      // Cargar header
+      fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          import('./header.js');
+        });
+
+      // Variables globales para almacenar datos
+      let todasLasFincas = [];
+      let todosLosCuarteles = [];
+      
+      // Variables de paginación
+      let datosCompletos = [];
+      let paginaActual = 1;
+      let registrosPorPagina = 25;
+      let totalPaginas = 0;
+
+      const contenedor = document.querySelector("#reportes-resultado");
+
+      // Inicialización después de que DOM esté listo
+      $(document).ready(function() {
+        // Configurar fecha hasta como hoy
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha-hasta').value = hoy;
+
+        // Inicializar Bootstrap Select
+        $('.selectpicker').selectpicker({
+          actionsBox: true,
+          selectAllText: 'Todas',
+          deselectAllText: 'Ninguna',
+          countSelectedText: function(numSelected, numTotal) {
+            return numSelected + ' de ' + numTotal + ' seleccionadas';
+          },
+          selectedTextFormat: 'count > 2',
+          liveSearch: true,
+          liveSearchPlaceholder: 'Buscar...',
+          noneSelectedText: 'Seleccione opciones...',
+          style: 'btn-outline-secondary'
+        });
+
+        // Cargar opciones iniciales
+        cargarFincasReporte();
+
+        // Configurar evento para cascada fincas → cuarteles
+        $('#finca-reporte').on('changed.bs.select', function() {
+          console.log('>>> Evento changed.bs.select disparado!');
+          console.log('>>> Fincas seleccionadas en evento:', $(this).val());
+          cargarCuartelesReporte();
+        });
+
+        // Agregar también el evento change estándar como respaldo
+        $('#finca-reporte').on('change', function() {
+          console.log('>>> Evento change estándar disparado!');
+          console.log('>>> Fincas seleccionadas en change:', $(this).val());
+          cargarCuartelesReporte();
+        });
+
+        // Configurar evento para cambio de tipo de reporte
+        $('#tipo-reporte').on('change', function() {
+          const tipoSeleccionado = this.value;
+          mostrarFiltrosSegunTipo(tipoSeleccionado);
+        });
+
+        // Mostrar filtros iniciales para riegos
+        mostrarFiltrosSegunTipo('riegos');
+
+        // Configurar formulario
+        document.getElementById('reportes-filtros').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const tipoReporte = document.getElementById('tipo-reporte').value;
+          await generarReportePorTipo(tipoReporte);
+        });
+        
+        // Configurar evento para cambio de registros por página
+        document.getElementById('registros-por-pagina').addEventListener('change', function() {
+          registrosPorPagina = parseInt(this.value);
+          paginaActual = 1;
+          if (datosCompletos.length > 0) {
+            mostrarPagina();
+          }
+        });
+
+        // Configurar eventos de exportación
+        document.getElementById('exportar-excel').addEventListener('click', exportarExcel);
+        document.getElementById('exportar-csv').addEventListener('click', exportarCSV);
+        document.getElementById('exportar-pdf').addEventListener('click', exportarPDF);
+      });
+
+      // Función para cargar fincas en el reporte
+      async function cargarFincasReporte() {
+        try {
+          console.log('=== CARGA DE FINCAS ===');
+          console.log('Usuario ID:', user.id);
+          
+          const { data: fincas, error } = await supabase
+            .from('fincas')
+            .select('id, nombre_finca, direccion, usuario_id')
+            .eq('usuario_id', user.id)
+            .order('nombre_finca');
+          
+          if (error) {
+            console.error('Error cargando fincas:', error);
+            throw error;
+          }
+          
+          console.log('Fincas obtenidas de BD:', fincas);
+          
+          todasLasFincas = fincas || [];
+          console.log('Total fincas del usuario:', todasLasFincas.length);
+          
+          // Limpiar y repoblar el selector
+          const selector = $('#finca-reporte');
+          selector.empty();
+          
+          // Destruir Bootstrap Select si existe
+          if (selector.hasClass('selectpicker')) {
+            selector.selectpicker('destroy');
+          }
+          
+          todasLasFincas.forEach(finca => {
+            const displayName = finca.nombre_finca || `Finca ${finca.id}`;
+            console.log('Agregando finca:', displayName);
+            selector.append(`<option value="${finca.id}">${displayName}</option>`);
+          });
+          
+          console.log('Opciones de fincas agregadas:', todasLasFincas.length);
+          console.log('HTML del selector de fincas:', selector.html());
+          
+          // Reinicializar Bootstrap Select con actionsBox
+          selector.selectpicker({
+            actionsBox: true,
+            selectAllText: 'Todas',
+            deselectAllText: 'Ninguna',
+            countSelectedText: function(numSelected, numTotal) {
+              return numSelected + ' de ' + numTotal + ' seleccionadas';
+            },
+            selectedTextFormat: 'count > 2',
+            liveSearch: true,
+            liveSearchPlaceholder: 'Buscar...',
+            noneSelectedText: 'Seleccione opciones...',
+            style: 'btn-outline-secondary'
+          });
+          
+          console.log('Bootstrap Select de fincas inicializado');
+          
+          // Cargar cuarteles iniciales (vacío hasta que se seleccionen fincas)
+          console.log('Llamando a cargarCuartelesReporte...');
+          cargarCuartelesReporte();
+          
+          console.log('=== FIN CARGA FINCAS ===');
+          
+        } catch (error) {
+          console.error('Error cargando fincas:', error);
+        }
+      }
+
+      // Función para cargar cuarteles según fincas seleccionadas
+      async function cargarCuartelesReporte() {
+        try {
+          const fincasSeleccionadas = $('#finca-reporte').val();
+          console.log('=== CARGA DE CUARTELES ===');
+          console.log('Fincas seleccionadas:', fincasSeleccionadas);
+          
+          // Obtener referencia al selector
+          const selector = $('#cuartel-reporte');
+          console.log('Selector encontrado:', selector.length > 0);
+          
+          // LIMPIEZA TOTAL Y AGRESIVA
+          console.log('Iniciando limpieza total...');
+          
+          // 1. Destruir Bootstrap Select si existe
+          if (selector.hasClass('selectpicker')) {
+            console.log('Destruyendo Bootstrap Select existente');
+            selector.selectpicker('destroy');
+          }
+          
+          // 2. Remover TODOS los wrappers Bootstrap Select relacionados con cuarteles
+          $('.bootstrap-select').each(function() {
+            const wrapper = $(this);
+            const prevSelect = wrapper.prev('select');
+            if (prevSelect.attr('id') === 'cuartel-reporte' || !prevSelect.length) {
+              console.log('Removiendo wrapper Bootstrap Select');
+              wrapper.remove();
+            }
+          });
+          
+          // 3. Limpiar completamente el select original
+          selector.empty();
+          selector.removeClass('selectpicker');
+          console.log('Selector limpiado completamente');
+          
+          let cuarteles = [];
+          
+          // Solo buscar cuarteles si hay fincas seleccionadas
+          if (fincasSeleccionadas && fincasSeleccionadas.length > 0) {
+            console.log('Buscando cuarteles para fincas:', fincasSeleccionadas);
+            
+            const { data: cuartelesData, error } = await supabase
+              .from('cuarteles')
+              .select('id, nombre, finca_id, fincas(nombre_finca)')
+              .in('finca_id', fincasSeleccionadas)
+              .order('nombre');
+            
+            if (error) {
+              console.error('Error en consulta de cuarteles:', error);
+              throw error;
+            }
+            
+            cuarteles = cuartelesData || [];
+            console.log('Cuarteles recibidos de BD:', cuarteles);
+            
+            // Eliminar duplicados si existen
+            const cuartelesUnicos = cuarteles.filter((cuartel, index, self) => 
+              index === self.findIndex(c => c.id === cuartel.id)
+            );
+            
+            console.log('Cuarteles únicos:', cuartelesUnicos);
+            
+            // Agregar opciones al selector DE UNA SOLA VEZ
+            const opciones = cuartelesUnicos.map(cuartel => {
+              const nombreCuartel = cuartel.nombre || `Cuartel ${cuartel.id}`;
+              const nombreFinca = cuartel.fincas?.nombre_finca || 'Sin finca';
+              const displayName = `${nombreFinca} - ${nombreCuartel}`;
+              console.log('Preparando opción:', displayName);
+              return `<option value="${cuartel.id}">${displayName}</option>`;
+            }).join('');
+            
+            selector.html(opciones);
+            console.log('Total opciones agregadas:', cuartelesUnicos.length);
+            console.log('HTML del selector después de agregar:', selector.html());
+            
+          } else {
+            console.log('No hay fincas seleccionadas, selector vacío');
+          }
+          
+          // ESPERAR UN MOMENTO ANTES DE INICIALIZAR
+          setTimeout(() => {
+            console.log('Inicializando Bootstrap Select después de pausa...');
+            console.log('Opciones en selector antes de selectpicker:', selector.find('option').length);
+            
+            // Verificar una vez más que no hay wrappers
+            const existingWrapper = selector.next('.bootstrap-select');
+            if (existingWrapper.length > 0) {
+              console.log('Encontrado wrapper residual, removiendo...');
+              existingWrapper.remove();
+            }
+            
+            // Agregar clase selectpicker
+            selector.addClass('selectpicker');
+            
+            // Inicializar Bootstrap Select UNA SOLA VEZ
+            selector.selectpicker({
+              actionsBox: true,
+              selectAllText: 'Todas',
+              deselectAllText: 'Ninguna',
+              countSelectedText: function(numSelected, numTotal) {
+                return numSelected + ' de ' + numTotal + ' seleccionadas';
+              },
+              selectedTextFormat: 'count > 2',
+              liveSearch: true,
+              liveSearchPlaceholder: 'Buscar...',
+              noneSelectedText: 'Seleccione cuarteles...',
+              style: 'btn-outline-secondary'
+            });
+            
+            console.log('Bootstrap Select inicializado');
+            
+            // Verificación final después de inicialización
+            setTimeout(() => {
+              console.log('=== VERIFICACIÓN FINAL ===');
+              const finalWrapper = selector.next('.bootstrap-select');
+              const allWrappers = $('.bootstrap-select');
+              
+              console.log('Wrappers Bootstrap Select en página:', allWrappers.length);
+              console.log('Wrapper específico de cuarteles:', finalWrapper.length);
+              
+              if (finalWrapper.length > 0) {
+                const menuItems = finalWrapper.find('.dropdown-menu li');
+                console.log('Items en dropdown final:', menuItems.length);
+                
+                // Verificar duplicados una última vez
+                const optionTexts = [];
+                menuItems.each(function() {
+                  const text = $(this).find('a span.text').text();
+                  if (text && text.trim() !== '') {
+                    optionTexts.push(text);
+                  }
+                });
+                
+                const duplicados = optionTexts.filter((item, index) => optionTexts.indexOf(item) !== index);
+                if (duplicados.length > 0) {
+                  console.error('❌ DUPLICADOS DETECTADOS:', duplicados);
+                } else {
+                  console.log('✅ Sin duplicados confirmado');
+                }
+              }
+              
+              console.log('=== FIN VERIFICACIÓN ===');
+            }, 200);
+            
+          }, 100);
+          
+          console.log('=== FIN CARGA CUARTELES ===');
+          
+        } catch (error) {
+          console.error('Error cargando cuarteles:', error);
+          alert('Error cargando cuarteles: ' + error.message);
+        }
+      }
+
+      // Función para mostrar filtros según el tipo de reporte
+      function mostrarFiltrosSegunTipo(tipo) {
+        console.log('=== MOSTRANDO FILTROS SEGÚN TIPO ===');
+        console.log('Tipo seleccionado:', tipo);
+        
+        // Ocultar todos los filtros primero
+        document.getElementById('filtros-riegos').style.display = 'none';
+        document.getElementById('filtros-riegos-regador').style.display = 'none';
+
+        // Mostrar el filtro correspondiente
+        if (tipo === 'riegos-regador') {
+          console.log('Mostrando filtros para riegos-regador');
+          document.getElementById('filtros-riegos-regador').style.display = 'block';
+          cargarRegadoresQueHicieronRiegos();
+          // Configurar fecha hasta como hoy para este formulario
+          const hoy = new Date().toISOString().split('T')[0];
+          document.getElementById('fecha-hasta-regador').value = hoy;
+        } else {
+          console.log('Mostrando filtros para riegos (general)');
+          document.getElementById('filtros-riegos').style.display = 'block';
+          
+          // Verificar que los combos estén visibles
+          setTimeout(() => {
+            const fincasVisible = $('#finca-reporte').is(':visible');
+            const cuartelesVisible = $('#cuartel-reporte').is(':visible');
+            console.log('Después de mostrar filtros:');
+            console.log('- Fincas visible:', fincasVisible);
+            console.log('- Cuarteles visible:', cuartelesVisible);
+            
+            if (!fincasVisible) {
+              console.warn('⚠️ Combo fincas no es visible después de mostrar filtros');
+            }
+          }, 100);
+        }
+        
+        console.log('=== FIN MOSTRAR FILTROS ===');
+      }
+
+      // Función para cargar solo regadores que han realizado riegos
+      async function cargarRegadoresQueHicieronRiegos() {
+        try {
+          // Obtener operadores únicos que tienen riegos
+          const { data: riegosConOperadores, error } = await supabase
+            .from('riegos')
+            .select('operador_id')
+            .not('operador_id', 'is', null);
+          
+          if (error) throw error;
+          
+          // Obtener IDs únicos
+          const operadorIds = [...new Set(riegosConOperadores.map(r => r.operador_id))];
+          
+          if (operadorIds.length === 0) {
+            console.log('No hay regadores con riegos');
+            return;
+          }
+          
+          // Obtener información de estos operadores
+          const { data: regadores, error: errorRegadores } = await supabase
+            .from('aplicadores_operarios')
+            .select('id, nombre, apellido')
+            .in('id', operadorIds)
+            .order('apellido, nombre');
+          
+          if (errorRegadores) throw errorRegadores;
+          
+          // Limpiar y repoblar el selector
+          const selector = $('#regador-reporte');
+          selector.empty();
+          
+          regadores.forEach(regador => {
+            const nombreCompleto = `${regador.apellido || ''} ${regador.nombre || ''}`.trim() || `Regador ${regador.id}`;
+            selector.append(`<option value="${regador.id}">${nombreCompleto}</option>`);
+          });
+          
+          // Refrescar Bootstrap Select
+          selector.selectpicker('refresh');
+          
+        } catch (error) {
+          console.error('Error cargando regadores con riegos:', error);
+        }
+      }
+
+      // Función para generar reportes según el tipo
+      async function generarReportePorTipo(tipo) {
+        try {
+          contenedor.innerHTML = `
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="mt-3">Generando reporte de ${tipo}...</p>
+            </div>
+          `;
+
+          let data, error;
+          let columns = [];
+          let title = '';
+
+          switch(tipo) {
+            case 'riegos':
+              // Aplicar filtros de fecha
+              let queryBuilderRiegos = supabase
+                .from("riegos")
+                .select(`
+                  id, fecha, horas_riego, volumen_agua, observaciones, operador_id, objetivo,
+                  fincas(id, nombre_finca),
+                  cuarteles(id, nombre)
+                `);
+              
+              const fechaDesdeRiegos = document.getElementById('fecha-desde').value;
+              const fechaHastaRiegos = document.getElementById('fecha-hasta').value;
+              
+              if (fechaDesdeRiegos) {
+                queryBuilderRiegos = queryBuilderRiegos.gte('fecha', fechaDesdeRiegos);
+              }
+              if (fechaHastaRiegos) {
+                queryBuilderRiegos = queryBuilderRiegos.lte('fecha', fechaHastaRiegos);
+              }
+              
+              ({ data, error } = await queryBuilderRiegos.order("fecha", { ascending: false }));
+              
+              // Obtener información de operadores por separado
+              if (data && data.length > 0) {
+                const operadorIds = [...new Set(data.map(row => row.operador_id).filter(id => id))];
+                
+                if (operadorIds.length > 0) {
+                  const { data: operadores } = await supabase
+                    .from('aplicadores_operarios')
+                    .select('id, nombre, apellido')
+                    .in('id', operadorIds);
+                  
+                  // Crear mapa de operadores
+                  const operadoresMap = {};
+                  operadores?.forEach(op => {
+                    operadoresMap[op.id] = op;
+                  });
+                  
+                  // Agregar información de operador a cada registro
+                  data = data.map(row => ({
+                    ...row,
+                    operadores: operadoresMap[row.operador_id] || null
+                  }));
+                }
+                
+                // Procesar datos para formatear nombres después de agregar operadores
+                data = data.map(row => {
+                  const processedRow = { ...row };
+                  
+                  // Formatear nombre de finca
+                  if (row.fincas) {
+                    processedRow.finca_nombre = row.fincas.nombre_finca || `Finca ${row.fincas.id}`;
+                  }
+                  
+                  // Formatear nombre de cuartel
+                  if (row.cuarteles) {
+                    processedRow.cuartel_nombre = row.cuarteles.nombre || `Cuartel ${row.cuarteles.id}`;
+                  }
+                  
+                  // Formatear nombre de regador
+                  if (row.operadores) {
+                    const nombre = row.operadores.nombre || '';
+                    const apellido = row.operadores.apellido || '';
+                    processedRow.regador_nombre = `${apellido} ${nombre}`.trim() || `Regador ${row.operadores.id}`;
+                  } else {
+                    processedRow.regador_nombre = 'Sin asignar';
+                  }
+                  
+                  return processedRow;
+                });
+              }
+              
+              columns = [
+                { key: 'fecha', label: 'Fecha', icon: 'calendar3', format: 'date' },
+                { key: 'regador_nombre', label: 'Regador', icon: 'person' },
+                { key: 'finca_nombre', label: 'Finca', icon: 'geo-alt' },
+                { key: 'cuartel_nombre', label: 'Cuartel', icon: 'grid' },
+                { key: 'horas_riego', label: 'Horas', icon: 'clock' },
+                { key: 'volumen_agua', label: 'Volumen (L)', icon: 'droplet' },
+                { key: 'objetivo', label: 'Objetivo', icon: 'target' },
+                { key: 'observaciones', label: 'Observaciones', icon: 'chat-text', format: 'truncate' }
+              ];
+              title = 'Riegos Realizados';
+              break;
+
+            case 'riegos-regador':
+              // Obtener regadores seleccionados
+              const regadoresSeleccionados = $('#regador-reporte').val() || [];
+              
+              let queryBuilder = supabase
+                .from("riegos")
+                .select(`
+                  id, fecha, horas_riego, volumen_agua, operador_id, objetivo,
+                  fincas(id, nombre_finca),
+                  cuarteles(id, nombre)
+                `);
+              
+              // Aplicar filtro de regadores si hay seleccionados
+              if (regadoresSeleccionados.length > 0) {
+                queryBuilder = queryBuilder.in('operador_id', regadoresSeleccionados);
+              }
+              
+              // Aplicar filtros de fecha
+              const fechaDesde = document.getElementById('fecha-desde-regador').value;
+              const fechaHasta = document.getElementById('fecha-hasta-regador').value;
+              
+              if (fechaDesde) {
+                queryBuilder = queryBuilder.gte('fecha', fechaDesde);
+              }
+              if (fechaHasta) {
+                queryBuilder = queryBuilder.lte('fecha', fechaHasta);
+              }
+              
+              ({ data, error } = await queryBuilder.order("fecha", { ascending: false }));
+              
+              // Obtener información de operadores por separado
+              if (data && data.length > 0) {
+                const operadorIds = [...new Set(data.map(row => row.operador_id).filter(id => id))];
+                
+                if (operadorIds.length > 0) {
+                  const { data: operadores } = await supabase
+                    .from('aplicadores_operarios')
+                    .select('id, nombre, apellido')
+                    .in('id', operadorIds);
+                  
+                  // Crear mapa de operadores
+                  const operadoresMap = {};
+                  operadores?.forEach(op => {
+                    operadoresMap[op.id] = op;
+                  });
+                  
+                  // Agregar información de operador a cada registro
+                  data = data.map(row => ({
+                    ...row,
+                    operadores: operadoresMap[row.operador_id] || null
+                  }));
+                }
+                
+                // Procesar datos para formatear nombres después de agregar operadores
+                data = data.map(row => {
+                  const processedRow = { ...row };
+                  
+                  // Formatear nombre de finca
+                  if (row.fincas) {
+                    processedRow.finca_nombre = row.fincas.nombre_finca || `Finca ${row.fincas.id}`;
+                  }
+                  
+                  // Formatear nombre de cuartel
+                  if (row.cuarteles) {
+                    processedRow.cuartel_nombre = row.cuarteles.nombre || `Cuartel ${row.cuarteles.id}`;
+                  }
+                  
+                  // Formatear nombre de regador
+                  if (row.operadores) {
+                    const nombre = row.operadores.nombre || '';
+                    const apellido = row.operadores.apellido || '';
+                    processedRow.regador_nombre = `${apellido} ${nombre}`.trim() || `Regador ${row.operadores.id}`;
+                  } else {
+                    processedRow.regador_nombre = 'Sin asignar';
+                  }
+                  
+                  return processedRow;
+                });
+              }
+              
+              columns = [
+                { key: 'fecha', label: 'Fecha', icon: 'calendar3', format: 'date' },
+                { key: 'regador_nombre', label: 'Regador', icon: 'person' },
+                { key: 'finca_nombre', label: 'Finca', icon: 'geo-alt' },
+                { key: 'cuartel_nombre', label: 'Cuartel', icon: 'grid' },
+                { key: 'horas_riego', label: 'Horas', icon: 'clock' },
+                { key: 'volumen_agua', label: 'Volumen (L)', icon: 'droplet' },
+                { key: 'objetivo', label: 'Objetivo', icon: 'target' }
+              ];
+              title = 'Riegos por Regador';
+              break;
+
+            case 'agroquimicos':
+              // Mostrar mensaje de funcionalidad futura
+              contenedor.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-tools fs-1 mb-3 d-block"></i>
+                  <h5>Funcionalidad en desarrollo</h5>
+                  <p>El reporte de aplicaciones de agroquímicos estará disponible próximamente</p>
+                </div>
+              `;
+              document.getElementById('paginacion-container').style.display = 'none';
+              return;
+
+            case 'fertilizaciones':
+              // Mostrar datos de fertilizantes como sustituto temporal
+              ({ data, error } = await supabase
+                .from("fertilizantes")
+                .select("id, producto, formula, n, p, k")
+                .order("producto"));
+              columns = [
+                { key: 'producto', label: 'Producto', icon: 'flower1' },
+                { key: 'formula', label: 'Fórmula', icon: 'calculator' },
+                { key: 'n', label: 'N %', icon: 'arrow-up' },
+                { key: 'p', label: 'P %', icon: 'arrow-right' },
+                { key: 'k', label: 'K %', icon: 'arrow-down' }
+              ];
+              title = 'Fertilizantes Disponibles';
+              break;
+
+            case 'labores':
+              // Mostrar mensaje de funcionalidad futura
+              contenedor.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-tools fs-1 mb-3 d-block"></i>
+                  <h5>Funcionalidad en desarrollo</h5>
+                  <p>El reporte de labores de suelo estará disponible próximamente</p>
+                </div>
+              `;
+              document.getElementById('paginacion-container').style.display = 'none';
+              return;
+
+            case 'bpa':
+              // Mostrar mensaje de funcionalidad futura
+              contenedor.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-award fs-1 mb-3 d-block"></i>
+                  <h5>Funcionalidad en desarrollo</h5>
+                  <p>El reporte de normas BPA estará disponible próximamente</p>
+                </div>
+              `;
+              document.getElementById('paginacion-container').style.display = 'none';
+              return;
+
+            default:
+              throw new Error('Tipo de reporte no reconocido');
+          }
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            contenedor.innerHTML = `
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 mb-3 d-block"></i>
+                <h5>No hay datos para ${title}</h5>
+                <p>No se encontraron registros para este tipo de reporte</p>
+              </div>
+            `;
+            document.getElementById('paginacion-container').style.display = 'none';
+            return;
+          }
+
+          // Guardar datos completos y configurar paginación
+          datosCompletos = data;
+          window.columnas = columns; // Hacer columnas globales para paginación
+          paginaActual = 1;
+          registrosPorPagina = parseInt(document.getElementById('registros-por-pagina').value);
+          totalPaginas = Math.ceil(datosCompletos.length / registrosPorPagina);
+
+          // Actualizar contador total
+          const totalElement = document.getElementById('total-registros');
+          if (totalElement) {
+            totalElement.textContent = datosCompletos.length;
+          }
+
+          // Mostrar primera página
+          mostrarPagina();
+
+          // Mostrar controles de paginación si hay más de una página
+          const paginacionContainer = document.getElementById('paginacion-container');
+          if (totalPaginas > 1) {
+            paginacionContainer.style.display = 'flex';
+          } else {
+            paginacionContainer.style.display = 'none';
+          }
+
+        } catch (err) {
+          console.error('Error generando reporte:', err);
+          contenedor.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              <strong>Error:</strong> ${err.message}
+            </div>
+          `;
+          document.getElementById('paginacion-container').style.display = 'none';
+        }
+      }
+
+      // Hacer funciones globales disponibles
+      window.cargarFincasReporte = cargarFincasReporte;
+      window.cargarCuartelesReporte = cargarCuartelesReporte;
+      window.cargarRegadoresQueHicieronRiegos = cargarRegadoresQueHicieronRiegos;
+      window.mostrarFiltrosSegunTipo = mostrarFiltrosSegunTipo;
+      window.generarReportePorTipo = generarReportePorTipo;
+      
+      // Función de prueba para debugging cuarteles
+      window.probarCuarteles = async function() {
+        console.log('=== PRUEBA DIRECTA DE CUARTELES ===');
+        try {
+          const { data: cuarteles, error } = await supabase
+            .from('cuarteles')
+            .select('id, nombre, finca_id, fincas(nombre_finca)')
+            .order('nombre');
+          
+          if (error) {
+            console.error('Error:', error);
+            return;
+          }
+          
+          console.log('Total cuarteles en BD:', cuarteles?.length || 0);
+          console.log('Cuarteles:', cuarteles);
+          
+          if (cuarteles && cuarteles.length > 0) {
+            const fincasIds = [...new Set(cuarteles.map(c => c.finca_id))];
+            console.log('Fincas únicas con cuarteles:', fincasIds);
+            
+            // Verificar si el usuario actual tiene fincas
+            const { data: fincasUsuario } = await supabase
+              .from('fincas')
+              .select('id, nombre_finca')
+              .eq('usuario_id', user.id);
+            
+            console.log('Fincas del usuario actual:', fincasUsuario);
+            
+            // Verificar cuarteles de las fincas del usuario
+            if (fincasUsuario && fincasUsuario.length > 0) {
+              const fincasUsuarioIds = fincasUsuario.map(f => f.id);
+              const cuartelesUsuario = cuarteles.filter(c => fincasUsuarioIds.includes(c.finca_id));
+              console.log('Cuarteles que pertenecen al usuario:', cuartelesUsuario);
+            }
+          }
+        } catch (error) {
+          console.error('Error en prueba:', error);
+        }
+        console.log('=== FIN PRUEBA ===');
+      };
+      
+      // Función de prueba simple para fincas
+      window.probarFincas = async function() {
+        console.log('=== PRUEBA FINCAS ===');
+        try {
+          const { data: fincas, error } = await supabase
+            .from('fincas')
+            .select('id, nombre_finca, usuario_id')
+            .eq('usuario_id', user.id);
+          
+          console.log('Fincas del usuario:', fincas);
+          console.log('Total fincas:', fincas?.length || 0);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+        console.log('=== FIN PRUEBA FINCAS ===');
+      };
+      
+      // Función para forzar selección de fincas y cargar cuarteles
+      window.probarSeleccionFincas = async function() {
+        console.log('=== PRUEBA SELECCION FINCAS ===');
+        
+        // Obtener todas las fincas del usuario
+        const { data: fincas } = await supabase
+          .from('fincas')
+          .select('id, nombre_finca')
+          .eq('usuario_id', user.id);
+        
+        if (fincas && fincas.length > 0) {
+          console.log('Seleccionando primera finca:', fincas[0]);
+          
+          // Método 1: Usar selectpicker
+          const selector = $('#finca-reporte');
+          selector.selectpicker('val', [fincas[0].id]);
+          selector.selectpicker('refresh');
+          
+          console.log('Valor después de selectpicker:', selector.val());
+          
+          // Método 2: Si no funciona, usar jQuery directamente
+          if (!selector.val() || selector.val().length === 0) {
+            console.log('Método selectpicker falló, probando jQuery directo...');
+            selector.val([fincas[0].id]);
+            selector.trigger('change');
+            console.log('Valor después de jQuery:', selector.val());
+          }
+          
+          // Método 3: Triggerar el evento de Bootstrap Select
+          setTimeout(() => {
+            console.log('Triggerando evento changed.bs.select...');
+            selector.trigger('changed.bs.select');
+            
+            // Verificar selección final
+            setTimeout(() => {
+              console.log('Verificación final - Fincas seleccionadas:', selector.val());
+              console.log('Llamando cargarCuartelesReporte manualmente...');
+              cargarCuartelesReporte();
+            }, 500);
+          }, 500);
+          
+        } else {
+          console.log('No hay fincas disponibles');
+        }
+        
+        console.log('=== FIN PRUEBA SELECCION ===');
+      };
+      
+      
+      // Función COMPLETA para resolver el problema de fincas
+      window.solucionarProblemaFincas = async function() {
+        console.log('=== SOLUCIÓN COMPLETA PROBLEMA FINCAS ===');
+        
+        try {
+          // 1. Diagnóstico inicial
+          console.log('🔍 PASO 1: Diagnóstico inicial');
+          const elementoFincasInicial = document.getElementById('finca-reporte');
+          console.log('- Elemento fincas existe:', !!elementoFincasInicial);
+          
+          if (!elementoFincasInicial) {
+            console.log('❌ Elemento no encontrado, procediendo con búsqueda detallada...');
+            buscarElementosPerdidos();
+            
+            // 2. Intentar recrear
+            console.log('🔧 PASO 2: Recreando elemento faltante');
+            const recreacionExitosa = recrearElementoFincas();
+            
+            if (!recreacionExitosa) {
+              console.error('❌ No se pudo recrear el elemento');
+              return false;
+            }
+            
+            // 3. Esperar un momento para que se asiente
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+          
+          // 4. Verificar que ahora existe
+          const elementoFincasFinal = document.getElementById('finca-reporte');
+          console.log('🔍 PASO 3: Verificación post-recreación');
+          console.log('- Elemento fincas existe ahora:', !!elementoFincasFinal);
+          
+          if (!elementoFincasFinal) {
+            console.error('❌ Fallo crítico: No se pudo crear el elemento');
+            return false;
+          }
+          
+          // 5. Asegurar que tiene datos
+          console.log('📊 PASO 4: Verificando datos');
+          if (!todasLasFincas || todasLasFincas.length === 0) {
+            console.log('🔄 Cargando datos de fincas...');
+            await cargarFincasReporte();
+          }
+          
+          // 6. Verificar opciones en el elemento
+          const opciones = elementoFincasFinal.querySelectorAll('option');
+          console.log('- Opciones en elemento:', opciones.length);
+          console.log('- Datos globales:', todasLasFincas?.length || 0);
+          
+          if (opciones.length === 0 && todasLasFincas && todasLasFincas.length > 0) {
+            console.log('🔄 Repoblando opciones...');
+            todasLasFincas.forEach(finca => {
+              const option = document.createElement('option');
+              option.value = finca.id;
+              option.textContent = finca.nombre_finca || `Finca ${finca.id}`;
+              elementoFincasFinal.appendChild(option);
+            });
+            
+            // Refrescar Bootstrap Select
+            $('#finca-reporte').selectpicker('refresh');
+            console.log('✅ Opciones agregadas y Bootstrap Select refrescado');
+          }
+          
+          // 7. Verificación final completa
+          console.log('🎯 PASO 5: Verificación final');
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          const verificacionFinal = {
+            elementoDOM: !!document.getElementById('finca-reporte'),
+            selectorJQuery: $('#finca-reporte').length > 0,
+            opciones: $('#finca-reporte option').length,
+            wrapperBootstrap: $('#finca-reporte').next('.bootstrap-select').length > 0,
+            visible: $('#finca-reporte').is(':visible') || $('#finca-reporte').next('.bootstrap-select').is(':visible'),
+            datosGlobales: todasLasFincas?.length || 0
+          };
+          
+          console.log('Verificación final:', verificacionFinal);
+          
+          const exito = verificacionFinal.elementoDOM && 
+                       verificacionFinal.selectorJQuery && 
+                       verificacionFinal.opciones > 0 && 
+                       verificacionFinal.datosGlobales > 0;
+          
+          if (exito) {
+            console.log('🎉 ¡ÉXITO COMPLETO! Problema de fincas resuelto');
+            console.log('✅ Elemento existe, tiene opciones y Bootstrap Select funcional');
+            
+            // Bonus: Inicializar cuarteles también
+            console.log('🔄 BONUS: Inicializando cuarteles...');
+            await new Promise(resolve => setTimeout(resolve, 100));
+            cargarCuartelesReporte();
+            
+            return true;
+          } else {
+            console.warn('⚠️ Solución parcial, revisar verificación final');
+            return false;
+          }
+          
+        } catch (error) {
+          console.error('❌ Error en solución completa:', error);
+          return false;
+        }
+      };
+
+      // Función DEFINITIVA para resolver el problema de fincas (VERSIÓN CORREGIDA)
+      window.solucionarProblemaFincasDefinitiva = async function() {
+        console.log('=== SOLUCIÓN DEFINITIVA PROBLEMA FINCAS ===');
+        
+        try {
+          // 1. Detener cualquier proceso que pueda interferir
+          console.log('🛑 PASO 1: Deteniendo procesos interferentes');
+          
+          // Temporalmente reemplazar cargarFincasReporte para evitar conflictos
+          const cargarFincasOriginal = window.cargarFincasReporte;
+          window.cargarFincasReporte = function() {
+            console.log('⚠️ cargarFincasReporte bloqueada temporalmente');
+            return Promise.resolve();
+          };
+          
+          // 2. Limpiar completamente el estado
+          console.log('🧹 PASO 2: Limpieza completa');
+          
+          // Destruir todos los Bootstrap Selects relacionados
+          $('#finca-reporte, #cuartel-reporte').each(function() {
+            if ($(this).hasClass('selectpicker')) {
+              $(this).selectpicker('destroy');
+            }
+          });
+          
+          // Remover todos los wrappers
+          $('.bootstrap-select').remove();
+          
+          // Remover elementos existentes
+          $('#finca-reporte').remove();
+          
+          // 3. Verificar contenedor
+          const contenedorFiltros = document.getElementById('filtros-riegos');
+          if (!contenedorFiltros) {
+            console.error('❌ No hay contenedor filtros-riegos');
+            return false;
+          }
+          
+          contenedorFiltros.style.display = 'block';
+          console.log('✅ Contenedor verificado y visible');
+          
+          // 4. Crear elemento fincas desde cero
+          console.log('🔧 PASO 3: Creando elemento desde cero');
+          
+          const primeraColumna = contenedorFiltros.querySelector('.col-md-6');
+          if (!primeraColumna) {
+            console.error('❌ No hay primera columna');
+            return false;
+          }
+          
+          // Crear el select
+          const selectFincas = document.createElement('select');
+          selectFincas.id = 'finca-reporte';
+          selectFincas.className = 'form-select selectpicker';
+          selectFincas.setAttribute('multiple', '');
+          selectFincas.setAttribute('title', 'Seleccione fincas...');
+          selectFincas.setAttribute('data-live-search', 'true');
+          
+          // Asegurar datos
+          if (!todasLasFincas || todasLasFincas.length === 0) {
+            console.log('📊 Cargando datos de fincas...');
+            
+            // Cargar datos directamente sin usar la función conflictiva
+            const { data: fincas, error } = await supabase
+              .from('fincas')
+              .select('id, nombre_finca, direccion, usuario_id')
+              .eq('usuario_id', user.id)
+              .order('nombre_finca');
+            
+            if (error) {
+              console.error('❌ Error cargando fincas:', error);
+              return false;
+            }
+            
+            todasLasFincas = fincas || [];
+            console.log('✅ Datos cargados:', todasLasFincas.length, 'fincas');
+          }
+          
+          // Agregar opciones
+          todasLasFincas.forEach(finca => {
+            const option = document.createElement('option');
+            option.value = finca.id;
+            option.textContent = finca.nombre_finca || `Finca ${finca.id}`;
+            selectFincas.appendChild(option);
+          });
+          
+          console.log('✅ Opciones agregadas:', todasLasFincas.length);
+          
+          // Insertar en el DOM
+          const labelFincas = primeraColumna.querySelector('label[for="finca-reporte"]');
+          if (labelFincas) {
+            labelFincas.insertAdjacentElement('afterend', selectFincas);
+          } else {
+            primeraColumna.appendChild(selectFincas);
+          }
+          
+          console.log('✅ Elemento insertado en DOM');
+          
+          // 5. Esperar estabilización
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // 6. Inicializar Bootstrap Select
+          console.log('🎨 PASO 4: Inicializando Bootstrap Select');
+          
+          $(selectFincas).selectpicker({
+            actionsBox: true,
+            selectAllText: 'Todas',
+            deselectAllText: 'Ninguna',
+            noneSelectedText: 'Seleccione fincas...',
+            style: 'btn-outline-secondary',
+            liveSearch: true,
+            countSelectedText: function(numSelected, numTotal) {
+              return numSelected + ' de ' + numTotal + ' seleccionadas';
+            },
+            selectedTextFormat: 'count > 2',
+            liveSearchPlaceholder: 'Buscar...'
+          });
+          
+          console.log('✅ Bootstrap Select inicializado');
+          
+          // 7. Agregar eventos
+          $('#finca-reporte').on('changed.bs.select change', function() {
+            console.log('>>> Evento fincas disparado, cargando cuarteles...');
+            cargarCuartelesReporte();
+          });
+          
+          console.log('✅ Eventos agregados');
+          
+          // 8. Verificación final robusta
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          const verificacion = {
+            elementoDOM: !!document.getElementById('finca-reporte'),
+            selectorJQuery: $('#finca-reporte').length > 0,
+            opciones: $('#finca-reporte option').length,
+            wrapper: $('#finca-reporte').next('.bootstrap-select').length > 0,
+            visible: $('#finca-reporte').is(':visible') || $('#finca-reporte').next('.bootstrap-select').is(':visible')
+          };
+          
+          console.log('🔍 PASO 5: Verificación final');
+          console.log('Verificación completa:', verificacion);
+          
+          const exito = verificacion.elementoDOM && 
+                       verificacion.selectorJQuery && 
+                       verificacion.opciones > 0;
+          
+          if (exito) {
+            console.log('🎉 ¡ÉXITO DEFINITIVO! Elemento fincas completamente funcional');
+            
+            // 9. Restaurar función original y inicializar cuarteles
+            console.log('🔄 PASO 6: Finalizando');
+            window.cargarFincasReporte = cargarFincasOriginal;
+            
+            // Inicializar cuarteles
+            setTimeout(() => {
+              cargarCuartelesReporte();
+            }, 200);
+            
+            return true;
+          } else {
+            console.error('❌ Verificación final falló');
+            window.cargarFincasReporte = cargarFincasOriginal;
+            return false;
+          }
+          
+        } catch (error) {
+          console.error('❌ Error en solución definitiva:', error);
+          // Restaurar función original en caso de error
+          if (cargarFincasOriginal) {
+            window.cargarFincasReporte = cargarFincasOriginal;
+          }
+          return false;
+        }
+      };
+
+      console.log('Funciones de prueba disponibles:');
+      console.log('- window.probarCuarteles()');
+      console.log('- window.probarFincas()');
+      console.log('- window.probarSeleccionFincas()');
+      console.log('- window.seleccionarFincaManual()');
+      console.log('- window.debugComboCuarteles()');
+      console.log('- window.limpiarDuplicadosCuarteles() [MEJORADA]');
+      console.log('- window.restablecerComboCuarteles()');
+      console.log('- window.eliminarTodosLosWrappers()');
+      console.log('- window.debugComboFincas() [NUEVA]');
+      console.log('- window.mostrarFiltrosRiegos() [NUEVA]');
+      console.log('- window.inicializarFiltrosRiegos() [COMPLETA MEJORADA]');
+      console.log('- window.inspeccionarDOM() [DEBUGGING AVANZADO]');
+      console.log('- window.buscarElementosPerdidos() [BUSCAR ELEMENTOS FALTANTES]');
+      console.log('- window.recrearElementoFincas() [RECREAR ELEMENTO FINCAS]');
+      console.log('- window.solucionarProblemaFincas() [SOLUCIÓN COMPLETA]');
+      console.log('- window.solucionarProblemaFincasDefinitiva() [🎯 SOLUCIÓN DEFINITIVA - USAR ESTA 🎯]');
+      
+      // Función para debuggear el estado del combo fincas
+      window.debugComboFincas = function() {
+        console.log('=== DEBUG COMBO FINCAS ===');
+        
+        // PRIMERO: Forzar mostrar filtros-riegos
+        console.log('0. Forzando visibilidad de filtros-riegos...');
+        document.getElementById('filtros-riegos').style.display = 'block';
+        
+        // ESPERAR un momento para que el DOM se actualice
+        setTimeout(() => {
+          console.log('1. Esperando que el DOM se actualice...');
+          
+          // Verificar si existe el elemento
+          const selector = $('#finca-reporte');
+          console.log('2. Selector fincas encontrado:', selector.length);
+          
+          if (selector.length === 0) {
+            console.error('❌ PROBLEMA: Selector #finca-reporte no encontrado');
+            console.log('Elementos con "finca" en el ID:');
+            $('[id*="finca"]').each(function() {
+              console.log('- ID encontrado:', this.id);
+            });
+            
+            // Verificar si el contenedor existe
+            const contenedor = document.getElementById('filtros-riegos');
+            console.log('Contenedor filtros-riegos:', contenedor ? 'EXISTS' : 'NO EXISTE');
+            if (contenedor) {
+              console.log('Contenido del contenedor:', contenedor.innerHTML.substring(0, 300) + '...');
+            }
+            return;
+          }
+          
+          // Verificar visibilidad del contenedor
+          const contenedorFiltros = $('#filtros-riegos');
+          console.log('3. Contenedor filtros-riegos encontrado:', contenedorFiltros.length);
+          console.log('4. Contenedor visible:', contenedorFiltros.is(':visible'));
+          console.log('5. Display CSS del contenedor:', contenedorFiltros.css('display'));
+          
+          // Verificar el selector de fincas
+          console.log('6. Selector fincas visible:', selector.is(':visible'));
+          console.log('7. Opciones en selector:', selector.find('option').length);
+          console.log('8. HTML del selector:', selector.html());
+          console.log('9. Clases del selector:', selector.attr('class'));
+          console.log('10. Valor actual del selector:', selector.val());
+          
+          // Verificar Bootstrap Select
+          const wrapper = selector.next('.bootstrap-select');
+          console.log('11. Wrapper Bootstrap Select:', wrapper.length);
+          if (wrapper.length > 0) {
+            console.log('12. Wrapper visible:', wrapper.is(':visible'));
+            console.log('13. Display del wrapper:', wrapper.css('display'));
+            console.log('14. Texto del botón:', wrapper.find('.filter-option-inner-inner').text());
+          }
+          
+          // Verificar tipo de reporte seleccionado
+          const tipoReporte = $('#tipo-reporte').val();
+          console.log('15. Tipo de reporte seleccionado:', tipoReporte);
+          
+          // Verificar datos cargados
+          console.log('16. todasLasFincas global:', typeof todasLasFincas, todasLasFincas?.length);
+          
+          console.log('=== FIN DEBUG FINCAS ===');
+          
+        }, 500); // Esperar 500ms para que el DOM se actualice
+      };
+      
+      // Función completa para inicializar filtros de riegos
+      window.inicializarFiltrosRiegos = async function() {
+        console.log('=== INICIALIZACIÓN COMPLETA FILTROS RIEGOS ===');
+        
+        try {
+          // 1. Mostrar contenedor de filtros
+          document.getElementById('filtros-riegos').style.display = 'block';
+          console.log('✅ Contenedor filtros-riegos mostrado');
+          
+          // 2. Esperar un momento para que el DOM se actualice
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          // 3. Cargar fincas si no están cargadas
+          if (!todasLasFincas || todasLasFincas.length === 0) {
+            console.log('🔄 Cargando fincas...');
+            await cargarFincasReporte();
+          } else {
+            console.log('✅ Fincas ya están cargadas:', todasLasFincas.length);
+          }
+          
+          // 4. Esperar otro momento
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // 5. Verificar que los selectores existen usando métodos más robustos
+          const elementoFincas = document.getElementById('finca-reporte');
+          const elementoCuarteles = document.getElementById('cuartel-reporte');
+          const selectorFincas = $('#finca-reporte');
+          const selectorCuarteles = $('#cuartel-reporte');
+          
+          console.log('Verificando selectores:');
+          console.log('- Elemento fincas (DOM):', elementoFincas ? 'EXISTS' : 'NOT FOUND');
+          console.log('- Elemento cuarteles (DOM):', elementoCuarteles ? 'EXISTS' : 'NOT FOUND');
+          console.log('- Fincas jQuery encontrado:', selectorFincas.length);
+          console.log('- Cuarteles jQuery encontrado:', selectorCuarteles.length);
+          
+          if (!elementoFincas) {
+            console.error('❌ GRAVE: Elemento #finca-reporte no existe en el DOM');
+            return false;
+          }
+          
+          // 6. Reinicializar Bootstrap Select para fincas
+          if (elementoFincas && selectorFincas.length > 0) {
+            console.log('🔄 Reinicializando Bootstrap Select para fincas...');
+            
+            // Destruir existente
+            if (selectorFincas.hasClass('selectpicker')) {
+              console.log('Destruyendo Bootstrap Select existente de fincas...');
+              selectorFincas.selectpicker('destroy');
+            }
+            
+            // Remover wrapper
+            const wrapperFincas = selectorFincas.next('.bootstrap-select');
+            if (wrapperFincas.length > 0) {
+              console.log('Removiendo wrapper de fincas...');
+              wrapperFincas.remove();
+            }
+            
+            // Verificar opciones en el elemento HTML directo
+            const opcionesDOM = elementoFincas.querySelectorAll('option');
+            console.log('- Opciones en DOM directo:', opcionesDOM.length);
+            
+            // Si no hay opciones, repoblar desde todasLasFincas
+            if (opcionesDOM.length === 0 && todasLasFincas && todasLasFincas.length > 0) {
+              console.log('🔄 Repoblando opciones de fincas desde datos globales...');
+              selectorFincas.empty();
+              
+              todasLasFincas.forEach(finca => {
+                const displayName = finca.nombre_finca || `Finca ${finca.id}`;
+                elementoFincas.appendChild(new Option(displayName, finca.id));
+              });
+              
+              console.log('✅ Opciones repobladas:', elementoFincas.querySelectorAll('option').length);
+            }
+            
+            if (elementoFincas.querySelectorAll('option').length > 0) {
+              // Reinicializar Bootstrap Select
+              selectorFincas.addClass('selectpicker');
+              selectorFincas.selectpicker({
+                actionsBox: true,
+                selectAllText: 'Todas',
+                deselectAllText: 'Ninguna',
+                noneSelectedText: 'Seleccione fincas...',
+                style: 'btn-outline-secondary',
+                liveSearch: true,
+                countSelectedText: function(numSelected, numTotal) {
+                  return numSelected + ' de ' + numTotal + ' seleccionadas';
+                },
+                selectedTextFormat: 'count > 2',
+                liveSearchPlaceholder: 'Buscar...'
+              });
+              
+              console.log('✅ Bootstrap Select fincas reinicializado exitosamente');
+            } else {
+              console.warn('⚠️ No hay opciones para inicializar en fincas');
+            }
+          } else {
+            console.error('❌ No se puede inicializar selector de fincas');
+          }
+          
+          // 7. Reinicializar Bootstrap Select para cuarteles
+          if (elementoCuarteles && selectorCuarteles.length > 0) {
+            console.log('🔄 Reinicializando Bootstrap Select para cuarteles...');
+            
+            // Destruir existente
+            if (selectorCuarteles.hasClass('selectpicker')) {
+              console.log('Destruyendo Bootstrap Select existente de cuarteles...');
+              selectorCuarteles.selectpicker('destroy');
+            }
+            
+            // Remover wrapper
+            const wrapperCuarteles = selectorCuarteles.next('.bootstrap-select');
+            if (wrapperCuarteles.length > 0) {
+              console.log('Removiendo wrapper de cuarteles...');
+              wrapperCuarteles.remove();
+            }
+            
+            // Limpiar cuarteles (inicialmente vacío)
+            selectorCuarteles.empty();
+            
+            // Reinicializar Bootstrap Select (vacío inicialmente)
+            selectorCuarteles.addClass('selectpicker');
+            selectorCuarteles.selectpicker({
+              actionsBox: true,
+              selectAllText: 'Todas',
+              deselectAllText: 'Ninguna',
+              noneSelectedText: 'Seleccione cuarteles...',
+              style: 'btn-outline-secondary',
+              liveSearch: true,
+              countSelectedText: function(numSelected, numTotal) {
+                return numSelected + ' de ' + numTotal + ' seleccionadas';
+              },
+              selectedTextFormat: 'count > 2',
+              liveSearchPlaceholder: 'Buscar...'
+            });
+            
+            console.log('✅ Bootstrap Select cuarteles reinicializado');
+          } else {
+            console.warn('⚠️ No se puede inicializar selector de cuarteles');
+          }
+          
+          // 8. Verificación final
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          const fincasVisibleFinal = $('#finca-reporte').is(':visible') || $('.bootstrap-select:has(+ #finca-reporte), .bootstrap-select:contains("finca")').is(':visible');
+          const cuartelesVisibleFinal = $('#cuartel-reporte').is(':visible') || $('.bootstrap-select:has(+ #cuartel-reporte), .bootstrap-select:contains("cuartel")').is(':visible');
+          const wrapperFincasFinal = $('#finca-reporte').next('.bootstrap-select');
+          const wrapperCuartelesFinal = $('#cuartel-reporte').next('.bootstrap-select');
+          const opcionesFincasFinal = $('#finca-reporte option').length;
+          
+          console.log('=== RESULTADO FINAL ===');
+          console.log('- Elemento fincas DOM:', !!document.getElementById('finca-reporte'));
+          console.log('- Elemento cuarteles DOM:', !!document.getElementById('cuartel-reporte'));
+          console.log('- Fincas visible:', fincasVisibleFinal);
+          console.log('- Cuarteles visible:', cuartelesVisibleFinal);
+          console.log('- Wrapper fincas:', wrapperFincasFinal.length);
+          console.log('- Wrapper cuarteles:', wrapperCuartelesFinal.length);
+          console.log('- Opciones en fincas:', opcionesFincasFinal);
+          console.log('- todasLasFincas global:', todasLasFincas?.length || 0);
+          
+          // Buscar cualquier dropdown visible con "finca" o Bootstrap Select relacionado
+          const bootstrapSelects = $('.bootstrap-select').length;
+          console.log('- Total Bootstrap Selects en página:', bootstrapSelects);
+          
+          if (bootstrapSelects > 0) {
+            $('.bootstrap-select').each(function(index) {
+              const select = $(this);
+              const buttonText = select.find('.filter-option-inner-inner').text();
+              console.log(`  Bootstrap Select ${index + 1}: "${buttonText}"`);
+            });
+          }
+          
+          if ((wrapperFincasFinal.length > 0 || fincasVisibleFinal) && opcionesFincasFinal > 0) {
+            console.log('🎉 ¡ÉXITO! Filtros de riegos completamente funcionales');
+            return true;
+          } else {
+            console.warn('⚠️ Todavía hay problemas con la inicialización');
+            console.log('Intentando recarga completa...');
+            
+            // Último intento: recargar fincas completamente
+            await cargarFincasReporte();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const opcionesFincasReintentoFinal = $('#finca-reporte option').length;
+            const wrapperFincasReintentoFinal = $('#finca-reporte').next('.bootstrap-select').length;
+            
+            console.log('Después de recarga:');
+            console.log('- Opciones fincas:', opcionesFincasReintentoFinal);
+            console.log('- Wrapper fincas:', wrapperFincasReintentoFinal);
+            
+            if (opcionesFincasReintentoFinal > 0 && wrapperFincasReintentoFinal > 0) {
+              console.log('🎉 ¡ÉXITO DESPUÉS DE RECARGA! Filtros funcionales');
+              return true;
+            } else {
+              console.error('❌ Fallo final en inicialización');
+              return false;
+            }
+          }
+          
+        } catch (error) {
+          console.error('❌ Error en inicialización completa:', error);
+          console.log('Stack trace:', error.stack);
+          return false;
+        }
+      };
+      
+      // Función para eliminar todos los wrappers de Bootstrap Select
+      window.eliminarTodosLosWrappers = function() {
+        console.log('=== ELIMINACIÓN TOTAL DE WRAPPERS ===');
+        
+        let wrappersEliminados = 0;
+        $('.bootstrap-select').each(function() {
+          console.log('Eliminando wrapper Bootstrap Select');
+          $(this).remove();
+          wrappersEliminados++;
+        });
+        
+        console.log(`Total wrappers eliminados: ${wrappersEliminados}`);
+        
+        // Reinicializar todos los selectpicker
+        $('.selectpicker').each(function() {
+          $(this).removeClass('selectpicker bs-select-hidden');
+        });
+        
+        setTimeout(() => {
+          $('.selectpicker').selectpicker();
+          console.log('Todos los selectpicker reinicializados');
+        }, 100);
+        
+        console.log('=== FIN ELIMINACIÓN ===');
+      };
+      
+      // Función para buscar elementos faltantes en el DOM
+      window.buscarElementosPerdidos = function() {
+        console.log('=== BÚSQUEDA DE ELEMENTOS PERDIDOS ===');
+        
+        // 1. Buscar TODOS los elementos que contengan "finca" en cualquier atributo
+        console.log('1. BÚSQUEDA EXHAUSTIVA DE ELEMENTOS:');
+        
+        const todosLosElementos = document.querySelectorAll('*');
+        const elementosConFinca = [];
+        
+        todosLosElementos.forEach(elemento => {
+          // Buscar en ID
+          if (elemento.id && elemento.id.toLowerCase().includes('finca')) {
+            elementosConFinca.push({
+              tipo: 'ID',
+              valor: elemento.id,
+              tagName: elemento.tagName.toLowerCase(),
+              elemento: elemento
+            });
+          }
+          
+          // Buscar en clases
+          if (elemento.className && elemento.className.toLowerCase().includes('finca')) {
+            elementosConFinca.push({
+              tipo: 'CLASS',
+              valor: elemento.className,
+              tagName: elemento.tagName.toLowerCase(),
+              elemento: elemento
+            });
+          }
+          
+          // Buscar en name
+          if (elemento.name && elemento.name.toLowerCase().includes('finca')) {
+            elementosConFinca.push({
+              tipo: 'NAME',
+              valor: elemento.name,
+              tagName: elemento.tagName.toLowerCase(),
+              elemento: elemento
+            });
+          }
+        });
+        
+        console.log('Elementos encontrados con "finca":', elementosConFinca);
+        
+        // 2. Buscar específicamente el contenedor filtros-riegos
+        const contenedorFiltros = document.getElementById('filtros-riegos');
+        console.log('2. CONTENEDOR FILTROS-RIEGOS:');
+        console.log('- Existe:', !!contenedorFiltros);
+        
+        if (contenedorFiltros) {
+          console.log('- Display:', contenedorFiltros.style.display);
+          console.log('- HTML interno (primeros 500 chars):', contenedorFiltros.innerHTML.substring(0, 500));
+          
+          // Buscar selects dentro del contenedor
+          const selectsEnContenedor = contenedorFiltros.querySelectorAll('select');
+          console.log('- Selects encontrados en contenedor:', selectsEnContenedor.length);
+          
+          selectsEnContenedor.forEach((select, index) => {
+            console.log(`  Select ${index + 1}:`);
+            console.log(`    - ID: ${select.id || 'SIN ID'}`);
+            console.log(`    - Clases: ${select.className || 'SIN CLASES'}`);
+            console.log(`    - Opciones: ${select.querySelectorAll('option').length}`);
+          });
+        }
+        
+        // 3. Verificar si existe en jQuery pero no en DOM nativo
+        console.log('3. DIFERENCIAS JQUERY VS DOM:');
+        console.log('- jQuery finca-reporte:', $('#finca-reporte').length);
+        console.log('- DOM nativo finca-reporte:', !!document.getElementById('finca-reporte'));
+        console.log('- jQuery cuartel-reporte:', $('#cuartel-reporte').length);
+        console.log('- DOM nativo cuartel-reporte:', !!document.getElementById('cuartel-reporte'));
+        
+        // 4. Buscar posibles duplicados o problemas
+        console.log('4. POSIBLES DUPLICADOS:');
+        const elementosConIdFinca = document.querySelectorAll('[id*="finca"]');
+        console.log('- Elementos con ID que contiene "finca":', elementosConIdFinca.length);
+        
+        elementosConIdFinca.forEach((elemento, index) => {
+          console.log(`  Elemento ${index + 1}:`);
+          console.log(`    - ID completo: ${elemento.id}`);
+          console.log(`    - Tag: ${elemento.tagName.toLowerCase()}`);
+          console.log(`    - Visible: ${elemento.offsetParent !== null}`);
+        });
+        
+        // 5. Verificar si el elemento fue removido por Bootstrap Select
+        console.log('5. WRAPPERS BOOTSTRAP SELECT:');
+        const wrappers = document.querySelectorAll('.bootstrap-select');
+        console.log('- Total wrappers:', wrappers.length);
+        
+        wrappers.forEach((wrapper, index) => {
+          const selectAnterior = wrapper.previousElementSibling;
+          const selectSiguiente = wrapper.nextElementSibling;
+          
+          console.log(`  Wrapper ${index + 1}:`);
+          console.log(`    - Elemento anterior: ${selectAnterior ? selectAnterior.tagName + ' ' + (selectAnterior.id || 'SIN-ID') : 'NINGUNO'}`);
+          console.log(`    - Elemento siguiente: ${selectSiguiente ? selectSiguiente.tagName + ' ' + (selectSiguiente.id || 'SIN-ID') : 'NINGUNO'}`);
+          
+          // Buscar select oculto dentro del wrapper
+          const selectOculto = wrapper.querySelector('select');
+          if (selectOculto) {
+            console.log(`    - Select interno ID: ${selectOculto.id || 'SIN ID'}`);
+            console.log(`    - Select interno clases: ${selectOculto.className || 'SIN CLASES'}`);
+          }
+        });
+        
+        console.log('=== FIN BÚSQUEDA ===');
+      };
+      
+      // Función para recrear el elemento finca-reporte si no existe
+      window.recrearElementoFincas = function() {
+        console.log('=== RECREANDO ELEMENTO FINCAS ===');
+        
+        const contenedorFiltros = document.getElementById('filtros-riegos');
+        if (!contenedorFiltros) {
+          console.error('❌ No se encontró el contenedor filtros-riegos');
+          return false;
+        }
+        
+        // Buscar si ya existe
+        let elementoFincas = document.getElementById('finca-reporte');
+        if (elementoFincas) {
+          console.log('✅ El elemento ya existe, no es necesario recrear');
+          return true;
+        }
+        
+        // Buscar el contenedor donde debería estar (primera columna)
+        const primeraColumna = contenedorFiltros.querySelector('.col-md-6');
+        if (!primeraColumna) {
+          console.error('❌ No se encontró la primera columna');
+          return false;
+        }
+        
+        console.log('🔄 Recreando elemento select de fincas...');
+        
+        // Crear el nuevo elemento select
+        const nuevoSelect = document.createElement('select');
+        nuevoSelect.id = 'finca-reporte';
+        nuevoSelect.className = 'form-select selectpicker';
+        nuevoSelect.setAttribute('multiple', '');
+        nuevoSelect.setAttribute('title', 'Seleccione fincas...');
+        nuevoSelect.setAttribute('data-live-search', 'true');
+        
+        // Agregar las opciones desde todasLasFincas
+        if (todasLasFincas && todasLasFincas.length > 0) {
+          todasLasFincas.forEach(finca => {
+            const option = document.createElement('option');
+            option.value = finca.id;
+            option.textContent = finca.nombre_finca || `Finca ${finca.id}`;
+            nuevoSelect.appendChild(option);
+          });
+          
+          console.log(`✅ Agregadas ${todasLasFincas.length} opciones al nuevo select`);
+        }
+        
+        // Buscar donde insertar el select (después del label)
+        const labelFincas = primeraColumna.querySelector('label[for="finca-reporte"]');
+        if (labelFincas) {
+          // Insertar después del label
+          labelFincas.insertAdjacentElement('afterend', nuevoSelect);
+          console.log('✅ Select insertado después del label');
+        } else {
+          // Insertar al final de la primera columna si no hay label
+          primeraColumna.appendChild(nuevoSelect);
+          console.log('✅ Select insertado al final de la columna');
+        }
+        
+        // Inicializar Bootstrap Select
+        $(nuevoSelect).selectpicker({
+          actionsBox: true,
+          selectAllText: 'Todas',
+          deselectAllText: 'Ninguna',
+          noneSelectedText: 'Seleccione fincas...',
+          style: 'btn-outline-secondary',
+          liveSearch: true,
+          countSelectedText: function(numSelected, numTotal) {
+            return numSelected + ' de ' + numTotal + ' seleccionadas';
+          },
+          selectedTextFormat: 'count > 2',
+          liveSearchPlaceholder: 'Buscar...'
+        });
+        
+        console.log('✅ Bootstrap Select inicializado en elemento recreado');
+        
+        // Reagregar eventos
+        $('#finca-reporte').on('changed.bs.select', function() {
+          console.log('>>> Evento changed.bs.select en elemento recreado!');
+          cargarCuartelesReporte();
+        });
+        
+        $('#finca-reporte').on('change', function() {
+          console.log('>>> Evento change en elemento recreado!');
+          cargarCuartelesReporte();
+        });
+        
+        console.log('✅ Eventos reagregados');
+        console.log('=== FIN RECREACIÓN ===');
+        
+        return true;
+      };
+
+      window.inspeccionarDOM = function() {
+        console.log('=== INSPECCIÓN COMPLETA DEL DOM ===');
+        
+        // 1. Verificar elementos base en el DOM
+        const elementoFincas = document.getElementById('finca-reporte');
+        const elementoCuarteles = document.getElementById('cuartel-reporte');
+        const contenedorFiltros = document.getElementById('filtros-riegos');
+        
+        console.log('1. ELEMENTOS BASE:');
+        console.log('- #finca-reporte:', elementoFincas ? 'EXISTS' : 'NOT FOUND');
+        console.log('- #cuartel-reporte:', elementoCuarteles ? 'EXISTS' : 'NOT FOUND');
+        console.log('- #filtros-riegos:', contenedorFiltros ? 'EXISTS' : 'NOT FOUND');
+        
+        if (contenedorFiltros) {
+          console.log('- Contenedor display:', contenedorFiltros.style.display);
+          console.log('- Contenedor visible:', contenedorFiltros.offsetParent !== null);
+        }
+        
+        // 2. Verificar selectores jQuery
+        const jQueryFincas = $('#finca-reporte');
+        const jQueryCuarteles = $('#cuartel-reporte');
+        
+        console.log('2. SELECTORES JQUERY:');
+        console.log('- $("#finca-reporte").length:', jQueryFincas.length);
+        console.log('- $("#cuartel-reporte").length:', jQueryCuarteles.length);
+        
+        // 3. Verificar opciones en elementos
+        if (elementoFincas) {
+          const opcionesDOM = elementoFincas.querySelectorAll('option');
+          const opcionesJQuery = jQueryFincas.find('option');
+          
+          console.log('3. OPCIONES DE FINCAS:');
+          console.log('- Opciones DOM directo:', opcionesDOM.length);
+          console.log('- Opciones jQuery:', opcionesJQuery.length);
+          console.log('- HTML del select:', elementoFincas.innerHTML.substring(0, 200) + '...');
+          
+          if (opcionesDOM.length > 0) {
+            console.log('- Primera opción:', opcionesDOM[0].textContent, '(value:', opcionesDOM[0].value + ')');
+          }
+        }
+        
+        // 4. Verificar Bootstrap Select wrappers
+        const todosLosWrappers = $('.bootstrap-select');
+        console.log('4. BOOTSTRAP SELECT WRAPPERS:');
+        console.log('- Total wrappers en página:', todosLosWrappers.length);
+        
+        todosLosWrappers.each(function(index) {
+          const wrapper = $(this);
+          const buttonText = wrapper.find('.filter-option-inner-inner').text();
+          const selectElement = wrapper.prev('select');
+          const selectId = selectElement.attr('id') || 'NO-ID';
+          
+          console.log(`  Wrapper ${index + 1}:`);
+          console.log(`    - Texto botón: "${buttonText}"`);
+          console.log(`    - Select asociado: ${selectId}`);
+          console.log(`    - Wrapper visible:`, wrapper.is(':visible'));
+          console.log(`    - Items en dropdown:`, wrapper.find('.dropdown-menu li').length);
+        });
+        
+        // 5. Verificar clases y estados
+        if (jQueryFincas.length > 0) {
+          console.log('5. ESTADOS DE FINCAS:');
+          console.log('- Clases:', jQueryFincas.attr('class'));
+          console.log('- Visible jQuery:', jQueryFincas.is(':visible'));
+          console.log('- Display CSS:', jQueryFincas.css('display'));
+          console.log('- Has selectpicker class:', jQueryFincas.hasClass('selectpicker'));
+          console.log('- Valor actual:', jQueryFincas.val());
+        }
+        
+        // 6. Verificar datos globales
+        console.log('6. DATOS GLOBALES:');
+        console.log('- todasLasFincas:', typeof todasLasFincas, todasLasFincas?.length || 0);
+        if (todasLasFincas && todasLasFincas.length > 0) {
+          console.log('- Primera finca:', todasLasFincas[0]);
+        }
+        
+        // 7. Verificar tipo de reporte activo
+        const tipoReporte = $('#tipo-reporte').val();
+        console.log('7. CONFIGURACIÓN:');
+        console.log('- Tipo reporte seleccionado:', tipoReporte);
+        
+        console.log('=== FIN INSPECCIÓN ===');
+      };
+      window.eliminarTodosLosWrappers = function() {
+        console.log('=== ELIMINACIÓN TOTAL DE WRAPPERS ===');
+        
+        let wrappersEliminados = 0;
+        $('.bootstrap-select').each(function() {
+          console.log('Eliminando wrapper Bootstrap Select');
+          $(this).remove();
+          wrappersEliminados++;
+        });
+        
+        console.log(`Total wrappers eliminados: ${wrappersEliminados}`);
+        
+        // Reinicializar todos los selectpicker
+        $('.selectpicker').each(function() {
+          $(this).removeClass('selectpicker bs-select-hidden');
+        });
+        
+        setTimeout(() => {
+          $('.selectpicker').selectpicker();
+          console.log('Todos los selectpicker reinicializados');
+        }, 100);
+        
+        console.log('=== FIN ELIMINACIÓN ===');
+      };
+      
+      // Función simple para seleccionar finca manualmente
+      window.seleccionarFincaManual = function() {
+        console.log('=== SELECCION MANUAL ===');
+        
+        // Seleccionar finca con ID 22 (segunda)
+        const selector = $('#finca-reporte');
+        console.log('Selector antes:', selector.val());
+        
+        // Seleccionar directamente con jQuery
+        selector.val(['22']);
+        console.log('Después de val():', selector.val());
+        
+        // Actualizar Bootstrap Select con el nuevo valor
+        selector.selectpicker('refresh');
+        console.log('Después de refresh():', selector.val());
+        
+        // Trigger ambos eventos como respaldo
+        selector.trigger('change');
+        selector.trigger('changed.bs.select');
+        
+        console.log('Eventos triggered, esperando 1 segundo...');
+        setTimeout(() => {
+          console.log('Verificando selección:', $('#finca-reporte').val());
+          console.log('Llamando cargarCuartelesReporte manualmente...');
+          cargarCuartelesReporte();
+        }, 1000);
+        
+        console.log('=== FIN SELECCION MANUAL ===');
+      };
+      
+      // Función para debuggear el estado visual del combo cuarteles
+      window.debugComboCuarteles = function() {
+        console.log('=== DEBUG VISUAL COMBO CUARTELES ===');
+        
+        const selector = $('#cuartel-reporte');
+        console.log('1. Selector jQuery encontrado:', selector.length);
+        
+        if (selector.length === 0) {
+          console.error('❌ PROBLEMA: Selector #cuartel-reporte no encontrado en el DOM');
+          console.log('Selectores disponibles con "cuartel" en el ID:');
+          $('[id*="cuartel"]').each(function() {
+            console.log('- ID encontrado:', this.id);
+          });
+          return;
+        }
+        
+        console.log('2. Opciones en select:', selector.find('option').length);
+        console.log('3. HTML del select:', selector.html());
+        console.log('4. Clases del select:', selector.attr('class'));
+        console.log('5. Select visible:', selector.is(':visible'));
+        console.log('6. Select display CSS:', selector.css('display'));
+        
+        // Verificar elementos de Bootstrap Select
+        const bootstrapSelect = selector.next('.bootstrap-select');
+        console.log('7. Bootstrap Select wrapper:', bootstrapSelect.length);
+        
+        if (bootstrapSelect.length > 0) {
+          console.log('8. Button del bootstrap-select:', bootstrapSelect.find('button').length);
+          console.log('9. Dropdown menu:', bootstrapSelect.find('.dropdown-menu').length);
+          console.log('10. Items en dropdown:', bootstrapSelect.find('.dropdown-menu li').length);
+          console.log('11. Texto del botón:', bootstrapSelect.find('.filter-option-inner-inner').text());
+          console.log('12. Classes del wrapper:', bootstrapSelect.attr('class'));
+          console.log('13. Display del wrapper:', bootstrapSelect.css('display'));
+          
+          // Verificar duplicados en el menú dropdown
+          const menuItems = bootstrapSelect.find('.dropdown-menu li a span.text');
+          const textos = [];
+          menuItems.each(function() {
+            const texto = $(this).text().trim();
+            if (texto) textos.push(texto);
+          });
+          console.log('14. Textos en dropdown:', textos);
+          
+          const duplicados = textos.filter((item, index) => textos.indexOf(item) !== index);
+          if (duplicados.length > 0) {
+            console.warn('⚠️ DUPLICADOS ENCONTRADOS:', duplicados);
+          } else {
+            console.log('✅ No hay duplicados en el dropdown');
+          }
+        } else {
+          console.log('❌ No se encontró el wrapper de Bootstrap Select');
+          
+          // Intentar recrear Bootstrap Select si no existe
+          console.log('15. Intentando recrear Bootstrap Select...');
+          if (selector.hasClass('selectpicker')) {
+            selector.selectpicker('destroy');
+          }
+          
+          selector.selectpicker({
+            actionsBox: true,
+            selectAllText: 'Todas',
+            deselectAllText: 'Ninguna',
+            noneSelectedText: 'Seleccione cuarteles...',
+            style: 'btn-outline-secondary',
+            liveSearch: true
+          });
+          
+          console.log('16. Bootstrap Select recreado');
+          
+          setTimeout(() => {
+            const newBootstrapSelect = selector.next('.bootstrap-select');
+            console.log('17. Nuevo wrapper después de recrear:', newBootstrapSelect.length);
+            if (newBootstrapSelect.length > 0) {
+              console.log('18. Nuevos items:', newBootstrapSelect.find('.dropdown-menu li').length);
+              console.log('19. Nuevo texto:', newBootstrapSelect.find('.filter-option-inner-inner').text());
+            }
+          }, 100);
+        }
+        
+        console.log('=== FIN DEBUG ===');
+      };
+      
+      // Función para restablecer completamente el combo cuarteles
+      window.restablecerComboCuarteles = function() {
+        console.log('=== RESTABLECIMIENTO COMPLETO ===');
+        
+        // Verificar que el selector existe
+        let selector = $('#cuartel-reporte');
+        if (selector.length === 0) {
+          console.error('❌ Selector no encontrado, no se puede restablecer');
+          return;
+        }
+        
+        // Destruir Bootstrap Select si existe
+        if (selector.hasClass('selectpicker')) {
+          selector.selectpicker('destroy');
+        }
+        
+        // Remover wrapper
+        const wrapper = selector.next('.bootstrap-select');
+        if (wrapper.length > 0) {
+          wrapper.remove();
+        }
+        
+        // Limpiar opciones
+        selector.empty();
+        
+        // Recrear Bootstrap Select
+        selector.selectpicker({
+          actionsBox: true,
+          selectAllText: 'Todas',
+          deselectAllText: 'Ninguna',
+          noneSelectedText: 'Seleccione cuarteles...',
+          style: 'btn-outline-secondary',
+          liveSearch: true
+        });
+        
+        console.log('✅ Combo cuarteles restablecido');
+        console.log('=== FIN RESTABLECIMIENTO ===');
+      };
+      
+      // Función para limpiar duplicados en el combo cuarteles
+      window.limpiarDuplicadosCuarteles = function() {
+        console.log('=== LIMPIEZA DE DUPLICADOS AGRESIVA ===');
+        
+        const selector = $('#cuartel-reporte');
+        
+        if (selector.length === 0) {
+          console.error('❌ Selector #cuartel-reporte no encontrado en el DOM');
+          return;
+        }
+        
+        console.log('✅ Selector encontrado, procediendo con limpieza agresiva...');
+        
+        // 1. Destruir completamente Bootstrap Select
+        if (selector.hasClass('selectpicker')) {
+          console.log('Destruyendo Bootstrap Select existente...');
+          selector.selectpicker('destroy');
+        }
+        
+        // 2. Remover TODOS los wrappers Bootstrap Select en la página
+        let wrappersRemovidos = 0;
+        $('.bootstrap-select').each(function() {
+          const wrapper = $(this);
+          const prevSelect = wrapper.prev('select');
+          
+          // Si no hay select asociado o es el de cuarteles, remover
+          if (!prevSelect.length || prevSelect.attr('id') === 'cuartel-reporte') {
+            console.log('Removiendo wrapper Bootstrap Select');
+            wrapper.remove();
+            wrappersRemovidos++;
+          }
+        });
+        console.log(`Wrappers removidos: ${wrappersRemovidos}`);
+        
+        // 3. Limpiar clases y HTML del selector
+        selector.removeClass('selectpicker bs-select-hidden');
+        selector.empty();
+        
+        // 4. Verificar que el selector sigue en el DOM
+        if ($('#cuartel-reporte').length === 0) {
+          console.error('❌ Error: El selector se perdió durante la limpieza');
+          return;
+        }
+        
+        // 5. Esperar un momento antes de recrear
+        setTimeout(() => {
+          console.log('Recreando Bootstrap Select...');
+          
+          // Agregar clase selectpicker
+          selector.addClass('selectpicker');
+          
+          // Recrear desde cero
+          selector.selectpicker({
+            actionsBox: true,
+            selectAllText: 'Todas',
+            deselectAllText: 'Ninguna',
+            noneSelectedText: 'Seleccione cuarteles...',
+            style: 'btn-outline-secondary',
+            liveSearch: true
+          });
+          
+          // Verificar resultado final
+          setTimeout(() => {
+            const newWrapper = $('#cuartel-reporte').next('.bootstrap-select');
+            const totalWrappers = $('.bootstrap-select').length;
+            
+            console.log('Resultado final de limpieza:');
+            console.log('- Selector en DOM:', $('#cuartel-reporte').length);
+            console.log('- Nuevo wrapper:', newWrapper.length);
+            console.log('- Opciones:', $('#cuartel-reporte option').length);
+            console.log('- Total wrappers en página:', totalWrappers);
+            
+            if (newWrapper.length > 0) {
+              const menuItems = newWrapper.find('.dropdown-menu li');
+              console.log('- Items en dropdown:', menuItems.length);
+              
+              // Verificar duplicados
+              const textos = [];
+              menuItems.each(function() {
+                const text = $(this).find('a span.text').text().trim();
+                if (text) textos.push(text);
+              });
+              
+              const duplicados = textos.filter((item, index) => textos.indexOf(item) !== index);
+              if (duplicados.length > 0) {
+                console.error('❌ DUPLICADOS AÚN PRESENTES:', duplicados);
+              } else {
+                console.log('✅ Limpieza exitosa - Sin duplicados');
+              }
+            }
+          }, 200);
+          
+        }, 100);
+        
+        console.log('=== FIN LIMPIEZA AGRESIVA ===');
+      };;
+
+      // Funciones de exportación
+      function exportarExcel() {
+        if (!datosCompletos || datosCompletos.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        try {
+          // Crear workbook
+          const wb = XLSX.utils.book_new();
+          
+          // Preparar datos para Excel
+          const datosExcel = datosCompletos.map(row => {
+            const fila = {};
+            window.columnas.forEach(col => {
+              let valor = row[col.key];
+              if (col.format === 'date' && valor) {
+                valor = new Date(valor).toLocaleDateString('es-ES');
+              } else if (!valor) {
+                valor = '';
+              }
+              fila[col.label] = valor;
+            });
+            return fila;
+          });
+
+          // Crear worksheet
+          const ws = XLSX.utils.json_to_sheet(datosExcel);
+          
+          // Agregar worksheet al workbook
+          XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+          
+          // Generar y descargar archivo
+          const tipoReporte = document.getElementById('tipo-reporte').value;
+          const fecha = new Date().toISOString().split('T')[0];
+          const filename = `reporte_${tipoReporte}_${fecha}.xlsx`;
+          
+          XLSX.writeFile(wb, filename);
+        } catch (error) {
+          console.error('Error exportando a Excel:', error);
+          alert('Error al exportar a Excel: ' + error.message);
+        }
+      }
+
+      function exportarCSV() {
+        if (!datosCompletos || datosCompletos.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        try {
+          // Crear encabezados
+          const headers = window.columnas.map(col => col.label).join(',');
+          
+          // Crear filas de datos
+          const rows = datosCompletos.map(row => {
+            return window.columnas.map(col => {
+              let valor = row[col.key];
+              if (col.format === 'date' && valor) {
+                valor = new Date(valor).toLocaleDateString('es-ES');
+              } else if (!valor) {
+                valor = '';
+              }
+              // Escapar comillas y envolver en comillas si contiene comas
+              if (typeof valor === 'string' && (valor.includes(',') || valor.includes('"'))) {
+                valor = '"' + valor.replace(/"/g, '""') + '"';
+              }
+              return valor;
+            }).join(',');
+          });
+          
+          // Combinar encabezados y filas
+          const csvContent = [headers, ...rows].join('\n');
+          
+          // Crear y descargar archivo
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+          
+          const tipoReporte = document.getElementById('tipo-reporte').value;
+          const fecha = new Date().toISOString().split('T')[0];
+          const filename = `reporte_${tipoReporte}_${fecha}.csv`;
+          
+          link.setAttribute('href', url);
+          link.setAttribute('download', filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error('Error exportando a CSV:', error);
+          alert('Error al exportar a CSV: ' + error.message);
+        }
+      }
+
+      async function exportarPDF() {
+        if (!datosCompletos || datosCompletos.length === 0) {
+          alert('No hay datos para exportar');
+          return;
+        }
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          
+          // Obtener datos del usuario y organización
+          let organizacion = null;
+          let usuarioData = null;
+          
+          try {
+            const { data: userData } = await supabase
+              .from('usuarios')
+              .select('nombre, apellido, organizacion_id, organizaciones(nombre, logo_url)')
+              .eq('id', user.id)
+              .single();
+            
+            if (userData) {
+              usuarioData = userData;
+              organizacion = userData.organizaciones;
+            }
+          } catch (error) {
+            console.warn('No se pudieron obtener datos de organización:', error);
+          }
+          
+          // Configurar encabezado con logo y datos de organización
+          let yPosition = 20;
+          
+          // Logo (si existe)
+          if (organizacion?.logo_url) {
+            try {
+              // Cargar logo como imagen base64
+              const response = await fetch(organizacion.logo_url);
+              const blob = await response.blob();
+              const reader = new FileReader();
+              
+              reader.onload = function(event) {
+                const imgData = event.target.result;
+                doc.addImage(imgData, 'PNG', 15, yPosition, 30, 20);
+              };
+              reader.readAsDataURL(blob);
+              
+              // Reservar espacio para el logo
+              yPosition += 25;
+            } catch (error) {
+              console.warn('No se pudo cargar el logo:', error);
+            }
+          }
+          
+          // Información de la organización en el encabezado
+          if (organizacion?.nombre) {
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(organizacion.nombre, 50, yPosition);
+            yPosition += 10;
+          }
+          
+          // Información del propietario en el encabezado
+          if (usuarioData) {
+            const nombreCompleto = `${usuarioData.nombre || ''} ${usuarioData.apellido || ''}`.trim();
+            if (nombreCompleto) {
+              doc.setFontSize(12);
+              doc.setFont(undefined, 'normal');
+              doc.text(`Propietario: ${nombreCompleto}`, 50, yPosition);
+              yPosition += 8;
+            }
+          }
+          
+          // Fecha del reporte en el encabezado
+          const fecha = new Date().toLocaleDateString('es-ES');
+          doc.setFontSize(10);
+          doc.text(`Fecha del reporte: ${fecha}`, 50, yPosition);
+          yPosition += 15;
+          
+          // Título principal del reporte
+          doc.setFontSize(18);
+          doc.setFont(undefined, 'bold');
+          const tipoReporte = document.getElementById('tipo-reporte').value;
+          const tituloReporte = tipoReporte === 'riegos' ? 'Riegos Realizados' : 
+                               tipoReporte === 'riegos-regador' ? 'Riegos por Regador' :
+                               tipoReporte === 'fertilizaciones' ? 'Fertilizantes Disponibles' : 'Reporte';
+          doc.text(tituloReporte, 15, yPosition);
+          yPosition += 10;
+          
+          // Total de registros
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'normal');
+          doc.text(`Total de registros: ${datosCompletos.length}`, 15, yPosition);
+          yPosition += 15;
+          
+          // Línea separadora
+          doc.setLineWidth(0.5);
+          doc.line(15, yPosition, 195, yPosition);
+          yPosition += 10;
+          
+          // Preparar datos para tabla incluyendo TODOS los datos
+          const headers = window.columnas.map(col => col.label);
+          const rows = datosCompletos.map(row => {
+            return window.columnas.map(col => {
+              let valor = row[col.key];
+              if (col.format === 'date' && valor) {
+                valor = new Date(valor).toLocaleDateString('es-ES');
+              } else if (!valor) {
+                valor = '-';
+              }
+              return String(valor).substring(0, 30); // Permitir más caracteres
+            });
+          });
+          
+          // Agregar tabla usando autoTable con todos los datos
+          doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: yPosition,
+            styles: { 
+              fontSize: 8,
+              cellPadding: 2,
+              overflow: 'linebreak',
+              cellWidth: 'wrap'
+            },
+            headStyles: { 
+              fillColor: [13, 110, 253],
+              textColor: 255,
+              fontStyle: 'bold',
+              fontSize: 9
+            },
+            alternateRowStyles: {
+              fillColor: [248, 249, 250]
+            },
+            columnStyles: {
+              0: { cellWidth: 25 }, // Fecha
+              1: { cellWidth: 35 }, // Regador
+              2: { cellWidth: 30 }, // Finca
+              3: { cellWidth: 30 }, // Cuartel
+              4: { cellWidth: 20 }, // Horas
+              5: { cellWidth: 25 }, // Volumen
+              6: { cellWidth: 30 }  // Objetivo
+            },
+            margin: { left: 15, right: 15 },
+            showHead: 'everyPage',
+            didDrawPage: function (data) {
+              // Encabezado en cada página
+              if (data.pageNumber > 1) {
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                if (organizacion?.nombre) {
+                  doc.text(organizacion.nombre, 15, 15);
+                }
+                doc.text(tituloReporte, 15, 25);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Página ${data.pageNumber}`, 170, 15);
+              }
+              
+              // Pie de página en cada página
+              const pageHeight = doc.internal.pageSize.height;
+              doc.setFontSize(8);
+              doc.setFont(undefined, 'normal');
+              doc.text('Generado por Cuaderno de Campo', 15, pageHeight - 15);
+              if (usuarioData) {
+                const nombreCompleto = `${usuarioData.nombre || ''} ${usuarioData.apellido || ''}`.trim();
+                if (nombreCompleto) {
+                  doc.text(`Propietario: ${nombreCompleto}`, 15, pageHeight - 10);
+                }
+              }
+              doc.text(new Date().toLocaleString('es-ES'), 15, pageHeight - 5);
+            }
+          });
+          
+          // Descargar PDF
+          const fechaArchivo = fecha.replace(/\//g, '-');
+          const filename = `reporte_${tipoReporte}_${fechaArchivo}.pdf`;
+          doc.save(filename);
+        } catch (error) {
+          console.error('Error exportando a PDF:', error);
+          alert('Error al exportar a PDF: ' + error.message);
+        }
+      }
+
+      // Funciones de paginación
+      function mostrarPagina() {
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const fin = inicio + registrosPorPagina;
+        const datosPagina = datosCompletos.slice(inicio, fin);
+
+        // Generar tabla con datos de la página actual
+        const tabla = document.createElement("table");
+        tabla.className = "table table-hover";
+        tabla.innerHTML = `
+          <thead class="table-primary">
+            <tr>
+              ${window.columnas.map(col => `<th><i class="bi bi-${col.icon} me-1"></i>${col.label}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${datosPagina.map(row => `
+              <tr>
+                ${window.columnas.map(col => {
+                  let value = row[col.key];
+                  if (col.format === 'date' && value) {
+                    value = new Date(value).toLocaleDateString('es-ES');
+                  } else if (col.format === 'badge' && value) {
+                    value = `<span class="badge bg-info">${value}</span>`;
+                  } else if (col.format === 'truncate' && value) {
+                    value = `<span class="text-truncate" style="max-width: 200px;" title="${value}">${value}</span>`;
+                  } else if (!value) {
+                    value = '-';
+                  }
+                  return `<td>${value}</td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+        
+        contenedor.innerHTML = "";
+        contenedor.appendChild(tabla);
+
+        // Actualizar información de página
+        actualizarInfoPaginacion();
+      }
+
+      function actualizarInfoPaginacion() {
+        const inicio = (paginaActual - 1) * registrosPorPagina + 1;
+        const fin = Math.min(paginaActual * registrosPorPagina, datosCompletos.length);
+        
+        document.getElementById('info-pagina').textContent = 
+          `Mostrando ${inicio}-${fin} de ${datosCompletos.length} registros`;
+        
+        document.getElementById('numero-pagina').textContent = paginaActual;
+        
+        // Habilitar/deshabilitar botones
+        document.getElementById('btn-primera').classList.toggle('disabled', paginaActual === 1);
+        document.getElementById('btn-anterior').classList.toggle('disabled', paginaActual === 1);
+        document.getElementById('btn-siguiente').classList.toggle('disabled', paginaActual === totalPaginas);
+        document.getElementById('btn-ultima').classList.toggle('disabled', paginaActual === totalPaginas);
+      }
+
+      // Funciones globales de navegación
+      window.irAPagina = function(pagina) {
+        if (pagina >= 1 && pagina <= totalPaginas) {
+          paginaActual = pagina;
+          mostrarPagina();
+        }
+      };
+
+      window.irAPaginaAnterior = function() {
+        if (paginaActual > 1) {
+          paginaActual--;
+          mostrarPagina();
+        }
+      };
+
+      window.irAPaginaSiguiente = function() {
+        if (paginaActual < totalPaginas) {
+          paginaActual++;
+          mostrarPagina();
+        }
+      };
+
+      window.irAUltimaPagina = function() {
+        paginaActual = totalPaginas;
+        mostrarPagina();
+      };
+    </script>
+  </body>
+</html>
