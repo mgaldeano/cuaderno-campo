@@ -783,57 +783,110 @@
           return;
         }
 
+        // Función para convertir imagen a base64
+        function convertirImagenABase64(url) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = this.width;
+              canvas.height = this.height;
+              ctx.drawImage(this, 0, 0);
+              const dataURL = canvas.toDataURL('image/png');
+              resolve(dataURL);
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        }
+
+        // Función para limpiar caracteres especiales que pueden causar problemas en PDF
+        function limpiarTexto(texto) {
+          if (!texto) return '';
+          return String(texto)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+            .replace(/[^\w\s\-,\.]/g, '') // Remover caracteres especiales excepto básicos
+            .trim();
+        }
+
         try {
           // Obtener datos de la organización y usuario actual
           const [orgResult, userResult] = await Promise.all([
-            supabase.from('organizaciones').select('nombre').limit(1).single(),
+            supabase.from('organizaciones').select('nombre, logo_url').limit(1).single(),
             supabase.auth.getUser()
           ]);
 
           const nombreOrganizacion = orgResult.data?.nombre || 'Organización';
+          const logoUrl = orgResult.data?.logo_url;
           const { data: { user } } = userResult;
           
-          // Obtener datos del productor
-          let nombreProductor = 'Productor';
+          // Obtener datos del productor desde la tabla usuarios
+          let nombreProductor = 'Sin nombre';
+          console.log('Usuario actual:', user); // Debug
+          
           if (user) {
-            const { data: perfilData } = await supabase
+            const { data: perfilData, error: perfilError } = await supabase
               .from('usuarios')
-              .select('nombre, apellido')
+              .select('nombre')  // Solo nombre, no apellido (campo no existe en BD)
               .eq('id', user.id)
               .single();
             
-            if (perfilData) {
-              nombreProductor = `${perfilData.apellido || ''}, ${perfilData.nombre || ''}`.replace(/^, /, '');
+            console.log('Datos del perfil:', perfilData, 'Error:', perfilError); // Debug
+            
+            if (perfilData && perfilData.nombre) {
+              nombreProductor = perfilData.nombre;
             }
           }
 
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
+          // Configurar encoding para caracteres especiales
+          doc.setLanguage("es");
+          
           // Configurar encabezado con logo y datos de la organización
-          let yPosition = 20;
+          let yPosition = 20; // Reducir espacio inicial
           
-          // Espacio para logo (aunque no podemos cargarlo dinámicamente en PDF)
-          doc.setFontSize(18);
+          // Intentar cargar y mostrar el logo real
+          try {
+            const logoBase64 = await convertirImagenABase64('./logo.png');
+            // Agregar logo real al PDF
+            doc.addImage(logoBase64, 'PNG', 20, yPosition - 8, 25, 12);
+          } catch (error) {
+            console.log('No se pudo cargar el logo, usando placeholder:', error);
+            // Fallback: rectángulo como placeholder del logo
+            doc.setFillColor(240, 240, 240); // Gris claro
+            doc.rect(20, yPosition - 8, 25, 12, 'F'); // Rectángulo relleno
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('LOGO', 28, yPosition - 2);
+            doc.setTextColor(0, 0, 0); // Volver a negro
+          }
+          
+          // Nombre de la organización (a la derecha del logo)
+          doc.setFontSize(14); // Cambiar de 16 a 14pt
           doc.setFont(undefined, 'bold');
-          doc.text(nombreOrganizacion, 20, yPosition);
+          doc.text(limpiarTexto(nombreOrganizacion), 50, yPosition);
           
-          yPosition += 10;
-          doc.setFontSize(14);
+          yPosition += 10; // Reducir espacio
+          doc.setFontSize(12); // Mantener 12pt para productor
           doc.setFont(undefined, 'normal');
-          doc.text(`Productor: ${nombreProductor}`, 20, yPosition);
+          doc.text(`Productor: ${limpiarTexto(nombreProductor)}`, 20, yPosition);
           
-          yPosition += 15;
-          doc.setFontSize(16);
+          yPosition += 10; // Reducir espacio
+          doc.setFontSize(10); // Cambiar de 14 a 10pt
           doc.setFont(undefined, 'bold');
           doc.text(`Reporte de Riegos por ${window.ultimoTipo === 'finca' ? 'Finca' : 'Regador'}`, 20, yPosition);
           
-          yPosition += 10;
-          doc.setFontSize(10);
+          yPosition += 8; // Reducir espacio
+          doc.setFontSize(9); // Cambiar de 10 a 9pt
           doc.setFont(undefined, 'normal');
-          doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, 20, yPosition);
+          doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')} - ${new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}`, 20, yPosition);
           
-          yPosition += 15;
+          yPosition += 12; // Reducir espacio
 
           // Si es reporte por finca, agrupar por finca
           if (window.ultimoTipo === 'finca') {
@@ -857,7 +910,8 @@
               // Encabezado de finca
               doc.setFontSize(14);
               doc.setFont(undefined, 'bold');
-              doc.text(`📍 ${nombreFinca}`, 20, yPosition);
+              // Reemplazar emoji por texto simple para evitar problemas de encoding
+              doc.text(`FINCA: ${limpiarTexto(nombreFinca)}`, 20, yPosition);
               yPosition += 5;
               
               doc.setFontSize(10);
@@ -889,19 +943,19 @@
                 
                 xPosition = 20;
                 const rowData = [
-                  riego.fecha || '',
-                  riego.cuarteles?.nombre || '',
-                  riego.aplicadores_operarios ? 
-                    `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '',
-                  riego.horas_riego || '',
-                  riego.volumen_agua || '',
-                  riego.objetivo || '',
-                  riego.observaciones || ''
+                  limpiarTexto(riego.fecha || ''),
+                  limpiarTexto(riego.cuarteles?.nombre || ''),
+                  limpiarTexto(riego.aplicadores_operarios ? 
+                    `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : ''),
+                  limpiarTexto(riego.horas_riego || ''),
+                  limpiarTexto(riego.volumen_agua || ''),
+                  limpiarTexto(riego.objetivo || ''),
+                  limpiarTexto(riego.observaciones || '')
                 ];
                 
                 rowData.forEach((cell, index) => {
                   const maxLength = index === 6 ? 20 : 12; // Observaciones pueden ser más largas
-                  const text = String(cell).substring(0, maxLength);
+                  const text = limpiarTexto(String(cell)).substring(0, maxLength);
                   doc.text(text, xPosition, yPosition);
                   xPosition += columnWidths[index];
                 });
@@ -913,15 +967,15 @@
           } else {
             // Reporte por regador - tabla única
             const tableData = window.ultimoReporte.map(riego => [
-              riego.fecha || '',
-              riego.fincas?.nombre_finca || '',
-              riego.cuarteles?.nombre || '',
-              riego.aplicadores_operarios ? 
-                `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : '',
-              riego.horas_riego || '',
-              riego.volumen_agua || '',
-              riego.objetivo || '',
-              riego.observaciones || ''
+              limpiarTexto(riego.fecha || ''),
+              limpiarTexto(riego.fincas?.nombre_finca || ''),
+              limpiarTexto(riego.cuarteles?.nombre || ''),
+              limpiarTexto(riego.aplicadores_operarios ? 
+                `${riego.aplicadores_operarios.apellido || ''}, ${riego.aplicadores_operarios.nombre}`.replace(/^, /, '') : ''),
+              limpiarTexto(riego.horas_riego || ''),
+              limpiarTexto(riego.volumen_agua || ''),
+              limpiarTexto(riego.objetivo || ''),
+              limpiarTexto(riego.observaciones || '')
             ]);
 
             // Headers
@@ -949,7 +1003,7 @@
               xPosition = 20;
               row.forEach((cell, index) => {
                 const maxLength = index === 7 ? 18 : 12;
-                const text = String(cell).substring(0, maxLength);
+                const text = limpiarTexto(String(cell)).substring(0, maxLength);
                 doc.text(text, xPosition, yPosition);
                 xPosition += columnWidths[index];
               });
