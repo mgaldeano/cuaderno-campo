@@ -3,28 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Métodos de Aplicación</title>
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <title>Métodos de Aplicación - Cuaderno de Campo</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Estilos personalizados -->
+  <link href="estilos.css" rel="stylesheet">
+  
+  <style>
+    .table-container {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .btn-add {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+    }
+    
+    .btn-add:hover {
+      background-color: #0056b3;
+      border-color: #004085;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    .search-container {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-action {
+      padding: 0.25rem 0.5rem;
+      margin: 0 0.125rem;
+      font-size: 0.875rem;
+    }
+    
+    .status-message {
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+    }
+    
+    .status-success {
+      background-color: #d1edff;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    .status-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
 </head>
-<body>
-  <div id="header-container"></div>
-  <main class="container">
-    <h2>Métodos de Aplicación</h2>
-    <input type="search" id="searchInput" placeholder="Buscar método..." />
-    <button id="addBtn">➕ Nuevo método</button>
-    <div style="overflow-x:auto;">
-      <table id="metodosTable" style="font-size:0.92em;">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+<body class="bg-light">
+  <!-- Header Container -->
+  <div id="header-container">
+    <!-- Header simple mientras carga -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <i class="bi bi-leaf"></i> Cuaderno de Campo
+        </a>
+      </div>
+    </nav>
+  </div>
+  
+  <main class="container py-4">
+    <!-- Título y descripción -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <h1 class="h2 mb-3">
+          <i class="bi bi-tools me-2"></i>
+          Métodos de Aplicación
+        </h1>
+        <p class="text-muted">
+          Gestiona los métodos de aplicación de productos fitosanitarios y fertilizantes.
+        </p>
+      </div>
     </div>
+    
+    <!-- Búsqueda y botón agregar -->
+    <div class="search-container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="search" id="searchInput" class="form-control" 
+                   placeholder="Buscar métodos por nombre o descripción...">
+          </div>
+        </div>
+        <div class="col-md-4 text-end mt-2 mt-md-0">
+          <button id="addBtn" class="btn btn-add">
+            <i class="bi bi-plus-circle me-1"></i>
+            Nuevo Método
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tabla de métodos -->
+    <div class="table-container">
+      <div class="table-responsive">
+        <table id="metodosTable" class="table table-hover mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th style="width: 30%">Nombre</th>
+              <th style="width: 50%">Descripción</th>
+              <th style="width: 20%" class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Mensaje de estado -->
+    <div id="statusMessage" class="status-message d-none"></div>
   </main>
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script type="module">
     import { supabase } from "./supabaseClient.js";
     const { data: { user } } = await supabase.auth.getUser();
@@ -45,56 +161,89 @@
     const table = document.getElementById('metodosTable').querySelector('tbody');
     const searchInput = document.getElementById('searchInput');
     const addBtn = document.getElementById('addBtn');
+    const statusMessage = document.getElementById('statusMessage');
 
     let metodos = [];
     let editingId = null;
 
     async function fetchMetodos() {
-      const { data, error } = await supabase.from('metodos_de_aplicacion').select('*').order('nombre');
-      if (!error) {
+      try {
+        const { data, error } = await supabase.from('metodos_de_aplicacion').select('*').order('nombre');
+        if (error) throw error;
         metodos = data;
         renderTable();
+        showStatus(`${metodos.length} métodos cargados`, 'success');
+      } catch (err) {
+        showStatus('Error al cargar métodos: ' + err.message, 'error');
       }
     }
 
-    // Mensaje de estado
-    let statusMsg = document.createElement('div');
-    statusMsg.style.fontSize = '0.95em';
-    statusMsg.style.margin = '0.5em 0 0.5em 0';
-    statusMsg.style.color = '#b22';
-    table.parentElement.insertBefore(statusMsg, table);
-
-    function showStatus(msg, ok=false) {
-      statusMsg.textContent = msg;
-      statusMsg.style.color = ok ? '#185' : '#b22';
-      if (msg) setTimeout(()=>{ statusMsg.textContent = ''; }, 2500);
+    function showStatus(msg, type = 'error') {
+      statusMessage.textContent = msg;
+      statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'}`;
+      statusMessage.classList.remove('d-none');
+      
+      if (msg) {
+        setTimeout(() => {
+          statusMessage.classList.add('d-none');
+        }, 3000);
+      }
     }
 
     function renderTable() {
       const filtro = searchInput.value.toLowerCase();
+      const metodosFiltrados = metodos.filter(m =>
+        (m.nombre || '').toLowerCase().includes(filtro) ||
+        (m.descripcion || '').toLowerCase().includes(filtro)
+      );
+      
       table.innerHTML = '';
-      metodos.filter(m =>
-        (m.nombre||'').toLowerCase().includes(filtro) ||
-        (m.descripcion||'').toLowerCase().includes(filtro)
-      ).forEach(m => {
+      
+      if (metodosFiltrados.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              ${filtro ? 'No se encontraron métodos que coincidan con la búsqueda' : 'No hay métodos registrados'}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      metodosFiltrados.forEach(m => {
         const tr = document.createElement('tr');
-        // Comparar IDs como string para evitar bugs
+        
         if (String(editingId) === String(m.id)) {
           tr.innerHTML = `
-            <td><input value="${m.nombre||''}" data-field="nombre" maxlength="60" required></td>
-            <td><input value="${m.descripcion||''}" data-field="descripcion" maxlength="120"></td>
             <td>
-              <button data-action="save">💾</button>
-              <button data-action="cancel">✖️</button>
+              <input class="form-control form-control-sm" value="${m.nombre || ''}" 
+                     data-field="nombre" maxlength="60" required>
+            </td>
+            <td>
+              <input class="form-control form-control-sm" value="${m.descripcion || ''}" 
+                     data-field="descripcion" maxlength="120">
+            </td>
+            <td class="text-center">
+              <button class="btn btn-success btn-action" data-action="save" title="Guardar">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="btn btn-secondary btn-action" data-action="cancel" title="Cancelar">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </td>
           `;
         } else {
           tr.innerHTML = `
-            <td>${m.nombre||''}</td>
-            <td>${m.descripcion||''}</td>
-            <td>
-              <button data-action="edit">✏️</button>
-              <button data-action="delete">🗑️</button>
+            <td><strong>${m.nombre || ''}</strong></td>
+            <td>${m.descripcion || '<span class="text-muted">Sin descripción</span>'}</td>
+            <td class="text-center">
+              <button class="btn btn-outline-primary btn-action" data-action="edit" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-action" data-action="delete" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
             </td>
           `;
         }
@@ -103,58 +252,94 @@
       });
     }
 
-
     table.addEventListener('click', async e => {
       const tr = e.target.closest('tr');
       const id = tr?.dataset.id;
-      const action = e.target.dataset.action;
-      if (!id) return;
+      const action = e.target.closest('button')?.dataset.action;
+      
+      if (!id || !action) return;
+      
       if (action === 'edit') {
         editingId = id;
         renderTable();
+        // Enfocar el primer input después del re-render
+        setTimeout(() => {
+          const newTr = table.querySelector(`tr[data-id="${id}"]`);
+          const firstInput = newTr?.querySelector('input');
+          if (firstInput) {
+            firstInput.focus();
+          }
+        }, 100);
+        
       } else if (action === 'cancel') {
         if (id.startsWith('nuevo-')) {
           metodos = metodos.filter(m => m.id !== id);
         }
         editingId = null;
         renderTable();
+        
       } else if (action === 'save') {
-        const btn = tr.querySelector('button[data-action="save"]');
+        const btn = e.target.closest('button');
+        const originalContent = btn.innerHTML;
         btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+        
         const inputs = tr.querySelectorAll('input');
         const values = {};
         inputs.forEach(inp => values[inp.dataset.field] = inp.value.trim());
+        
         if (!values.nombre) {
-          showStatus('El nombre es obligatorio');
+          showStatus('El nombre es obligatorio', 'error');
           btn.disabled = false;
+          btn.innerHTML = originalContent;
+          tr.querySelector('input[data-field="nombre"]').focus();
           return;
         }
+        
         try {
           if (id.startsWith('nuevo-')) {
+            console.log('➕ Insertando nuevo método:', values);
             const { error } = await supabase.from('metodos_de_aplicacion').insert([values]);
-            if (error) throw error;
-            showStatus('Método agregado', true);
+            if (error) {
+              console.error('❌ Error en INSERT:', error);
+              throw error;
+            }
+            console.log('✅ Método insertado correctamente');
+            showStatus('Método agregado correctamente', 'success');
           } else {
-            const { error } = await supabase.from('metodos_de_aplicacion').update(values).eq('id', isNaN(Number(id)) ? id : Number(id));
-            if (error) throw error;
-            showStatus('Método actualizado', true);
+            console.log('✏️ Actualizando método ID:', id, 'con datos:', values);
+            const { error } = await supabase.from('metodos_de_aplicacion')
+              .update(values)
+              .eq('id', isNaN(Number(id)) ? id : Number(id));
+            if (error) {
+              console.error('❌ Error en UPDATE:', error);
+              throw error;
+            }
+            console.log('✅ Método actualizado correctamente');
+            showStatus('Método actualizado correctamente', 'success');
           }
+          editingId = null;
+          await fetchMetodos();
         } catch (err) {
-          showStatus('Error: ' + (err.message || err));
+          showStatus('Error al guardar: ' + err.message, 'error');
           btn.disabled = false;
-          return;
+          btn.innerHTML = originalContent;
         }
-        editingId = null;
-        fetchMetodos();
+        
       } else if (action === 'delete') {
-        if (confirm('¿Eliminar este método?')) {
+        const metodo = metodos.find(m => String(m.id) === String(id));
+        const nombreMetodo = metodo?.nombre || 'este método';
+        
+        if (confirm(`¿Está seguro de eliminar "${nombreMetodo}"?\n\nEsta acción no se puede deshacer.`)) {
           try {
-            const { error } = await supabase.from('metodos_de_aplicacion').delete().eq('id', isNaN(Number(id)) ? id : Number(id));
+            const { error } = await supabase.from('metodos_de_aplicacion')
+              .delete()
+              .eq('id', isNaN(Number(id)) ? id : Number(id));
             if (error) throw error;
-            showStatus('Método eliminado', true);
-            fetchMetodos();
+            showStatus('Método eliminado correctamente', 'success');
+            await fetchMetodos();
           } catch (err) {
-            showStatus('Error: ' + (err.message || err));
+            showStatus('Error al eliminar: ' + err.message, 'error');
           }
         }
       }
@@ -162,15 +347,27 @@
 
     addBtn.addEventListener('click', () => {
       const nuevo = {
-        id: 'nuevo-' + Math.random(), nombre: '', descripcion: ''
+        id: 'nuevo-' + Date.now(),
+        nombre: '',
+        descripcion: ''
       };
       metodos.unshift(nuevo);
       editingId = nuevo.id;
       renderTable();
+      
+      // Enfocar el primer input después del re-render
+      setTimeout(() => {
+        const firstInput = table.querySelector('input');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 100);
     });
 
     searchInput.addEventListener('input', renderTable);
-    fetchMetodos();
+    
+    // Cargar datos iniciales
+    await fetchMetodos();
   </script>
 </body>
 </html>

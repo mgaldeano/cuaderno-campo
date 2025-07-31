@@ -1,0 +1,464 @@
+/* ===== ESPACIADO DE ICONOS ===== */
+/* Clase para iconos en listas que necesitan más espacio */
+.icon-spacing {
+  margin-right: 0.5rem !important;
+}
+
+/* Específico para iconos en pequeños elementos de texto */
+.text-muted .bi {
+  margin-right: 0.5rem;
+}
+
+/* ===== COMPONENTES REUTILIZABLES ===== */
+.mui-card {
+  position: relative;
+}
+/* Asegura que el menú desplegable siempre quede por encima de las tarjetas y no parpadee */
+.dropdown-menu {
+  z-index: 2000 !important;
+}
+/* Título principal en el header */
+.titulo-header {
+  color: var(--color-primary);
+  font-family: var(--font-main);
+  font-size: 1.35em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-right: 0.5em;
+}
+
+/* Caja de usuario/institución en header */
+.header-info-box {
+  font-size: 0.98em;
+  color: var(--color-text);
+  background: #fff !important;
+  color: var(--color-text) !important;
+  border-radius: 10px;
+  padding: 6px 18px;
+  box-shadow: 0 2px 8px #0001;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-left: 1em;
+  border: 1px solid var(--color-border);
+}
+/* Título principal para login y páginas importantes */
+.titulo-principal {
+  color: var(--color-primary);
+  font-family: var(--font-main);
+  font-size: 2.1em;
+  font-weight: 500;
+  margin-bottom: 0.5em;
+  letter-spacing: 0.01em;
+}
+:root {
+  --color-primary: #1976d2;
+  --color-secondary: #43a047;
+  --color-accent: #ffb300;
+  --color-bg: #f7f8fa;
+  --color-bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #f7f8fa 100%);
+  --color-card: #fff;
+  --color-border: #e0e0e0;
+  --color-text: #222;
+  --color-muted: #888;
+  --font-main: 'Roboto', 'Segoe UI', Arial, sans-serif;
+}
+body {
+  background: var(--color-bg-gradient);
+  font-family: var(--font-main);
+  color: var(--color-text);
+}
+.mui-card {
+  background: var(--color-card);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0002;
+  padding: 1.5em;
+  margin-bottom: 2em;
+  border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.mui-card:hover {
+  box-shadow: 0 6px 24px #1976d233;
+  transform: translateY(-2px) scale(1.01);
+}
+.btn-primary, .btn-secondary {
+  box-shadow: 0 2px 4px #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn-primary:hover, .btn-secondary:hover {
+  box-shadow: 0 4px 12px #1976d233;
+  transform: translateY(-1px) scale(1.03);
+}
+.form-control, .selectpicker {
+  font-family: var(--font-main);
+  font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: #fafafa;
+  color: var(--color-text);
+  margin-bottom: 1em;
+  transition: border-color 0.2s;
+}
+.form-control:focus, .selectpicker:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+label {
+  font-weight: 500;
+  color: var(--color-primary);
+  font-family: var(--font-main);
+}
+small.form-text {
+  color: var(--color-muted);
+  font-family: var(--font-main);
+}
+/* Personalización Bootstrap Select: checks más visibles y alineados a la izquierda */
+.bootstrap-select .dropdown-menu li a span.check-mark {
+  left: 8px;
+  color: var(--color-primary);
+  font-size: 1.2em;
+}
+.bootstrap-select .dropdown-menu li.selected a {
+  background-color: #e3f2fd;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.bootstrap-select .dropdown-menu li a {
+  padding-left: 32px !important;
+  font-family: var(--font-main);
+}
+.bootstrap-select .dropdown-menu li.selected a span.text {
+  font-weight: bold;
+}
+.bootstrap-select .dropdown-menu li.disabled a {
+  color: #bbb !important;
+}
+/* Custom radio/checkbox */
+.form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.form-check-label {
+  font-family: var(--font-main);
+  color: var(--color-text);
+}
+
+/* Unificar tamaño y altura de letra en navbar y botón cerrar sesión */
+.navbar, .navbar-nav .nav-link, .navbar-text, #logoutBtn {
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
+#logoutBtn {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  font-size: 1.05em !important;
+  font-weight: 500;
+  box-shadow: 0 2px 4px #0001;
+  border-radius: 6px;
+  border: none;
+  padding: 0.45em 1.2em;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.navbar {
+  min-height: 64px;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  align-items: center;
+  display: flex;
+}
+.navbar .navbar-brand,
+.navbar .navbar-nav,
+.navbar .navbar-text,
+.navbar #logoutBtn {
+  align-items: center;
+  display: flex;
+}
+
+/* Header dinámico */
+#header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#header-container .titulo-header {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+#header-container .header-info-box {
+  position: absolute;
+  right: 1em;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary);
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#header-container .header-info-box:hover {
+  background: #fff;
+  color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para el script de header.js */
+#header-container.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+#header-container.loaded {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+/* =====================================================
+   MEJORAS ADICIONALES - INTERFAZ MODERNA
+   ===================================================== */
+
+/* Mejoras para formularios grandes */
+.card-header {
+  border-radius: 16px 16px 0 0 !important;
+}
+
+.card-body {
+  border-radius: 0 0 16px 16px !important;
+}
+
+/* Lista de elementos mejorada */
+.list-group-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.list-group-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--color-primary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.list-group-item:hover::before {
+  transform: scaleY(1);
+}
+
+/* Badges con efectos */
+.badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.badge:hover::after {
+  left: 100%;
+}
+
+/* Iconos con animación */
+.bi {
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .bi {
+  transform: scale(1.1);
+}
+
+/* Empty states mejorados */
+#empty-state {
+  padding: 3rem 1rem;
+}
+
+#empty-state i {
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+#empty-state:hover i {
+  opacity: 0.6;
+  transform: scale(1.1);
+}
+
+/* Contador de elementos */
+#contador-fincas, #contador-cuarteles {
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(44, 90, 160, 0.1), rgba(44, 90, 160, 0.05));
+  border: 1px solid rgba(44, 90, 160, 0.2);
+  color: var(--color-primary);
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.form-control:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Transiciones suaves para todos los elementos */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Media queries adicionales */
+@media (max-width: 576px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .h3 {
+    font-size: 1.5rem;
+  }
+  
+  .btn-lg {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* =====================================================
+   MEJORAS ESPECÍFICAS PARA NAVBAR-BRAND
+   ===================================================== */
+.navbar-brand {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  transform: translateY(-1px);
+  text-decoration: none !important;
+}
+
+.navbar-brand img {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.navbar-brand:hover img {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)) brightness(1.1);
+}
+
+.navbar-brand span {
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover span {
+  color: var(--color-primary-dark) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Botón de agregar colapsable */
+#toggle-form-btn {
+  border-radius: 25px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, var(--color-success) 0%, #1e7e34 100%);
+  border: none;
+  box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+}
+
+#toggle-form-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #1e7e34 0%, var(--color-success) 100%);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+/* Animación suave para collapse */
+.collapse {
+  transition: height 0.35s ease;
+}
+
+.collapsing {
+  transition: height 0.35s ease;
+}
+
+/* Mejoras para la búsqueda prominente */
+#buscar-fincas {
+  border: none;
+  font-size: 1.1em;
+  padding: 12px 16px;
+}
+
+#buscar-fincas:focus {
+  background: white;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Animación suave para formulario */
+#formulario-finca {
+  transition: opacity 0.3s ease;
+}
+
+/* ===== ESTILOS DASHBOARD ===== */
+.dashboard-card-link {
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover {
+  text-decoration: none !important;
+}
+
+.dashboard-card-link .mui-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e3e6ea;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.dashboard-card-link:hover .mui-card {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  border-color: #d1ecf1;
+}
+
+.dashboard-card-link .card-body {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover .card-body {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Efecto especial para iconos del dashboard */
+.dashboard-card-link i {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover i {
+  transform: scale(1.1);
+}
+
+/* Números en el dashboard */
+.dashboard-card-link h2 {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-link:hover h2 {
+  color: #007bff !important;
+}

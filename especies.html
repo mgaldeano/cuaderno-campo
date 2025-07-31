@@ -1,28 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ABM Especies</title>
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
-  <style>
-    .tabla-especies-boton {
-      font-size: 0.85em;
-      padding: 2px 4px;
-      border-radius: 4px;
-      line-height: 1.2;
-      margin: 0 1px;
-      min-width: 48px;
-      max-width: 64px;
-      white-space: nowrap;
-    }
-    #tabla-especies td:last-child {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-    }
-  </style>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- Google Fonts Roboto -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- Tu CSS personalizado -->
+  <link rel="stylesheet" href="estilos.css">
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
   <div id="header-container"></div>
@@ -40,77 +31,347 @@
         import('./header.js');
       });
   </script>
-  <main class="container">
-    <h2>Gestión de Especies</h2>
-    <form id="form-especie" style="display:flex; gap:1em; flex-wrap:wrap; align-items:end;">
-      <input type="hidden" id="especie-id" />
-      <div>
-        <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" required />
+  <main class="container py-4">
+    <!-- Header Section -->
+    <div class="container-fluid bg-light py-3 mb-4">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="h3 mb-1 text-primary font-weight-bold">
+              <i class="bi bi-flower1 text-success me-2"></i>
+              Gestión de Especies
+            </h1>
+            <p class="text-muted mb-0">Administra las especies de cultivos y plantas</p>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="badge badge-secondary badge-lg me-3" id="contador-especies">0 especies</span>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#formulario-especie" aria-expanded="false" aria-controls="formulario-especie" id="toggle-form-btn"
+                    style="background-color: #007bff !important; border-color: #007bff !important; color: #ffffff !important; font-weight: 600; box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);">
+              <i class="bi bi-plus-circle me-1"></i> Agregar Especie
+            </button>
+          </div>
+        </div>
       </div>
-      <button type="submit" id="guardar">Guardar</button>
-      <button type="button" id="cancelar" style="display:none;">Cancelar</button>
-    </form>
-    <p id="status"></p>
-    <table id="tabla-especies" style="margin-top:1em;"></table>
+    </div>
+
+    <!-- Formulario Colapsable -->
+    <div class="collapse mb-4" id="formulario-especie">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-plus-circle text-success me-2"></i>
+                <span id="form-title">Nueva Especie</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="form-especie">
+                <input type="hidden" id="especie-id" />
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <label for="nombre" class="form-label font-weight-medium">
+                      <i class="bi bi-tag me-1"></i> Nombre de la especie *
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required />
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-success btn-lg px-4" id="guardar">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="btn-text">Guardar Especie</span>
+                  </button>
+                  <button type="button" id="cancelar" class="btn btn-outline-secondary" style="display:none;">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-hover" id="tabla-especies">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="status"></div>
   </main>
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    
     const form = document.getElementById('form-especie');
     const status = document.getElementById('status');
     const tabla = document.getElementById('tabla-especies');
     const cancelarBtn = document.getElementById('cancelar');
-    async function cargarEspecies() {
-      const { data, error } = await supabase.from('especies').select('*').order('nombre');
-      if (error) { status.textContent = 'Error al cargar especies'; return; }
-      let html = `<thead><tr><th>Nombre</th><th>Acciones</th></tr></thead><tbody>`;
-      data.forEach(e => {
-        html += `<tr>
-          <td>${e.nombre}</td>
-          <td>
-            <button type='button' data-id='${e.id}' class='editar tabla-especies-boton'>✎</button>
-            <button type='button' data-id='${e.id}' class='borrar tabla-especies-boton' style='color:red;'>🗑</button>
-          </td>
-        </tr>`;
-      });
-      html += '</tbody>';
-      tabla.innerHTML = html;
-      tabla.querySelectorAll('.editar').forEach(btn => btn.onclick = () => editarEspecie(btn.dataset.id));
-      tabla.querySelectorAll('.borrar').forEach(btn => btn.onclick = () => borrarEspecie(btn.dataset.id));
+    const toggleBtn = document.getElementById('toggle-form-btn');
+    const formulario = document.getElementById('formulario-especie');
+
+    // Función para mostrar mensajes con estilo Bootstrap
+    function mostrarStatus(mensaje, tipo = 'info') {
+      const alertClass = tipo === 'success' ? 'alert-success' : 
+                        tipo === 'error' ? 'alert-danger' : 
+                        tipo === 'warning' ? 'alert-warning' : 'alert-info';
+      
+      const icon = tipo === 'success' ? 'bi-check-circle' : 
+                  tipo === 'error' ? 'bi-exclamation-triangle' : 
+                  tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+      
+      status.innerHTML = `
+        <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+          <i class="bi ${icon} me-2"></i>
+          <div>${mensaje}</div>
+        </div>
+      `;
+      
+      // Auto-ocultar después de 5 segundos si es éxito
+      if (tipo === 'success') {
+        setTimeout(() => {
+          status.innerHTML = '';
+        }, 5000);
+      }
     }
+
+    // Función para actualizar contador
+    function actualizarContador(cantidad) {
+      const contador = document.getElementById('contador-especies');
+      if (contador) {
+        contador.textContent = `${cantidad} especie${cantidad !== 1 ? 's' : ''}`;
+        contador.className = cantidad > 0 ? 'badge badge-success badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+      }
+    }
+
+    // Toggle del formulario
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        setTimeout(() => {
+          const isVisible = formulario.classList.contains('show');
+          toggleBtn.innerHTML = isVisible ? 
+            '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario' : 
+            '<i class="bi bi-plus-circle me-1"></i> Agregar Especie';
+        }, 150);
+      });
+    }
+
+    async function cargarEspecies() {
+      try {
+        mostrarStatus('Cargando especies...', 'info');
+        const { data, error } = await supabase.from('especies').select('*').order('nombre');
+        if (error) { 
+          mostrarStatus('Error al cargar especies: ' + error.message, 'error');
+          return; 
+        }
+        
+        // Actualizar contador
+        actualizarContador(data.length);
+        
+        if (data.length === 0) {
+          tabla.querySelector('tbody').innerHTML = '<tr><td colspan="2" class="text-center text-muted">No hay especies registradas. <strong>Agrega la primera!</strong></td></tr>';
+          status.innerHTML = '';
+          return;
+        }
+
+        let html = '';
+        data.forEach(e => {
+          html += `<tr>
+            <td><strong>${e.nombre}</strong></td>
+            <td>
+              <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-primary" onclick="editarEspecie('${e.id}')">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="borrarEspecie('${e.id}', '${e.nombre}')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        });
+        
+        tabla.querySelector('tbody').innerHTML = html;
+        status.innerHTML = '';
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    }
+
     form.onsubmit = async e => {
       e.preventDefault();
       const id = document.getElementById('especie-id').value;
       const nombre = document.getElementById('nombre').value.trim();
-      if (!nombre) { status.textContent = 'Complete el nombre.'; return; }
-      status.textContent = 'Guardando...';
-      if (id) {
-        const { error } = await supabase.from('especies').update({ nombre }).eq('id', id);
-        if (error) { status.textContent = 'Error al actualizar'; return; }
-      } else {
-        const { error } = await supabase.from('especies').insert([{ nombre }]);
-        if (error) { status.textContent = 'Error al crear'; return; }
+      if (!nombre) { 
+        mostrarStatus('Complete el nombre de la especie', 'warning'); 
+        return; 
       }
-      form.reset();
-      cancelarBtn.style.display = 'none';
-      status.textContent = 'Guardado';
-      cargarEspecies();
+      
+      mostrarStatus('Guardando especie...', 'info');
+      
+      try {
+        if (id) {
+          // 🔄 ESTRATEGIA DUAL: UPDATE directo + RPC fallback
+          console.log('🔄 Actualizando especie:', id, nombre);
+          
+          let { data, error } = await supabase
+            .from('especies')
+            .update({ nombre })
+            .eq('id', id)
+            .select();
+          
+          console.log('Resultado UPDATE directo:', { data, error });
+          
+          // Si UPDATE directo falla o no retorna datos, usar RPC
+          if (error || !data || data.length === 0) {
+            console.log('⚠️ UPDATE directo falló, intentando con RPC...');
+            
+            const rpcResult = await supabase.rpc('actualizar_especie', {
+              especie_id: id,
+              nuevo_nombre: nombre
+            });
+            
+            console.log('Resultado RPC:', rpcResult);
+            
+            if (rpcResult.error) {
+              mostrarStatus('Error al actualizar especie (RPC): ' + rpcResult.error.message, 'error'); 
+              return; 
+            }
+            
+            console.log('✅ Actualización exitosa con RPC');
+            mostrarStatus('Especie actualizada correctamente (RPC)', 'success');
+          } else {
+            console.log('✅ Actualización exitosa directa');
+            mostrarStatus('Especie actualizada correctamente', 'success');
+          }
+        } else {
+          const { error } = await supabase.from('especies').insert([{ nombre }]);
+          if (error) { 
+            mostrarStatus('Error al crear especie: ' + error.message, 'error'); 
+            return; 
+          }
+          mostrarStatus('Especie creada correctamente', 'success');
+        }
+        
+        form.reset();
+        cancelarBtn.style.display = 'none';
+        document.getElementById('form-title').textContent = 'Nueva Especie';
+        document.getElementById('btn-text').textContent = 'Guardar Especie';
+        cargarEspecies();
+        
+        // Ocultar el formulario después de agregar (solo si es nuevo)
+        if (!id) {
+          const collapseEl = document.getElementById('formulario-especie');
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: false });
+          bsCollapse.hide();
+          
+          // Actualizar texto del botón
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Especie';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
     };
-    async function editarEspecie(id) {
-      const { data, error } = await supabase.from('especies').select('*').eq('id', id).single();
-      if (error) { status.textContent = 'Error al cargar especie'; return; }
-      document.getElementById('especie-id').value = data.id;
-      document.getElementById('nombre').value = data.nombre;
-      cancelarBtn.style.display = '';
-    }
-    async function borrarEspecie(id) {
-      if (!confirm('¿Borrar especie?')) return;
-      const { error } = await supabase.from('especies').delete().eq('id', id);
-      if (error) { status.textContent = 'Error al borrar'; return; }
-      status.textContent = 'Borrado';
-      cargarEspecies();
-    }
-    cancelarBtn.onclick = () => { form.reset(); cancelarBtn.style.display = 'none'; status.textContent = ''; };
+
+    window.editarEspecie = async function(id) {
+      try {
+        const { data, error } = await supabase.from('especies').select('*').eq('id', id).single();
+        if (error) { 
+          mostrarStatus('Error al cargar especie: ' + error.message, 'error'); 
+          return; 
+        }
+        
+        document.getElementById('especie-id').value = data.id;
+        document.getElementById('nombre').value = data.nombre;
+        document.getElementById('form-title').textContent = 'Editar Especie';
+        document.getElementById('btn-text').textContent = 'Actualizar Especie';
+        cancelarBtn.style.display = 'inline-block';
+        
+        // Mostrar el formulario si está oculto
+        const collapseEl = document.getElementById('formulario-especie');
+        if (!collapseEl.classList.contains('show')) {
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: true });
+          bsCollapse.show();
+          
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    window.borrarEspecie = async function(id, nombre) {
+      if (!confirm(`¿Está seguro de eliminar la especie "${nombre}"?`)) return;
+      
+      try {
+        mostrarStatus('Eliminando especie...', 'info');
+        
+        // 🔄 ESTRATEGIA DUAL: DELETE directo + RPC fallback
+        console.log('🗑️ Eliminando especie:', id, nombre);
+        
+        let { data, error } = await supabase
+          .from('especies')
+          .delete()
+          .eq('id', id)
+          .select();
+        
+        console.log('Resultado DELETE directo:', { data, error });
+        
+        // Si DELETE directo falla o no retorna datos, usar RPC
+        if (error || !data || data.length === 0) {
+          console.log('⚠️ DELETE directo falló, intentando con RPC...');
+          
+          const rpcResult = await supabase.rpc('eliminar_especie', {
+            especie_id: id
+          });
+          
+          console.log('Resultado RPC eliminación:', rpcResult);
+          
+          if (rpcResult.error) {
+            mostrarStatus('Error al eliminar especie (RPC): ' + rpcResult.error.message, 'error'); 
+            return; 
+          }
+          
+          console.log('✅ Eliminación exitosa con RPC');
+          mostrarStatus('Especie eliminada correctamente (RPC)', 'success');
+        } else {
+          console.log('✅ Eliminación exitosa directa');
+          mostrarStatus('Especie eliminada correctamente', 'success');
+        }
+        
+        cargarEspecies();
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    cancelarBtn.onclick = () => { 
+      form.reset(); 
+      cancelarBtn.style.display = 'none'; 
+      document.getElementById('form-title').textContent = 'Nueva Especie';
+      document.getElementById('btn-text').textContent = 'Guardar Especie';
+      status.innerHTML = ''; 
+    };
+
+    // Cargar especies al inicio
     cargarEspecies();
   </script>
 </body>

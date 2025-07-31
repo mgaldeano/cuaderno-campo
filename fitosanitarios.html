@@ -4,26 +4,166 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fitosanitarios | Cuaderno de Campo</title>
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Google Fonts Roboto -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="estilos.css">
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
+      /* Estilos modernos para fitosanitarios */
       .fitos-btn {
         font-size: 0.85em;
-        padding: 2px 10px;
-        border-radius: 4px;
-        line-height: 1.2;
-        margin: 0 4px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        line-height: 1.3;
+        margin: 0 2px;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
       }
-      .fitos-btn + .fitos-btn {
-        margin-left: 8px;
+      
+      .fitos-btn.btn-edit {
+        background: #f8f9fa;
+        color: #495057;
+        border-color: #dee2e6;
       }
+      
+      .fitos-btn.btn-edit:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+      }
+      
+      .fitos-btn.btn-save {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+      }
+      
+      .fitos-btn.btn-cancel {
+        background: #6c757d;
+        color: white;
+        border-color: #6c757d;
+      }
+      
+      .fitos-btn.btn-delete {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+      }
+      
       .fitos-search {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1em;
-        margin-bottom: 1em;
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
       }
+      
+      .fitos-search .row {
+        align-items: end;
+      }
+      
       .fitos-search input {
         min-width: 180px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease;
+      }
+      
+      .fitos-search input:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+      
+      .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+      }
+      
+      .fitos-table {
+        font-size: 0.88em;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      
+      .fitos-table th {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        padding: 12px 8px;
+        border-bottom: 2px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .fitos-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #f8f9fa;
+        vertical-align: middle;
+      }
+      
+      .fitos-table tr:hover {
+        background: #f8f9fa;
+      }
+      
+      .fitos-table input {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 4px 6px;
+        font-size: 0.9em;
+      }
+      
+      .form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+      }
+      
+      .form-container h2 {
+        color: #495057;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+      }
+      
+      .form-container .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease;
+      }
+      
+      .form-container .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+      
+      .status-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin: 1rem 0;
+        font-weight: 500;
+      }
+      
+      .status-success {
+        background: #d1eddc;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      
+      .status-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
       }
     </style>
   </head>
@@ -44,90 +184,209 @@
         });
     </script>
 
-    <main class="container">
-      <hgroup>
-        <h2>Gestión de Fitosanitarios</h2>
-        <h3>Agregue, edite, elimine y busque fitosanitarios</h3>
-      </hgroup>
-      <form id="fitosanitario-form">
-        <label for="nombre_comercial">Nombre comercial</label>
-        <input type="text" id="nombre_comercial" name="nombre_comercial" required />
-
-        <label for="principio_activo">Principio activo</label>
-        <input type="text" id="principio_activo" name="principio_activo" required />
-
-        <label for="formulacion">Formulación</label>
-        <input type="text" id="formulacion" name="formulacion" />
-
-        <label for="plaga_o_enfermedad">Plaga o enfermedad</label>
-        <input type="text" id="plaga_o_enfermedad" name="plaga_o_enfermedad" />
-
-        <label for="accion">Acción</label>
-        <input type="text" id="accion" name="accion" />
-
-        <label for="tc_tiempo_carencia">TC (tiempo de carencia)</label>
-        <input type="text" id="tc_tiempo_carencia" name="tc_tiempo_carencia" />
-
-        <label for="ct">CT</label>
-        <input type="text" id="ct" name="ct" />
-
-        <label for="dosis_marbete">Dosis de marbete</label>
-        <input type="text" id="dosis_marbete" name="dosis_marbete" />
-
-        <label for="unidad_marbete">Unidad de marbete</label>
-        <input type="text" id="unidad_marbete" name="unidad_marbete" />
-
-        <label for="lmr_senasa">LMR Senasa</label>
-        <input type="text" id="lmr_senasa" name="lmr_senasa" />
-
-        <label for="lmr_eu">LMR EU</label>
-        <input type="text" id="lmr_eu" name="lmr_eu" />
-
-        <label for="uso">Uso</label>
-        <input type="text" id="uso" name="uso" />
-
-        <label for="dosis_frecuente_100l">Dosis más frecuente 100 L de agua</label>
-        <input type="text" id="dosis_frecuente_100l" name="dosis_frecuente_100l" />
-
-        <label for="registro_para">Registro para (especies)</label>
-        <input type="text" id="registro_para" name="registro_para" />
-
-        <button type="submit">Agregar fitosanitario</button>
-      </form>
-
-      <hr />
-      <h3>Búsqueda de fitosanitarios</h3>
-      <div class="fitos-search">
-        <input type="text" id="busca_nombre" placeholder="Nombre comercial..." />
-        <input type="text" id="busca_pa" placeholder="Principio activo..." />
-        <input type="text" id="busca_plaga" placeholder="Plaga o enfermedad..." />
-        <input type="text" id="busca_registro" placeholder="Registro para..." />
-        <button id="buscarBtn" type="button">Buscar</button>
-        <button id="limpiarBtn" type="button">Limpiar</button>
+    <main class="container py-4">
+      <!-- Header Section -->
+      <div class="container-fluid bg-light py-3 mb-4">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-1 text-primary font-weight-bold">
+                <i class="bi bi-shield-check text-success me-2"></i>
+                Gestión de Fitosanitarios
+              </h1>
+              <p class="text-muted mb-0">Administra productos fitosanitarios, principios activos y registros</p>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="badge badge-secondary badge-lg me-3" id="contador-fitosanitarios">0 productos</span>
+              <button class="btn btn-success btn-sm" type="button" data-bs-toggle="collapse" 
+                      data-bs-target="#formulario-fitosanitario" aria-expanded="false" aria-controls="formulario-fitosanitario" id="toggle-form-btn">
+                <i class="bi bi-plus-circle me-1"></i> Agregar Fitosanitario
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre comercial</th>
-            <th>Principio activo</th>
-            <th>Formulación</th>
-            <th>Plaga o enfermedad</th>
-            <th>Acción</th>
-            <th>Dosis marbete</th>
-      <table id="fitosanitariosTable" style="font-size:0.92em;">
-            <th>Dosis más frecuente 100L</th>
-            <th>TC</th>
-            <th>CT</th>
-            <th>LMR Senasa</th>
-            <th>LMR EU</th>
-            <th>Uso</th>
-            <th>Registro para</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="fitos-list"></tbody>
-      </table>
-      <p id="status"></p>
+
+      <!-- Formulario Colapsable -->
+      <div class="collapse mb-4" id="formulario-fitosanitario">
+        <div class="row">
+          <div class="col-12">
+            <div class="card shadow-sm border-0" style="border-radius: 16px;">
+              <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title mb-0 d-flex align-items-center">
+                  <i class="bi bi-plus-circle text-success me-2"></i>
+                  <span id="form-title">Nuevo Fitosanitario</span>
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <form id="fitosanitario-form">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="nombre_comercial" class="form-label font-weight-medium">
+                        <i class="bi bi-tag me-1"></i> Nombre comercial *
+                      </label>
+                      <input type="text" class="form-control" id="nombre_comercial" name="nombre_comercial" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="principio_activo" class="form-label font-weight-medium">
+                        <i class="bi bi-flask me-1"></i> Principio activo *
+                      </label>
+                      <input type="text" class="form-control" id="principio_activo" name="principio_activo" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="formulacion" class="form-label font-weight-medium">
+                        <i class="bi bi-droplet me-1"></i> Formulación
+                      </label>
+                      <input type="text" class="form-control" id="formulacion" name="formulacion" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="plaga_o_enfermedad" class="form-label font-weight-medium">
+                        <i class="bi bi-bug me-1"></i> Plaga o enfermedad
+                      </label>
+                      <input type="text" class="form-control" id="plaga_o_enfermedad" name="plaga_o_enfermedad" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="accion" class="form-label font-weight-medium">
+                        <i class="bi bi-lightning me-1"></i> Acción
+                      </label>
+                      <input type="text" class="form-control" id="accion" name="accion" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="tc_tiempo_carencia" class="form-label font-weight-medium">
+                        <i class="bi bi-clock me-1"></i> TC (tiempo de carencia)
+                      </label>
+                      <input type="text" class="form-control" id="tc_tiempo_carencia" name="tc_tiempo_carencia" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="ct" class="form-label font-weight-medium">
+                        <i class="bi bi-hourglass me-1"></i> CT
+                      </label>
+                      <input type="text" class="form-control" id="ct" name="ct" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="dosis_marbete" class="form-label font-weight-medium">
+                        <i class="bi bi-eyedropper me-1"></i> Dosis de marbete
+                      </label>
+                      <input type="text" class="form-control" id="dosis_marbete" name="dosis_marbete" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="unidad_marbete" class="form-label font-weight-medium">
+                        <i class="bi bi-rulers me-1"></i> Unidad de marbete
+                      </label>
+                      <input type="text" class="form-control" id="unidad_marbete" name="unidad_marbete" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="lmr_senasa" class="form-label font-weight-medium">
+                        <i class="bi bi-shield me-1"></i> LMR Senasa
+                      </label>
+                      <input type="text" class="form-control" id="lmr_senasa" name="lmr_senasa" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="lmr_eu" class="form-label font-weight-medium">
+                        <i class="bi bi-globe me-1"></i> LMR EU
+                      </label>
+                      <input type="text" class="form-control" id="lmr_eu" name="lmr_eu" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="uso" class="form-label font-weight-medium">
+                        <i class="bi bi-gear me-1"></i> Uso
+                      </label>
+                      <input type="text" class="form-control" id="uso" name="uso" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="dosis_frecuente_100l" class="form-label font-weight-medium">
+                        <i class="bi bi-droplet-half me-1"></i> Dosis más frecuente 100L
+                      </label>
+                      <input type="text" class="form-control" id="dosis_frecuente_100l" name="dosis_frecuente_100l" />
+                    </div>
+                    <div class="col-12 mb-3">
+                      <label for="registro_para" class="form-label font-weight-medium">
+                        <i class="bi bi-list-check me-1"></i> Registro para (especies)
+                      </label>
+                      <input type="text" class="form-control" id="registro_para" name="registro_para" />
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <button type="submit" class="btn btn-success btn-lg px-4">
+                      <i class="bi bi-check-circle me-2"></i>
+                      <span id="btn-text">Guardar Fitosanitario</span>
+                    </button>
+                    <button type="button" id="cancelEdit" class="btn btn-outline-secondary" style="display:none;">
+                      <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Búsqueda -->
+      <div class="fitos-search">
+        <h3 class="h5 mb-3">
+          <i class="bi bi-search text-primary me-2"></i>
+          Búsqueda de Fitosanitarios
+        </h3>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="busca_nombre" class="form-label small text-muted">Nombre comercial</label>
+            <input type="text" class="form-control" id="busca_nombre" placeholder="Buscar por nombre..." />
+          </div>
+          <div class="col-md-3">
+            <label for="busca_pa" class="form-label small text-muted">Principio activo</label>
+            <input type="text" class="form-control" id="busca_pa" placeholder="Buscar por principio..." />
+          </div>
+          <div class="col-md-3">
+            <label for="busca_plaga" class="form-label small text-muted">Plaga o enfermedad</label>
+            <input type="text" class="form-control" id="busca_plaga" placeholder="Buscar por plaga..." />
+          </div>
+          <div class="col-md-3">
+            <label for="busca_registro" class="form-label small text-muted">Registro para</label>
+            <input type="text" class="form-control" id="busca_registro" placeholder="Buscar por registro..." />
+          </div>
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button id="buscarBtn" type="button" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Buscar
+              </button>
+              <button id="limpiarBtn" type="button" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-container">
+        <div class="table-responsive">
+          <table class="table fitos-table mb-0">
+            <thead>
+              <tr>
+                <th>Nombre comercial</th>
+                <th>Principio activo</th>
+                <th>Formulación</th>
+                <th>Plaga/Enfermedad</th>
+                <th>Acción</th>
+                <th>Dosis marbete</th>
+                <th>Unidad</th>
+                <th>Dosis 100L</th>
+                <th>TC</th>
+                <th>CT</th>
+                <th>LMR Senasa</th>
+                <th>LMR EU</th>
+                <th>Uso</th>
+                <th>Registro para</th>
+                <th style="width: 120px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="fitos-list"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="status"></div>
     </main>
 
     <footer class="container">
@@ -147,6 +406,55 @@
       const buscarBtn = document.getElementById("buscarBtn");
       const limpiarBtn = document.getElementById("limpiarBtn");
 
+      // Función para mostrar mensajes con estilo Bootstrap
+      function mostrarStatus(mensaje, tipo = 'info') {
+        const alertClass = tipo === 'success' ? 'alert-success' : 
+                          tipo === 'error' ? 'alert-danger' : 
+                          tipo === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const icon = tipo === 'success' ? 'bi-check-circle' : 
+                    tipo === 'error' ? 'bi-exclamation-triangle' : 
+                    tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+        
+        status.innerHTML = `
+          <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+            <i class="bi ${icon} me-2"></i>
+            <div>${mensaje}</div>
+          </div>
+        `;
+        
+        // Auto-ocultar después de 5 segundos si es éxito
+        if (tipo === 'success') {
+          setTimeout(() => {
+            status.innerHTML = '';
+          }, 5000);
+        }
+      }
+
+      // Función para actualizar contador
+      function actualizarContador(cantidad) {
+        const contador = document.getElementById('contador-fitosanitarios');
+        if (contador) {
+          contador.textContent = `${cantidad} producto${cantidad !== 1 ? 's' : ''}`;
+          contador.className = cantidad > 0 ? 'badge badge-success badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+        }
+      }
+
+      // Toggle del formulario
+      const toggleBtn = document.getElementById('toggle-form-btn');
+      const formulario = document.getElementById('formulario-fitosanitario');
+      
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          setTimeout(() => {
+            const isVisible = formulario.classList.contains('show');
+            toggleBtn.innerHTML = isVisible ? 
+              '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario' : 
+              '<i class="bi bi-plus-circle me-1"></i> Agregar Fitosanitario';
+          }, 150);
+        });
+      }
+
       // Cargar fitosanitarios (con filtros)
       async function cargarFitos() {
         fitosList.innerHTML = "";
@@ -157,9 +465,13 @@
         if (buscaRegistro.value) query = query.ilike("registro_para", `%${buscaRegistro.value}%`);
         const { data, error } = await query.order("nombre_comercial", { ascending: true });
         if (error) {
-          status.textContent = "Error al cargar fitosanitarios";
+          mostrarStatus("Error al cargar fitosanitarios: " + error.message, 'error');
           return;
         }
+        
+        // Actualizar contador
+        actualizarContador(data.length);
+        
         for (const f of data) {
           fitosList.innerHTML += `
             <tr data-id="${f.id}">
@@ -178,10 +490,20 @@
               <td><span class="view">${f.uso || ""}</span><input class="edit" type="text" value="${f.uso || ""}" style="display:none;width:100%"></td>
               <td><span class="view">${f.registro_para || ""}</span><input class="edit" type="text" value="${f.registro_para || ""}" style="display:none;width:100%"></td>
               <td>
-                <button class="editar fitos-btn" data-id="${f.id}">Editar</button>
-                <button class="guardar fitos-btn" data-id="${f.id}" style="display:none">Guardar</button>
-                <button class="cancelar fitos-btn" data-id="${f.id}" style="display:none">Cancelar</button>
-                <button class="eliminar fitos-btn" data-id="${f.id}">Eliminar</button>
+                <div class="d-flex gap-1">
+                  <button class="editar fitos-btn btn-edit" data-id="${f.id}" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="guardar fitos-btn btn-save" data-id="${f.id}" style="display:none" title="Guardar">
+                    <i class="bi bi-check"></i>
+                  </button>
+                  <button class="cancelar fitos-btn btn-cancel" data-id="${f.id}" style="display:none" title="Cancelar">
+                    <i class="bi bi-x"></i>
+                  </button>
+                  <button class="eliminar fitos-btn btn-delete" data-id="${f.id}" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           `;
@@ -200,7 +522,7 @@
       // Agregar fitosanitario
       fitosForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        status.textContent = "Agregando...";
+        mostrarStatus("Agregando fitosanitario...", 'info');
         const form = e.target;
         const nuevo = {
           nombre_comercial: form.nombre_comercial.value,
@@ -220,11 +542,23 @@
         };
         const { error } = await supabase.from("fitosanitarios").insert([nuevo]);
         if (error) {
-          status.textContent = "❌ Error al agregar: " + error.message;
+          mostrarStatus("Error al agregar fitosanitario: " + error.message, 'error');
         } else {
-          status.textContent = "✅ Fitosanitario agregado";
+          mostrarStatus("Fitosanitario agregado correctamente", 'success');
           form.reset();
           cargarFitos();
+          
+          // Ocultar el formulario después de agregar
+          const collapseEl = document.getElementById('formulario-fitosanitario');
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: false });
+          bsCollapse.hide();
+          
+          // Actualizar texto del botón
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Fitosanitario';
+            }
+          }, 350);
         }
       });
 
@@ -269,25 +603,26 @@
           const lmr_eu = edits[11].value;
           const uso = edits[12].value;
           const registro_para = edits[13].value;
-          status.textContent = "Actualizando...";
+          mostrarStatus("Actualizando fitosanitario...", 'info');
           const { error } = await supabase.from("fitosanitarios")
             .update({ nombre_comercial, principio_activo, formulacion, plaga_o_enfermedad, accion, dosis_marbete, unidad_marbete, dosis_frecuente_100l, tc_tiempo_carencia, ct, lmr_senasa, lmr_eu, uso, registro_para })
             .eq("id", id);
           if (error) {
-            status.textContent = "❌ Error al actualizar";
+            mostrarStatus("Error al actualizar fitosanitario", 'error');
           } else {
-            status.textContent = "✅ Fitosanitario actualizado";
+            mostrarStatus("Fitosanitario actualizado correctamente", 'success');
             cargarFitos();
           }
         }
 
         // Eliminar
         if (e.target.classList.contains("eliminar")) {
-          if (confirm("¿Eliminar este fitosanitario?")) {
+          if (confirm("¿Está seguro de eliminar este fitosanitario?")) {
             const { error } = await supabase.from("fitosanitarios").delete().eq("id", id);
-            if (error) status.textContent = "❌ Error al eliminar";
-            else {
-              status.textContent = "✅ Fitosanitario eliminado";
+            if (error) {
+              mostrarStatus("Error al eliminar fitosanitario", 'error');
+            } else {
+              mostrarStatus("Fitosanitario eliminado correctamente", 'success');
               cargarFitos();
             }
           }

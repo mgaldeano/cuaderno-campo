@@ -1,341 +1,1438 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cuarteles</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Cuarteles - Cuaderno de Campo</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Estilos personalizados -->
+    <link href="estilos.css" rel="stylesheet">
+    
     <style>
-      .btn-small {
-        font-size: 0.7em;
-        padding: 0.1em 0.4em;
-        margin: 0 0.1em;
-        vertical-align: middle;
-      }
-      .cuartel-item {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 0.5em;
-        flex-wrap: wrap;
-        border-bottom: 1px solid #eee;
-        padding: 0.5em 0;
-      }
-      .cuartel-info {
-        flex: 1;
-        min-width: 180px;
-      }
-      .cuartel-actions {
-        display: flex;
-        gap: 0.2em;
-        align-items: center;
-      }
-      .info-secundaria {
-        font-size: 0.85em;
-        color: #666;
-        display: block;
-        margin-left: 1em;
-      }
-      #status.success { color: green; }
-      #status.error { color: red; }
-      #status.warn { color: orange; }
+        .badge-lg { 
+            font-size: 0.9em; 
+            padding: 0.5rem 0.75rem; 
+        }
+        .card-header-custom {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        .list-group-item:hover { 
+            background-color: #f8f9fa; 
+        }
+        #formulario-cuartel {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        #cuarteles-list {
+            display: block;
+            min-height: 200px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        
+        /* Mejorar legibilidad del botón principal */
+        #toggle-form-btn {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        }
+        
+        #toggle-form-btn:hover {
+            background-color: #0056b3 !important;
+            border-color: #004085 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        #toggle-form-btn:focus {
+            background-color: #0056b3 !important;
+            border-color: #004085 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+        }
     </style>
-  </head>
-  <body>
-    <div id="header-container"></div>
-    <main class="container">
-      <hgroup>
-        <h2>Cuarteles</h2>
-      </hgroup>
-      <form id="cuartel-form">
-        <fieldset>
-          <legend>Datos Principales</legend>
-          <label for="finca_id">Finca</label>
-          <select name="finca_id" id="finca_id" required>
-            <option value="">Seleccionar Finca...</option>
-          </select>
-          <label for="nombre_cuartel">Nombre del Cuartel</label>
-          <input type="text" name="nombre" id="nombre_cuartel" placeholder="Nombre del Cuartel" required />
-          <label for="superficie_cuartel">Superficie (ha)</label>
-          <input type="number" name="superficie" id="superficie_cuartel" placeholder="Superficie (ha)" step="0.01" min="0" />
-        </fieldset>
-        <fieldset>
-          <legend>Datos Secundarios</legend>
-          <label for="nro_viñedo">Nro. de Viñedo</label>
-          <input type="text" name="nro_viñedo" id="nro_viñedo" placeholder="Nro. de Viñedo" />
-          <label for="provincia">Provincia</label>
-          <input type="text" name="provincia" id="provincia" placeholder="Provincia" />
-          <label for="departamento">Departamento</label>
-          <input type="text" name="departamento" id="departamento" placeholder="Departamento" />
-          <label for="especie">Especie</label>
-          <input type="text" name="especie" id="especie" placeholder="Especie" />
-        </fieldset>
-        <fieldset>
-          <legend>Variedades</legend>
-          <label for="variedades_cuartel">Variedades</label>
-          <select id="variedades_cuartel" multiple size="3">
-            <!-- Opciones generadas dinámicamente -->
-          </select>
-          <small>Puedes seleccionar hasta 3 Variedades</small>
-        </fieldset>
-        <button type="submit">Guardar Cuartel</button>
-        <button type="button" id="cancelEdit" style="display:none;">Cancelar</button>
-      </form>
-      <p id="status"></p>
+</head>
+<body class="bg-light">
+    <!-- Header Container -->
+    <div id="header-container">
+        <!-- Header simple mientras carga -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-leaf"></i> Cuaderno de Campo
+                </a>
+            </div>
+        </nav>
+    </div>
 
-      <h3>Cuarteles registrados</h3>
-      <ul id="cuarteles-list"></ul>
-    </main>
-    <script type="module">
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
+    <div class="container-fluid mt-4">
+        <!-- Título principal -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1 text-dark font-weight-bold">
+                            <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>
+                            Gestión de Cuarteles
+                        </h2>
+                        <p class="text-muted mb-0">Administra los lotes y variedades por finca</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span id="contador-cuarteles" class="badge badge-secondary badge-lg me-3">
+                            Cargando...
+                        </span>
+                        <button type="button" id="toggle-form-btn" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar Cuartel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="busqueda-cuarteles" 
+                           placeholder="Buscar cuarteles por nombre, finca, especie o variedad..."
+                           autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="limpiar-busqueda">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+                <small class="text-muted">Resultados en tiempo real mientras escribes</small>
+            </div>
+            <div class="col-md-4">
+                <!-- Estadísticas de búsqueda -->
+                <div id="busqueda-stats" class="text-muted small">
+                    <span id="resultados-count"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes de estado -->
+        <div id="status" class="mb-3"></div>
+        <!-- Formulario de cuartel (oculto por defecto) -->
+        <div id="formulario-cuartel">
+            <div class="card shadow">
+                <div class="card-header card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span id="form-title">Nuevo Cuartel</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="cuartel-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="finca_id" class="form-label font-weight-bold">
+                                    <i class="bi bi-geo-alt-fill text-success me-1"></i>
+                                    Finca *
+                                </label>
+                                <select id="finca_id" class="form-control" required>
+                                    <option value="">Seleccionar Finca...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-tag-fill text-primary me-1"></i>
+                                    Nombre del Cuartel *
+                                </label>
+                                <input type="text" class="form-control" id="nombre_cuartel" 
+                                       placeholder="Ej: Cuartel Norte" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="superficie_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-rulers text-warning me-1"></i>
+                                    Superficie (hectáreas)
+                                </label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="superficie_cuartel" 
+                                       placeholder="Ej: 5.5">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nro_viñedo" class="form-label font-weight-bold">
+                                    <i class="bi bi-123 text-info me-1"></i>
+                                    Nro. de Viñedo
+                                </label>
+                                <input type="text" class="form-control" id="nro_viñedo" 
+                                       placeholder="Opcional">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="especie_id" class="form-label font-weight-bold">
+                                    <i class="bi bi-flower1 text-danger me-1"></i>
+                                    Especie *
+                                </label>
+                                <select class="form-select" id="especie_id" required>
+                                    <option value="">- Seleccione una especie -</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="variedades_cuartel" class="form-label font-weight-bold">
+                                    <i class="bi bi-collection text-secondary me-1"></i>
+                                    Variedades <small class="text-muted">(máximo 3)</small>
+                                </label>
+                                <select id="variedades_cuartel" multiple size="4" class="form-control">
+                                    <option value="" disabled>Primero seleccione una especie</option>
+                                </select>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Las variedades se filtran según la especie seleccionada
+                                </small>
+                            </div>
+                        </div>
+                                Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples variedades
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="button" id="cancelEdit" class="btn btn-secondary" style="display: none;">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Cancelar
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                <span id="btn-text">Guardar Cuartel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de cuarteles -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 text-secondary">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Lista de Cuarteles
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <!-- Lista principal -->
+                <div id="cuarteles-list" class="list-group list-group-flush">
+                    <!-- Los cuarteles se cargarán aquí dinámicamente -->
+                </div>
+
+                <!-- Estado vacío -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <div class="mb-3">
+                        <i class="bi bi-grid-3x3-gap display-1 text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">No hay cuarteles registrados</h5>
+                    <p class="text-muted mb-4">
+                        Comienza agregando tu primer cuartel para gestionar tus lotes.
+                    </p>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('toggle-form-btn').click()">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Agregar Primer Cuartel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Variables globales
+    let supabase = null;
+    let currentUser = null;
+    let cuartelesData = [];
+    let cuartelesOriginales = []; // Para búsqueda
+    let fincasData = [];
+    let especiesData = [];
+    let variedadesData = [];
+    let editId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM cargado, inicializando...');
+        inicializarPagina();
+    });
+
+    async function inicializarPagina() {
+        try {
+            // Intentar conectar con Supabase
+            await conectarSupabase();
+            
+            // Configurar funcionalidades
+            configurarToggleForm();
+            configurarFormulario();
+            
+            // Cargar datos
+            await cargarDatos();
+            
+            // Intentar cargar header dinámico
+            cargarHeaderDinamico();
+            
+            console.log('✅ Página completamente inicializada');
+        } catch (error) {
+            console.error('Error inicializando página:', error);
+        }
     }
 
-      const form = document.getElementById("cuartel-form");
-      const status = document.getElementById("status");
-      const lista = document.getElementById("cuarteles-list");
-      const fincaSelect = document.getElementById("finca_id");
-      const nombreInput = document.getElementById("nombre_cuartel");
-      const superficieInput = document.getElementById("superficie_cuartel");
-      const nroViñedoInput = document.getElementById("nro_viñedo");
-      const provinciaInput = document.getElementById("provincia");
-      const departamentoInput = document.getElementById("departamento");
-      const especieInput = document.getElementById("especie");
-      const variedadInput = document.getElementById("variedad");
-      const variedadesSelect = document.getElementById("variedades_cuartel");
-      const cancelEditBtn = document.getElementById("cancelEdit");
-
-      let editId = null;
-      let fincasMap = {};
-      let variedadesMap = {};
-
-      // Obtener usuario actual
-      // user ya está definido globalmente arriba
-      const userId = user?.id;
-
-      async function cargarFincas() {
-        const { data, error } = await supabase
-          .from("fincas")
-          .select("id, nombre_finca")
-          .eq("usuario_id", userId);
-
-        fincaSelect.innerHTML = '<option value="">Seleccionar finca...</option>';
-        fincasMap = {};
-        if (error || !data) {
-          status.textContent = "❌ Error cargando fincas";
-          status.className = "error";
-          return;
-        }
-        data.forEach(f => {
-          fincasMap[f.id] = f.nombre_finca;
-          const opt = document.createElement("option");
-          opt.value = f.id;
-          opt.textContent = f.nombre_finca;
-          fincaSelect.appendChild(opt);
-        });
-      }
-
-      async function cargarVariedades() {
-        const { data, error } = await supabase
-          .from("variedades")
-          .select("id, nombre");
-        variedadesSelect.innerHTML = "";
-        variedadesMap = {};
-        if (error || !data) return;
-        data.forEach(v => {
-          variedadesMap[v.id] = v.nombre;
-          const opt = document.createElement("option");
-          opt.value = v.id;
-          opt.textContent = v.nombre;
-          variedadesSelect.appendChild(opt);
-        });
-      }
-
-      // Obtener variedades de un cuartel
-      async function obtenerVariedadesCuartel(cuartelId) {
-        const { data, error } = await supabase
-          .from("cuartel_variedades")
-          .select("variedad_id")
-          .eq("cuartel_id", cuartelId);
-        if (error || !data) return [];
-        return data.map(v => v.variedad_id);
-      }
-
-      // Guardar variedades seleccionadas para un cuartel
-      async function guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas) {
-        await supabase.from("cuartel_variedades").delete().eq("cuartel_id", cuartelId);
-        for (const variedadId of variedadesSeleccionadas) {
-          const { error } = await supabase.from("cuartel_variedades").insert({ cuartel_id: cuartelId, variedad_id: variedadId });
-          if (error) console.error("Error insertando variedad:", variedadId, error);
-        }
-      }
-
-      async function cargarCuarteles() {
-        const { data, error } = await supabase
-          .from("cuarteles")
-          .select("*")
-          .in("finca_id", Object.keys(fincasMap));
-
-        if (error) {
-          status.textContent = "❌ Error cargando cuarteles";
-          status.className = "error";
-          return;
-        }
-        lista.innerHTML = "";
-        for (const c of data) {
-          const variedadesIds = await obtenerVariedadesCuartel(c.id);
-          const variedadesNombres = variedadesIds.map(id => variedadesMap[id]).filter(Boolean);
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <span class="cuartel-info">
-              <strong>${c.nombre}</strong>
-              <small class="info-secundaria">Finca: ${fincasMap[c.finca_id] || '-'}</small>
-              ${c.superficie ? `<small class="info-secundaria">Superficie: ${c.superficie} ha</small>` : ""}
-              ${c.nro_viñedo ? `<small class="info-secundaria">Viñedo: ${c.nro_viñedo}</small>` : ""}
-              ${c.provincia ? `<small class="info-secundaria">Provincia: ${c.provincia}</small>` : ""}
-              ${c.departamento ? `<small class="info-secundaria">Departamento: ${c.departamento}</small>` : ""}
-              ${c.especie ? `<small class="info-secundaria">Especie: ${c.especie}</small>` : ""}
-              ${variedadesNombres.length ? `<small class="info-secundaria">Variedades: ${variedadesNombres.join(", ")}</small>` : ""}
-            </span>
-            <span class="cuartel-actions">
-              <button data-id="${c.id}" class="edit btn-small">Editar</button>
-              <button data-id="${c.id}" class="delete btn-small">Eliminar</button>
-            </span>
-          `;
-          li.classList.add("cuartel-item");
-          lista.appendChild(li);
-        }
-
-        // Editar cuartel
-        lista.querySelectorAll(".edit").forEach(btn => {
-          btn.onclick = async () => {
-            editId = btn.dataset.id;
-            const cuartel = data.find(c => c.id == editId);
-            fincaSelect.value = cuartel.finca_id;
-            nombreInput.value = cuartel.nombre;
-            superficieInput.value = cuartel.superficie || "";
-            nroViñedoInput.value = cuartel.nro_viñedo || "";
-            provinciaInput.value = cuartel.provincia || "";
-            departamentoInput.value = cuartel.departamento || "";
-            especieInput.value = cuartel.especie || "";
-            // Cargar variedades seleccionadas
-            const variedadesIds = await obtenerVariedadesCuartel(editId);
-            Array.from(variedadesSelect.options).forEach(opt => {
-              opt.selected = variedadesIds.includes(Number(opt.value));
-            });
-            status.textContent = "Editando cuartel #" + editId;
-            status.className = "warn";
-            cancelEditBtn.style.display = "";
-          };
-        });
-
-        // Eliminar cuartel
-        lista.querySelectorAll(".delete").forEach(btn => {
-          btn.onclick = async () => {
-            const id = btn.dataset.id;
-            if (!confirm("¿Seguro que deseas eliminar este cuartel?")) return;
-            await supabase.from("cuartel_variedades").delete().eq("cuartel_id", id);
-            const { error } = await supabase.from("cuarteles").delete().eq("id", id);
-            if (error) {
-              status.textContent = "❌ Error al eliminar";
-              status.className = "error";
+    async function conectarSupabase() {
+        try {
+            console.log('🔗 Intentando conectar con Supabase...');
+            const supabaseModule = await import('./supabaseClient.js');
+            supabase = supabaseModule.supabase;
+            
+            if (supabase) {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (user && !error) {
+                    currentUser = user;
+                    console.log('✅ Usuario autenticado:', user.email);
+                    mostrarMensaje('✅ Conectado a Supabase como: ' + user.email, 'success');
+                    return true;
+                } else {
+                    console.warn('❌ No hay usuario autenticado, redirigiendo al login...');
+                    window.location.href = 'login.html';
+                    return false;
+                }
             } else {
-              status.textContent = "✅ Cuartel eliminado";
-              status.className = "success";
+                console.warn('❌ Supabase no disponible, redirigiendo al login...');
+                window.location.href = 'login.html';
+                return false;
             }
-            cargarCuarteles();
-          };
-        });
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        // Validaciones
-        if (!fincaSelect.value || !nombreInput.value) {
-          status.textContent = "⚠️ Debe completar finca y nombre";
-          status.className = "warn";
-          return;
+        } catch (error) {
+            console.warn('⚠️ Error conectando con Supabase:', error.message);
+            
+            // En desarrollo local, permitir modo demo
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
+                console.log('🎭 Modo demo activado para desarrollo local');
+                mostrarMensaje('⚠️ Modo demo - Desarrollo local', 'warning');
+                return false; // false = modo demo
+            } else {
+                // En producción, redirigir al login
+                window.location.href = 'login.html';
+                return false;
+            }
         }
-        if (superficieInput.value && Number(superficieInput.value) <= 0) {
-          status.textContent = "⚠️ La superficie debe ser positiva";
-          status.className = "warn";
-          return;
-        }
-        const finca_id = fincaSelect.value;
-        const nombre = nombreInput.value;
-        const superficie = superficieInput.value ? Number(superficieInput.value) : null;
-        const nro_viñedo = nroViñedoInput.value || null;
-        const provincia = provinciaInput.value || null;
-        const departamento = departamentoInput.value || null;
-        const especie = especieInput.value || null;
-        const variedadesSeleccionadas = Array.from(variedadesSelect.selectedOptions)
-          .map(opt => opt.value)
-          .filter(id => id) // filtra vacíos
-          .slice(0, 3);
-        console.log("Variedades seleccionadas:", variedadesSeleccionadas);
+    }
 
-        let cuartelId = editId;
-        if (editId) {
-          // Editar cuartel
-          const { error } = await supabase
-            .from("cuarteles")
-            .update({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
-            .eq("id", editId);
-          if (error) {
-            status.textContent = "❌ Error al editar cuartel";
-            status.className = "error";
-          } else {
-            await guardarVariedadesCuartel(editId, variedadesSeleccionadas);
-            status.textContent = "✅ Cuartel editado";
-            status.className = "success";
-            form.reset();
-            editId = null;
-            cancelEditBtn.style.display = "none";
-          }
+    function mostrarMensaje(mensaje, tipo = 'info') {
+        const status = document.getElementById('status');
+        if (!status) return;
+        
+        const clases = {
+            'success': 'alert-success',
+            'error': 'alert-danger', 
+            'warning': 'alert-warning',
+            'info': 'alert-info'
+        };
+        
+        status.innerHTML = `
+            <div class="alert ${clases[tipo]} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+                ${mensaje}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        // Auto-ocultar después de 5 segundos para mensajes de info y success
+        if (tipo === 'info' || tipo === 'success') {
+            setTimeout(() => {
+                const alert = status.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+    }
+
+    async function cargarDatos() {
+        try {
+            if (supabase && currentUser) {
+                await Promise.all([
+                    cargarFincas(),
+                    cargarEspecies(),
+                    cargarVariedades(),
+                    cargarCuarteles()
+                ]);
+            } else {
+                cargarDatosDemo();
+            }
+        } catch (error) {
+            console.error('❌ Error cargando datos:', error);
+            cargarDatosDemo();
+        }
+    }
+
+    async function cargarFincas() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("fincas")
+                .select("*")
+                .eq("usuario_id", currentUser.id)
+                .order('nombre_finca');
+
+            if (error) throw error;
+            fincasData = data;
         } else {
-          // Crear cuartel
-          const { data, error } = await supabase
-            .from("cuarteles")
-            .insert({ finca_id, nombre, superficie, nro_viñedo, provincia, departamento, especie })
-            .select();
-          if (error || !data || !data[0]) {
-            status.textContent = "❌ Error al guardar cuartel";
-            status.className = "error";
-          } else {
-            cuartelId = data[0].id;
-            await guardarVariedadesCuartel(cuartelId, variedadesSeleccionadas);
-            status.textContent = "✅ Cuartel registrado";
-            status.className = "success";
-            form.reset();
-          }
+            fincasData = [
+                { id: 1, nombre_finca: "Finca Demo 1" },
+                { id: 2, nombre_finca: "Finca Demo 2" }
+            ];
         }
-        cargarCuarteles();
-      });
+        
+        llenarSelectFincas();
+    }
 
-      cancelEditBtn.addEventListener("click", () => {
-        form.reset();
-        editId = null;
-        status.textContent = "";
-        status.className = "";
-        cancelEditBtn.style.display = "none";
-      });
+    // 🌱 CARGAR ESPECIES
+    async function cargarEspecies() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("especies")
+                .select("*")
+                .order('nombre');
 
-      // Cargar header y manejar logout
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
-          // Manejo de logout (opcional, si no lo tienes en header.js)
-          // Eliminar el manejo de logoutBtn ya que se maneja en header.js
+            if (error) throw error;
+            especiesData = data;
+        } else {
+            especiesData = [
+                { id: 1, nombre: "Vitis vinifera" },
+                { id: 2, nombre: "Olea europaea" },
+                { id: 3, nombre: "Malus domestica" }
+            ];
+        }
+        
+        llenarSelectEspecies();
+    }
+
+    async function cargarVariedades() {
+        if (supabase && currentUser) {
+            const { data, error } = await supabase
+                .from("variedades")
+                .select(`
+                    id, 
+                    nombre, 
+                    color, 
+                    tipo_destino,
+                    especie_id,
+                    especies(nombre)
+                `)
+                .order('nombre');
+
+            if (error) throw error;
+            variedadesData = data;
+        } else {
+            variedadesData = [
+                { id: 1, nombre: "Malbec", especie_id: 1 },
+                { id: 2, nombre: "Cabernet Sauvignon", especie_id: 1 },
+                { id: 3, nombre: "Chardonnay", especie_id: 1 },
+                { id: 4, nombre: "Syrah", especie_id: 1 }
+            ];
+        }
+        
+        // No llenar select aún - se llena cuando se selecciona especie
+    }
+
+    // 🌱 LLENAR SELECT DE ESPECIES
+    function llenarSelectEspecies() {
+        const selectEspecies = document.getElementById('especie_id');
+        if (!selectEspecies) return;
+        
+        selectEspecies.innerHTML = '<option value="">- Seleccione una especie -</option>';
+        
+        especiesData.forEach(especie => {
+            const option = document.createElement('option');
+            option.value = especie.id;
+            option.textContent = especie.nombre;
+            selectEspecies.appendChild(option);
         });
+        
+        // Configurar evento para filtrar variedades
+        selectEspecies.onchange = function() {
+            filtrarVariedadesPorEspecie(this.value);
+        };
+    }
 
-      await cargarFincas();
-      await cargarVariedades();
-      await cargarCuarteles();
+    // 🔄 FILTRAR VARIEDADES POR ESPECIE
+    function filtrarVariedadesPorEspecie(especieId) {
+        const selectVariedades = document.getElementById('variedades_cuartel');
+        if (!selectVariedades) return;
+        
+        selectVariedades.innerHTML = '';
+        
+        if (!especieId) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.disabled = true;
+            option.textContent = 'Primero seleccione una especie';
+            selectVariedades.appendChild(option);
+            return;
+        }
+        
+        const variedadesFiltradas = variedadesData.filter(v => v.especie_id == especieId);
+        
+        if (variedadesFiltradas.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.disabled = true;
+            option.textContent = 'No hay variedades para esta especie';
+            selectVariedades.appendChild(option);
+            return;
+        }
+        
+        variedadesFiltradas.forEach(variedad => {
+            const option = document.createElement('option');
+            option.value = variedad.id;
+            option.textContent = variedad.nombre;
+            selectVariedades.appendChild(option);
+        });
+    }
+
+    async function cargarCuarteles() {
+        console.log('📋 Cargando cuarteles...');
+        
+        try {
+            if (supabase && currentUser) {
+                console.log('🔗 Cargando desde Supabase...');
+                const { data, error } = await supabase
+                    .from("cuarteles")
+                    .select(`
+                        *,
+                        fincas!inner(nombre_finca, usuario_id),
+                        especies(nombre),
+                        cuartel_variedades(
+                            variedades(id, nombre, especies(nombre))
+                        )
+                    `)
+                    .eq("fincas.usuario_id", currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                cuartelesData = data;
+                cuartelesOriginales = [...data];
+                console.log('✅ Cuarteles cargados desde Supabase:', data.length);
+                
+                if (data.length === 0) {
+                    mostrarMensaje('ℹ️ No tienes cuarteles registrados. ¡Agrega tu primer cuartel!', 'info');
+                }
+                
+                configurarBusqueda();
+                
+            } else {
+                console.log('🎭 Cargando datos demo...');
+                cargarCuartelesDemo();
+            }
+            
+            actualizarContador();
+            renderizarCuarteles();
+            
+        } catch (error) {
+            console.error('❌ Error cargando cuarteles:', error);
+            mostrarMensaje('❌ Error cargando cuarteles: ' + error.message, 'error');
+            cargarCuartelesDemo();
+        }
+    }
+
+    function cargarDatosDemo() {
+        // Cargar fincas demo
+        fincasData = [
+            { id: 1, nombre_finca: "Finca Demo 1" },
+            { id: 2, nombre_finca: "Finca Demo 2" },
+            { id: 3, nombre_finca: "Finca Demo 3" }
+        ];
+        
+        // Cargar variedades demo
+        variedadesData = [
+            { id: 1, nombre: "Malbec" },
+            { id: 2, nombre: "Cabernet Sauvignon" },
+            { id: 3, nombre: "Chardonnay" },
+            { id: 4, nombre: "Syrah" },
+            { id: 5, nombre: "Merlot" }
+        ];
+        
+        // Llenar selects
+        llenarSelectFincas();
+        llenarSelectVariedades();
+        
+        // Cargar cuarteles demo
+        cargarCuartelesDemo();
+    }
+
+    function cargarCuartelesDemo() {
+        cuartelesData = [
+            {
+                id: 1,
+                nombre: "Cuartel Norte",
+                superficie: 5.2,
+                nro_viñedo: "V001",
+                especie: "Vitis vinifera",
+                finca_id: 1,
+                fincas: { nombre_finca: "Finca Demo 1" },
+                cuartel_variedades: [
+                    { variedades: { nombre: "Malbec" } },
+                    { variedades: { nombre: "Cabernet Sauvignon" } }
+                ],
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                nombre: "Cuartel Sur",
+                superficie: 3.8,
+                nro_viñedo: "V002",
+                especie: "Vitis vinifera",
+                finca_id: 2,
+                fincas: { nombre_finca: "Finca Demo 2" },
+                cuartel_variedades: [
+                    { variedades: { nombre: "Chardonnay" } }
+                ],
+                created_at: new Date().toISOString()
+            }
+        ];
+        
+        cuartelesOriginales = [...cuartelesData];
+        console.log('✅ Datos demo de cuarteles cargados');
+        configurarBusqueda();
+        actualizarContador();
+        renderizarCuarteles();
+    }
+
+    function llenarSelectFincas() {
+        const selectFincas = document.getElementById('finca_id');
+        if (!selectFincas) return;
+        
+        selectFincas.innerHTML = '<option value="">Seleccionar Finca...</option>';
+        
+        fincasData.forEach(finca => {
+            const option = document.createElement('option');
+            option.value = finca.id;
+            option.textContent = finca.nombre_finca;
+            selectFincas.appendChild(option);
+        });
+    }
+
+    function llenarSelectVariedades() {
+        const selectVariedades = document.getElementById('variedades_cuartel');
+        if (!selectVariedades) return;
+        
+        selectVariedades.innerHTML = '';
+        
+        variedadesData.forEach(variedad => {
+            const option = document.createElement('option');
+            option.value = variedad.id;
+            option.textContent = variedad.nombre;
+            selectVariedades.appendChild(option);
+        });
+    }
+
+    function actualizarContador() {
+        const contador = document.getElementById('contador-cuarteles');
+        if (!contador) return;
+        
+        const cantidad = cuartelesData.length;
+        const texto = `${cantidad} cuartel${cantidad !== 1 ? 'es' : ''}`;
+        
+        if (supabase && currentUser) {
+            contador.textContent = texto;
+            contador.className = cantidad > 0 ? 'badge badge-primary badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+        } else {
+            contador.textContent = texto + ' (demo)';
+            contador.className = 'badge badge-warning badge-lg me-3';
+        }
+    }
+
+    function renderizarCuarteles() {
+        const lista = document.getElementById('cuarteles-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!lista || !emptyState) return;
+        
+        if (cuartelesData.length === 0) {
+            lista.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        lista.style.display = 'block';
+        emptyState.style.display = 'none';
+        lista.innerHTML = '';
+        
+        cuartelesData.forEach((cuartel) => {
+            const cuartelItem = document.createElement("div");
+            cuartelItem.className = "list-group-item border-0 py-3";
+            
+            // Preparar variedades
+            const variedades = cuartel.cuartel_variedades?.map(cv => cv.variedades?.nombre).filter(Boolean) || [];
+            const variedadesText = variedades.length > 0 ? variedades.join(', ') : 'Sin variedades';
+            
+            cuartelItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <h6 class="mb-0 font-weight-bold text-primary">
+                                ${cuartel.nombre}
+                                <small class="text-muted font-weight-normal ms-2">
+                                    en ${cuartel.fincas?.nombre_finca || 'Finca no especificada'}
+                                </small>
+                            </h6>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center mb-2">
+                            <span class="badge badge-light me-2">#${cuartel.id}</span>
+                            ${cuartel.superficie ? `<span class="badge badge-secondary me-2">${cuartel.superficie} ha</span>` : ''}
+                            ${cuartel.nro_viñedo ? `<span class="badge badge-info me-2">${cuartel.nro_viñedo}</span>` : ''}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                ${cuartel.especie ? `
+                                    <small class="text-muted d-flex align-items-center mb-1">
+                                        <i class="bi bi-flower1 me-2"></i>
+                                        ${cuartel.especie}
+                                    </small>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-flex align-items-center mb-1">
+                                    <i class="bi bi-collection me-2"></i>
+                                    ${variedadesText}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary btn-sm btn-editar" 
+                                data-id="${cuartel.id}" title="Editar cuartel">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar" 
+                                data-id="${cuartel.id}" title="Eliminar cuartel">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            lista.appendChild(cuartelItem);
+        });
+        
+        // Agregar event listeners a los botones
+        agregarEventListenersAcciones();
+    }
+
+    function agregarEventListenersAcciones() {
+        // Botones de editar
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                editarCuartel(id);
+            });
+        });
+        
+        // Botones de eliminar
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                eliminarCuartel(id);
+            });
+        });
+    }
+
+    function configurarToggleForm() {
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        const formularioCuartel = document.getElementById('formulario-cuartel');
+        
+        if (toggleFormBtn && formularioCuartel) {
+            toggleFormBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Toggle clickeado!');
+                
+                const isHidden = formularioCuartel.style.display === 'none' || formularioCuartel.style.display === '';
+                
+                if (isHidden) {
+                    // Mostrar formulario
+                    console.log('Mostrando formulario...');
+                    formularioCuartel.style.display = 'block';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+                    
+                    // Scroll al formulario
+                    setTimeout(() => {
+                        formularioCuartel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } else {
+                    // Ocultar formulario
+                    console.log('Ocultando formulario...');
+                    formularioCuartel.style.display = 'none';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Cuartel';
+                }
+            });
+            
+            console.log('✅ Toggle configurado correctamente');
+        } else {
+            console.error('No se encontraron elementos del formulario');
+        }
+    }
+
+    function configurarFormulario() {
+        const form = document.getElementById('cuartel-form');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+        
+        if (!form) return;
+        
+        // Botón cancelar edición
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', cancelarEdicion);
+        }
+        
+        // Envío del formulario
+        form.addEventListener('submit', manejarEnvioFormulario);
+        
+        console.log('📝 Formulario configurado');
+    }
+
+    async function manejarEnvioFormulario(e) {
+        e.preventDefault();
+        
+        const fincaSelect = document.getElementById('finca_id');
+        const nombreInput = document.getElementById('nombre_cuartel');
+        const superficieInput = document.getElementById('superficie_cuartel');
+        const nroViñedoInput = document.getElementById('nro_viñedo');
+        const especieSelect = document.getElementById('especie_id');
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        
+        // Validaciones básicas
+        if (!fincaSelect.value) {
+            mostrarMensaje('⚠️ Debes seleccionar una finca', 'warning');
+            fincaSelect.focus();
+            return;
+        }
+        
+        if (!nombreInput.value.trim()) {
+            mostrarMensaje('⚠️ El nombre del cuartel es obligatorio', 'warning');
+            nombreInput.focus();
+            return;
+        }
+
+        if (!especieSelect.value) {
+            mostrarMensaje('⚠️ Debes seleccionar una especie', 'warning');
+            especieSelect.focus();
+            return;
+        }
+        
+        // Verificar duplicados en la misma finca
+        const nombreCuartel = nombreInput.value.trim();
+        const fincaId = parseInt(fincaSelect.value);
+        const cuartelDuplicado = cuartelesOriginales.find(c => 
+            c.nombre.toLowerCase() === nombreCuartel.toLowerCase() && 
+            c.finca_id === fincaId && 
+            (!editId || c.id !== editId)
+        );
+        
+        if (cuartelDuplicado) {
+            const nombreFinca = fincasData.find(f => f.id === fincaId)?.nombre_finca || 'esta finca';
+            mostrarMensaje(`⚠️ Ya existe un cuartel llamado "${nombreCuartel}" en ${nombreFinca}. Por favor, elige un nombre diferente.`, 'warning');
+            nombreInput.focus();
+            nombreInput.select();
+            return;
+        }
+        
+        // Preparar datos
+        const especieSeleccionada = especiesData.find(e => e.id == especieSelect.value);
+        const datos = {
+            finca_id: parseInt(fincaSelect.value),
+            nombre: nombreInput.value.trim(),
+            superficie: superficieInput.value ? parseFloat(superficieInput.value) : null,
+            nro_viñedo: nroViñedoInput.value.trim() || null,
+            especie: especieSeleccionada ? especieSeleccionada.nombre : null, // Guardar nombre por compatibilidad
+            especie_id: especieSelect.value || null, // UUID directo, no parseInt
+            variedades: Array.from(variedadesSelect.selectedOptions).map(opt => opt.value) // Mantener como UUID, no parseInt
+        };
+        
+        // Preparar UI para guardado
+        const submitBtn = document.querySelector('#formulario-cuartel button[type="submit"]');
+        if (!submitBtn) {
+            console.error('❌ No se encontró el botón submit');
+            return;
+        }
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>' + (editId ? 'Actualizando...' : 'Guardando...');
+        submitBtn.disabled = true;
+        
+        try {
+            if (editId) {
+                await actualizarCuartel({ id: editId, ...datos });
+            } else {
+                await crearCuartel(datos);
+            }
+            
+            // Resetear formulario después del éxito
+            resetearFormulario();
+            
+            // Recargar datos
+            await cargarCuarteles();
+            
+        } catch (error) {
+            console.error('❌ Error guardando cuartel:', error);
+            mostrarMensaje('❌ Error guardando cuartel: ' + error.message, 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    async function crearCuartel(datos) {
+        console.log('➕ Creando nuevo cuartel:', datos);
+        
+        if (supabase && currentUser) {
+            // Crear en Supabase
+            const { data: cuartel, error } = await supabase
+                .from("cuarteles")
+                .insert({
+                    finca_id: datos.finca_id,
+                    nombre: datos.nombre,
+                    superficie: datos.superficie,
+                    nro_viñedo: datos.nro_viñedo,
+                    especie: datos.especie, // Mantener por compatibilidad
+                    especie_id: datos.especie_id // Nueva columna
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            // Agregar variedades si existen
+            if (datos.variedades.length > 0) {
+                const variedadesToInsert = datos.variedades.map(variedadId => ({
+                    cuartel_id: cuartel.id, // BIGINT del cuartel
+                    variedad_id: variedadId // UUID de la variedad (ya es UUID)
+                }));
+                
+                console.log('🌱 Insertando variedades para nuevo cuartel (UUIDs directos):', variedadesToInsert);
+                
+                const { error: varError } = await supabase
+                    .from("cuartel_variedades")
+                    .insert(variedadesToInsert);
+                
+                if (varError) {
+                    console.warn('⚠️ Error agregando variedades:', varError);
+                } else {
+                    console.log('✅ Variedades del nuevo cuartel insertadas correctamente');
+                }
+            }
+            
+            mostrarMensaje('✅ Cuartel creado exitosamente', 'success');
+            console.log('✅ Cuartel creado en Supabase:', cuartel);
+            
+        } else {
+            // Crear en modo demo
+            const nuevoId = Math.max(...cuartelesData.map(c => c.id), 0) + 1;
+            const finca = fincasData.find(f => f.id === datos.finca_id);
+            const variedadesSeleccionadas = datos.variedades.map(vId => {
+                const variedad = variedadesData.find(v => v.id === vId);
+                return { variedades: { nombre: variedad?.nombre || 'Desconocida' } };
+            });
+            
+            const nuevoCuartel = {
+                id: nuevoId,
+                nombre: datos.nombre,
+                superficie: datos.superficie,
+                nro_viñedo: datos.nro_viñedo,
+                especie: datos.especie,
+                finca_id: datos.finca_id,
+                fincas: { nombre_finca: finca?.nombre_finca || 'Finca Desconocida' },
+                cuartel_variedades: variedadesSeleccionadas,
+                created_at: new Date().toISOString()
+            };
+            
+            cuartelesData.push(nuevoCuartel);
+            cuartelesOriginales.push(nuevoCuartel);
+            mostrarMensaje('✅ Cuartel creado exitosamente (modo demo)', 'success');
+            console.log('✅ Cuartel creado en modo demo:', nuevoCuartel);
+            
+            // Actualizar vista inmediatamente en modo demo
+            actualizarContador();
+            renderizarCuarteles();
+        }
+    }
+
+    async function actualizarCuartel(datos) {
+        console.log('✏️ Actualizando cuartel:', datos);
+        
+        try {
+            if (supabase && currentUser) {
+                // 🔄 ESTRATEGIA DUAL: UPDATE directo + RPC fallback
+                console.log('🔄 Actualizando cuartel en Supabase:', datos.id);
+                
+                // Preparar datos para actualización
+                const updateData = {
+                    finca_id: datos.finca_id,
+                    nombre: datos.nombre,
+                    superficie: datos.superficie || null,
+                    nro_viñedo: datos.nro_viñedo || null, // ✅ Corregido: usar nro_viñedo consistentemente
+                    especie: datos.especie || null,
+                    especie_id: datos.especie_id || null // UUID directo
+                };
+                
+                let { data, error } = await supabase
+                    .from('cuarteles')
+                    .update(updateData)
+                    .eq('id', datos.id)
+                    .select();
+                
+                console.log('Resultado UPDATE directo:', { data, error });
+                
+                // Si UPDATE directo falla o no retorna datos, usar RPC
+                if (error || !data || data.length === 0) {
+                    console.log('⚠️ UPDATE directo falló, intentando con RPC...');
+                    
+                    const rpcResult = await supabase.rpc('actualizar_cuartel', {
+                        cuartel_id: datos.id,
+                        nueva_finca_id: datos.finca_id,
+                        nuevo_nombre: datos.nombre,
+                        nueva_superficie: datos.superficie || null,
+                        nuevo_nro_vinedo: datos.nro_viñedo || null, // ✅ Corregido: usar nro_viñedo
+                        nueva_especie: datos.especie || null,
+                        nueva_especie_id: datos.especie_id || null // UUID directo
+                    });
+                    
+                    console.log('Resultado RPC:', rpcResult);
+                    
+                    if (rpcResult.error) {
+                        throw new Error('Error al actualizar cuartel (RPC): ' + rpcResult.error.message);
+                    }
+                    
+                    console.log('✅ Actualización exitosa con RPC');
+                } else {
+                    console.log('✅ Actualización exitosa directa');
+                }
+
+                // ⭐ ACTUALIZAR VARIEDADES DEL CUARTEL
+                if (datos.variedades && Array.isArray(datos.variedades)) {
+                    console.log('🌱 Actualizando variedades del cuartel:', datos.variedades);
+                    
+                    // 1. Eliminar variedades existentes
+                    const { error: deleteError } = await supabase
+                        .from("cuartel_variedades")
+                        .delete()
+                        .eq('cuartel_id', datos.id); // datos.id es BIGINT del cuartel
+                    
+                    if (deleteError) {
+                        console.warn('⚠️ Error eliminando variedades existentes:', deleteError);
+                        // No fallar completamente, continuar
+                    }
+                    
+                    // 2. Insertar nuevas variedades si hay seleccionadas
+                    if (datos.variedades.length > 0) {
+                        const variedadesToInsert = datos.variedades.map(variedadId => ({
+                            cuartel_id: parseInt(datos.id), // BIGINT del cuartel
+                            variedad_id: variedadId // UUID de la variedad (ya es UUID)
+                        }));
+                        
+                        console.log('🌱 Insertando variedades (UUIDs directos):', variedadesToInsert);
+                        
+                        const { error: insertError } = await supabase
+                            .from("cuartel_variedades")
+                            .insert(variedadesToInsert);
+                        
+                        if (insertError) {
+                            console.error('⚠️ Error insertando variedades:', insertError);
+                            // No fallar el cuartel completo por las variedades
+                            mostrarMensaje('⚠️ Cuartel actualizado, pero hubo un problema con las variedades: ' + insertError.message, 'warning');
+                        } else {
+                            console.log('✅ Variedades actualizadas correctamente');
+                        }
+                    }
+                }
+                
+                mostrarMensaje('✅ Cuartel actualizado correctamente', 'success');
+                
+                // Recargar datos
+                await cargarCuarteles();
+                
+            } else {
+                console.log('✏️ Actualizando en modo demo...');
+                // Actualizar en modo demo
+                const index = cuartelesData.findIndex(c => c.id === datos.id);
+                if (index !== -1) {
+                    cuartelesData[index] = { ...cuartelesData[index], ...datos };
+                    cuartelesOriginales[index] = { ...cuartelesOriginales[index], ...datos };
+                    
+                    mostrarMensaje('✅ Cuartel actualizado exitosamente (modo demo)', 'success');
+                    renderizarCuarteles();
+                    actualizarContador();
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Error actualizando cuartel:', error);
+            mostrarMensaje('❌ Error actualizando cuartel: ' + error.message, 'error');
+        }
+    }
+
+    function editarCuartel(id) {
+        console.log('✏️ Editando cuartel con ID:', id);
+        
+        try {
+            // Buscar el cuartel en los datos
+            const cuartel = cuartelesData.find(c => c.id === id);
+            if (!cuartel) {
+                mostrarMensaje('❌ Cuartel no encontrado', 'error');
+                return;
+            }
+            
+            console.log('📝 Datos del cuartel a editar:', cuartel);
+            
+            // Mostrar el formulario
+            const formulario = document.getElementById('formulario-cuartel');
+            const toggleBtn = document.getElementById('toggle-form-btn');
+            const submitBtn = document.querySelector('#formulario-cuartel button[type="submit"]');
+            
+            formulario.style.display = 'block';
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+            }
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-pencil me-1"></i> Actualizar Cuartel';
+            }
+            
+            // Llenar los campos del formulario
+            document.getElementById('finca_id').value = cuartel.finca_id || '';
+            document.getElementById('nombre_cuartel').value = cuartel.nombre || '';
+            document.getElementById('superficie_cuartel').value = cuartel.superficie || '';
+            document.getElementById('nro_viñedo').value = cuartel.nro_viñedo || '';
+            document.getElementById('especie_id').value = cuartel.especie_id || '';
+            
+            // Establecer el ID de edición para el formulario
+            editId = id;
+            
+            // Trigger del cambio de especie para cargar variedades
+            const especieSelect = document.getElementById('especie_id');
+            if (especieSelect.value) {
+                // Disparar el evento para cargar variedades
+                especieSelect.dispatchEvent(new Event('change'));
+                
+                // Preseleccionar variedades después de un pequeño delay para que se carguen
+                setTimeout(() => {
+                    preseleccionarVariedades(cuartel);
+                }, 200);
+            }
+            
+            // Scroll hacia el formulario
+            formulario.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            mostrarMensaje('📝 Editando cuartel: ' + cuartel.nombre, 'info');
+            
+        } catch (error) {
+            console.error('❌ Error al editar cuartel:', error);
+            mostrarMensaje('❌ Error al editar cuartel: ' + error.message, 'error');
+        }
+    }
+
+    // Función para preseleccionar variedades en el formulario de edición
+    function preseleccionarVariedades(cuartel) {
+        console.log('🌱 Preseleccionando variedades actuales:', cuartel.cuartel_variedades);
+        
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        if (!variedadesSelect) {
+            console.warn('⚠️ No se encontró el select de variedades');
+            return;
+        }
+        
+        // Limpiar selecciones actuales
+        Array.from(variedadesSelect.options).forEach(option => {
+            option.selected = false;
+        });
+        
+        // Obtener IDs de variedades que tiene el cuartel
+        const variedadesActuales = cuartel.cuartel_variedades?.map(cv => cv.variedades?.id).filter(Boolean) || [];
+        console.log('🔍 IDs de variedades a seleccionar:', variedadesActuales);
+        
+        // Seleccionar las variedades correspondientes
+        variedadesActuales.forEach(variedadId => {
+            const option = variedadesSelect.querySelector(`option[value="${variedadId}"]`);
+            if (option) {
+                option.selected = true;
+                console.log(`✅ Variedad seleccionada: ${option.textContent} (${variedadId})`);
+            } else {
+                console.warn(`⚠️ No se encontró opción para variedad ID: ${variedadId}`);
+            }
+        });
+        
+        console.log(`🌱 ${variedadesActuales.length} variedades preseleccionadas`);
+    }
+
+    function eliminarCuartel(id) {
+        console.log('🗑️ Eliminar cuartel:', id);
+        
+        const cuartel = cuartelesData.find(c => c.id === id);
+        if (!cuartel) {
+            mostrarMensaje('❌ Cuartel no encontrado', 'error');
+            return;
+        }
+        
+        // Mostrar confirmación
+        if (confirm(`¿Estás seguro de que deseas eliminar el cuartel "${cuartel.nombre}" de la finca "${cuartel.fincas?.nombre_finca || 'Desconocida'}"?\n\nEsta acción no se puede deshacer.`)) {
+            eliminarCuartelConfirmado(id);
+        }
+    }
+    
+    async function eliminarCuartelConfirmado(id) {
+        try {
+            if (supabase && currentUser) {
+                console.log('🗑️ Eliminando de Supabase...');
+                
+                // Primero verificar que el cuartel pertenezca al usuario (a través de la finca)
+                const { data: cuartelData, error: checkError } = await supabase
+                    .from("cuarteles")
+                    .select("id, fincas!inner(usuario_id)")
+                    .eq("id", id)
+                    .eq("fincas.usuario_id", currentUser.id)
+                    .single();
+                
+                if (checkError || !cuartelData) {
+                    throw new Error('No tienes permisos para eliminar este cuartel');
+                }
+                
+                // 🔄 ESTRATEGIA DUAL: DELETE directo + RPC fallback
+                console.log('🗑️ Eliminando cuartel:', id);
+                
+                // Eliminar relaciones de variedades primero
+                await supabase
+                    .from("cuartel_variedades")
+                    .delete()
+                    .eq("cuartel_id", id);
+                
+                // Intentar DELETE directo
+                let { data, error } = await supabase
+                    .from("cuarteles")
+                    .delete()
+                    .eq("id", id)
+                    .select();
+                
+                console.log('Resultado DELETE directo:', { data, error });
+                
+                // Si DELETE directo falla, no hay RPC de eliminación implementada aún
+                // pero podemos agregar logs detallados
+                if (error) {
+                    console.error('❌ DELETE directo falló:', error);
+                    throw new Error('Error al eliminar cuartel: ' + error.message);
+                }
+                
+                if (!data || data.length === 0) {
+                    console.log('⚠️ DELETE no retornó datos, pero puede haber funcionado');
+                    // Verificar si realmente se eliminó
+                    const { data: checkData, error: checkError2 } = await supabase
+                        .from("cuarteles")
+                        .select("id")
+                        .eq("id", id)
+                        .single();
+                    
+                    if (checkError2 && checkError2.code === 'PGRST116') {
+                        // Error PGRST116 significa "no rows returned" = eliminación exitosa
+                        console.log('✅ Eliminación confirmada (registro no encontrado)');
+                        mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                    } else {
+                        throw new Error('No se pudo confirmar la eliminación del cuartel');
+                    }
+                } else {
+                    console.log('✅ Eliminación exitosa directa');
+                    mostrarMensaje('✅ Cuartel eliminado exitosamente', 'success');
+                }
+                
+                console.log('✅ Cuartel eliminado de Supabase');
+                
+                // Recargar datos
+                await cargarCuarteles();
+                
+            } else {
+                console.log('🗑️ Eliminando en modo demo...');
+                // Eliminar de ambos arrays
+                cuartelesData = cuartelesData.filter(c => c.id !== id);
+                cuartelesOriginales = cuartelesOriginales.filter(c => c.id !== id);
+                
+                mostrarMensaje('✅ Cuartel eliminado exitosamente (modo demo)', 'success');
+                console.log('✅ Cuartel eliminado en modo demo');
+                
+                // Actualizar vista inmediatamente en modo demo
+                renderizarCuarteles();
+                actualizarContador();
+                
+                // Mantener búsqueda activa si hay un término
+                const busquedaInput = document.getElementById('busqueda-cuarteles');
+                if (busquedaInput && busquedaInput.value.trim()) {
+                    const termino = busquedaInput.value.trim().toLowerCase();
+                    buscarCuarteles(termino);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Error eliminando cuartel:', error);
+            mostrarMensaje('❌ Error eliminando cuartel: ' + error.message, 'error');
+        }
+    }
+
+    function cancelarEdicion() {
+        resetearFormulario();
+        mostrarMensaje('ℹ️ Edición cancelada', 'info');
+    }
+
+    function resetearFormulario() {
+        // Resetear formulario
+        const form = document.getElementById('cuartel-form');
+        if (form) form.reset();
+        
+        // Resetear selects específicos
+        const especieSelect = document.getElementById('especie_id');
+        const variedadesSelect = document.getElementById('variedades_cuartel');
+        
+        if (especieSelect) especieSelect.value = '';
+        if (variedadesSelect) {
+            variedadesSelect.innerHTML = '<option value="" disabled>Primero seleccione una especie</option>';
+        }
+        
+        // Resetear estado de edición
+        editId = null;
+        
+        // Resetear textos de forma segura
+        const formTitle = document.getElementById('form-title');
+        const btnText = document.getElementById('btn-text');
+        const cancelEdit = document.getElementById('cancelEdit');
+        
+        if (formTitle) formTitle.textContent = 'Nuevo Cuartel';
+        if (btnText) btnText.textContent = 'Guardar Cuartel';
+        if (cancelEdit) cancelEdit.style.display = 'none';
+        
+        // Ocultar formulario
+        const formularioCuartel = document.getElementById('formulario-cuartel');
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        
+        if (formularioCuartel && toggleFormBtn) {
+            formularioCuartel.style.display = 'none';
+            toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Cuartel';
+        }
+        
+        console.log('🔄 Formulario reseteado');
+    }
+
+    // ===== FUNCIONALIDAD DE BÚSQUEDA =====
+    
+    function configurarBusqueda() {
+        console.log('🔍 Configurando búsqueda...');
+        
+        const busquedaInput = document.getElementById('busqueda-cuarteles');
+        const limpiarBtn = document.getElementById('limpiar-busqueda');
+        
+        if (!busquedaInput || !limpiarBtn) {
+            console.warn('⚠️ Elementos de búsqueda no encontrados');
+            return;
+        }
+        
+        // Búsqueda en tiempo real
+        busquedaInput.addEventListener('input', function() {
+            const termino = this.value.trim().toLowerCase();
+            buscarCuarteles(termino);
+        });
+        
+        // Limpiar búsqueda
+        limpiarBtn.addEventListener('click', function() {
+            busquedaInput.value = '';
+            buscarCuarteles('');
+            busquedaInput.focus();
+        });
+        
+        // Tecla Escape para limpiar
+        busquedaInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                buscarCuarteles('');
+            }
+        });
+        
+        console.log('✅ Búsqueda configurada');
+    }
+    
+    function buscarCuarteles(termino) {
+        if (!termino) {
+            // Mostrar todos los cuarteles
+            cuartelesData = [...cuartelesOriginales];
+            renderizarCuarteles();
+            actualizarEstadisticasBusqueda(cuartelesData.length, cuartelesOriginales.length);
+            return;
+        }
+        
+        // Buscar en nombre, finca, especie y variedades
+        const resultados = cuartelesOriginales.filter(cuartel => {
+            const nombre = (cuartel.nombre || '').toLowerCase();
+            const finca = (cuartel.fincas?.nombre_finca || '').toLowerCase();
+            const especie = (cuartel.especie || '').toLowerCase();
+            const variedades = cuartel.cuartel_variedades?.map(cv => 
+                (cv.variedades?.nombre || '').toLowerCase()
+            ).join(' ') || '';
+            
+            return nombre.includes(termino) || 
+                   finca.includes(termino) || 
+                   especie.includes(termino) || 
+                   variedades.includes(termino);
+        });
+        
+        cuartelesData = resultados;
+        renderizarCuarteles();
+        actualizarEstadisticasBusqueda(resultados.length, cuartelesOriginales.length);
+        
+        if (resultados.length === 0) {
+            mostrarMensaje(`🔍 No se encontraron cuarteles que coincidan con "${termino}"`, 'info');
+        }
+    }
+    
+    function actualizarEstadisticasBusqueda(encontrados, total) {
+        const statsElement = document.getElementById('resultados-count');
+        if (statsElement) {
+            if (encontrados === total) {
+                statsElement.textContent = `Mostrando ${total} cuarteles`;
+            } else {
+                statsElement.textContent = `${encontrados} de ${total} cuarteles`;
+            }
+        }
+    }
+
+    function cargarHeaderDinamico() {
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                const headerContainer = document.getElementById('header-container');
+                if (headerContainer) {
+                    headerContainer.innerHTML = html;
+                    console.log('✅ Header dinámico cargado');
+                    
+                    // Importar header.js después de cargar el HTML
+                    import('./header.js')
+                        .then(() => {
+                            console.log('✅ Header.js importado exitosamente');
+                        })
+                        .catch(error => {
+                            console.warn('⚠️ Error importando header.js:', error);
+                        });
+                }
+            })
+            .catch(error => {
+                console.warn('Header dinámico no disponible, usando header estático');
+            });
+    }
     </script>
-  </body>
+</body>
 </html>

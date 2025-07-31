@@ -3,45 +3,159 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gestionar Fertilizantes</title>
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <title>Fertilizantes - Cuaderno de Campo</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Estilos personalizados -->
+  <link href="estilos.css" rel="stylesheet">
+  
+  <style>
+    .table-container {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .btn-add {
+      background-color: #28a745;
+      border-color: #28a745;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+    
+    .btn-add:hover {
+      background-color: #218838;
+      border-color: #1e7e34;
+      color: white;
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .search-container {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-action {
+      padding: 0.25rem 0.5rem;
+      margin: 0 0.125rem;
+      border-radius: 0.25rem;
+    }
+    
+    .nutrient-badge {
+      background-color: #e8f5e8;
+      color: #2d5016;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .formula-badge {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 <body>
-  <div id="header-container"></div>
-  <main class="container">
-    <h2>Fertilizantes</h2>
-    <input type="search" id="searchInput" placeholder="Buscar por producto, fórmula o nutriente..." />
-    <button id="addBtn">➕ Nuevo fertilizante</button>
-    <div style="overflow-x:auto;">
-      <table id="fertilizantesTable" style="font-size:0.92em;">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Fórmula</th>
-            <th>N</th>
-            <th>P</th>
-            <th>K</th>
-            <th>Ca</th>
-            <th>Mg</th>
-            <th>S</th>
-            <th>Fe</th>
-            <th>Mn</th>
-            <th>Zn</th>
-            <th>Cu</th>
-            <th>Bo</th>
-            <th>Mo</th>
-            <th>Cl</th>
-            <th>pH</th>
-            <th>Otro</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Header -->
+      <div class="col-12">
+        <div id="header-container"></div>
+      </div>
     </div>
-  </main>
+    
+    <div class="row mt-4">
+      <div class="col-12">
+        <!-- Título y descripción -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h1 class="h2 mb-3">
+              <i class="bi bi-droplet-fill me-2 text-success"></i>
+              Fertilizantes
+            </h1>
+            <p class="text-muted">
+              Gestiona el catálogo de fertilizantes con sus fórmulas y composición nutricional.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Búsqueda y botón agregar -->
+        <div class="search-container">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input type="search" id="searchInput" class="form-control" 
+                       placeholder="Buscar por producto, fórmula o nutriente...">
+              </div>
+            </div>
+            <div class="col-md-4 text-end mt-2 mt-md-0">
+              <button id="addBtn" class="btn btn-add">
+                <i class="bi bi-plus-circle me-1"></i>
+                Nuevo Fertilizante
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tabla de fertilizantes -->
+        <div class="table-container">
+          <div class="table-responsive">
+            <table id="fertilizantesTable" class="table table-hover mb-0">
+              <thead class="table-success">
+                <tr>
+                  <th style="width: 15%">Producto</th>
+                  <th style="width: 10%">Fórmula</th>
+                  <th style="width: 6%">N %</th>
+                  <th style="width: 6%">P %</th>
+                  <th style="width: 6%">K %</th>
+                  <th style="width: 6%">Ca %</th>
+                  <th style="width: 6%">Mg %</th>
+                  <th style="width: 6%">S %</th>
+                  <th style="width: 5%">Fe %</th>
+                  <th style="width: 5%">Mn %</th>
+                  <th style="width: 5%">Zn %</th>
+                  <th style="width: 5%">Cu %</th>
+                  <th style="width: 5%">Bo %</th>
+                  <th style="width: 5%">Mo %</th>
+                  <th style="width: 15%" class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Status Message -->
+        <div id="status-message" class="d-none mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    
+    // Verificar autenticación
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       window.location.href = "login.html";
@@ -56,77 +170,114 @@
         import('./header.js');
       });
 
-    // ABM lógica
+    // Variables globales
     const table = document.getElementById('fertilizantesTable').querySelector('tbody');
     const searchInput = document.getElementById('searchInput');
     const addBtn = document.getElementById('addBtn');
+    const statusMessage = document.getElementById('status-message');
 
     let fertilizantes = [];
     let editingId = null;
 
+    // Cargar fertilizantes
     async function fetchFertilizantes() {
-      const { data, error } = await supabase.from('fertilizantes').select('*').order('producto');
-      if (!error) {
-        fertilizantes = data;
+      try {
+        const { data, error } = await supabase.from('fertilizantes').select('*').order('producto');
+        if (error) throw error;
+        fertilizantes = data || [];
         renderTable();
+        showStatus(`${fertilizantes.length} fertilizantes cargados`, 'success');
+      } catch (err) {
+        showStatus('Error al cargar fertilizantes: ' + err.message, 'error');
       }
     }
 
+    // Renderizar tabla
     function renderTable() {
       const filtro = searchInput.value.toLowerCase();
+      const fertilizantesFiltrados = fertilizantes.filter(f =>
+        (f.producto || '').toLowerCase().includes(filtro) ||
+        (f.formula || '').toLowerCase().includes(filtro) ||
+        String(f.n || '').toLowerCase().includes(filtro) ||
+        String(f.p || '').toLowerCase().includes(filtro) ||
+        String(f.k || '').toLowerCase().includes(filtro)
+      );
+      
       table.innerHTML = '';
-      fertilizantes.filter(f =>
-        f.producto?.toLowerCase().includes(filtro) ||
-        f.formula?.toLowerCase().includes(filtro) ||
-        [f.n,f.p,f.k,f.ca,f.mg,f.s,f.fe,f.mn,f.zn,f.cu,f.bo,f.mo,f.cl,f.ph,f.otro].some(x => (x+'').toLowerCase().includes(filtro))
-      ).forEach(f => {
+      
+      if (fertilizantesFiltrados.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="15" class="text-center text-muted py-4">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              ${filtro ? 'No se encontraron fertilizantes que coincidan con la búsqueda' : 'No hay fertilizantes registrados'}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      fertilizantesFiltrados.forEach(f => {
         const tr = document.createElement('tr');
-        if (editingId === f.id) {
+        
+        if (String(editingId) === String(f.id)) {
+          // Modo edición
           tr.innerHTML = `
-            <td><input value="${f.producto||''}" data-field="producto"></td>
-            <td><input value="${f.formula||''}" data-field="formula"></td>
-            <td><input value="${f.n||''}" data-field="n"></td>
-            <td><input value="${f.p||''}" data-field="p"></td>
-            <td><input value="${f.k||''}" data-field="k"></td>
-            <td><input value="${f.ca||''}" data-field="ca"></td>
-            <td><input value="${f.mg||''}" data-field="mg"></td>
-            <td><input value="${f.s||''}" data-field="s"></td>
-            <td><input value="${f.fe||''}" data-field="fe"></td>
-            <td><input value="${f.mn||''}" data-field="mn"></td>
-            <td><input value="${f.zn||''}" data-field="zn"></td>
-            <td><input value="${f.cu||''}" data-field="cu"></td>
-            <td><input value="${f.bo||''}" data-field="bo"></td>
-            <td><input value="${f.mo||''}" data-field="mo"></td>
-            <td><input value="${f.cl||''}" data-field="cl"></td>
-            <td><input value="${f.ph||''}" data-field="ph"></td>
-            <td><input value="${f.otro||''}" data-field="otro"></td>
             <td>
-              <button data-action="save">💾</button>
-              <button data-action="cancel">✖️</button>
+              <input class="form-control form-control-sm" value="${f.producto || ''}" 
+                     data-field="producto" maxlength="100" required>
+            </td>
+            <td>
+              <input class="form-control form-control-sm" value="${f.formula || ''}" 
+                     data-field="formula" maxlength="50">
+            </td>
+            <td><input class="form-control form-control-sm" value="${f.n || ''}" data-field="n" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.p || ''}" data-field="p" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.k || ''}" data-field="k" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.ca || ''}" data-field="ca" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.mg || ''}" data-field="mg" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.s || ''}" data-field="s" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.fe || ''}" data-field="fe" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.mn || ''}" data-field="mn" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.zn || ''}" data-field="zn" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.cu || ''}" data-field="cu" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.bo || ''}" data-field="bo" type="number" step="0.01" min="0" max="100"></td>
+            <td><input class="form-control form-control-sm" value="${f.mo || ''}" data-field="mo" type="number" step="0.01" min="0" max="100"></td>
+            <td class="text-center">
+              <button class="btn btn-success btn-action" data-action="save" title="Guardar">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="btn btn-secondary btn-action" data-action="cancel" title="Cancelar">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </td>
           `;
         } else {
+          // Modo visualización
           tr.innerHTML = `
-            <td>${f.producto||''}</td>
-            <td>${f.formula||''}</td>
-            <td>${f.n||''}</td>
-            <td>${f.p||''}</td>
-            <td>${f.k||''}</td>
-            <td>${f.ca||''}</td>
-            <td>${f.mg||''}</td>
-            <td>${f.s||''}</td>
-            <td>${f.fe||''}</td>
-            <td>${f.mn||''}</td>
-            <td>${f.zn||''}</td>
-            <td>${f.cu||''}</td>
-            <td>${f.bo||''}</td>
-            <td>${f.mo||''}</td>
-            <td>${f.cl||''}</td>
-            <td>${f.ph||''}</td>
-            <td>${f.otro||''}</td>
-            <td>
-              <button data-action="edit">✏️</button>
-              <button data-action="delete">🗑️</button>
+            <td><strong>${f.producto || ''}</strong></td>
+            <td>${f.formula ? `<span class="formula-badge">${f.formula}</span>` : '<span class="text-muted">-</span>'}</td>
+            <td class="text-center">${formatNutrient(f.n)}</td>
+            <td class="text-center">${formatNutrient(f.p)}</td>
+            <td class="text-center">${formatNutrient(f.k)}</td>
+            <td class="text-center">${formatNutrient(f.ca)}</td>
+            <td class="text-center">${formatNutrient(f.mg)}</td>
+            <td class="text-center">${formatNutrient(f.s)}</td>
+            <td class="text-center">${formatNutrient(f.fe)}</td>
+            <td class="text-center">${formatNutrient(f.mn)}</td>
+            <td class="text-center">${formatNutrient(f.zn)}</td>
+            <td class="text-center">${formatNutrient(f.cu)}</td>
+            <td class="text-center">${formatNutrient(f.bo)}</td>
+            <td class="text-center">${formatNutrient(f.mo)}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary btn-action" data-action="edit" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-action" data-action="delete" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </td>
           `;
         }
@@ -135,60 +286,166 @@
       });
     }
 
+    // Formatear nutriente
+    function formatNutrient(value) {
+      if (value === null || value === undefined || value === '') {
+        return '<span class="text-muted">-</span>';
+      }
+      return `<span class="nutrient-badge">${Number(value).toFixed(1)}%</span>`;
+    }
+
+    // Mostrar mensaje de estado
+    function showStatus(message, type = 'info') {
+      const alertClass = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'info': 'alert-info',
+        'warning': 'alert-warning'
+      }[type] || 'alert-info';
+      
+      const icon = {
+        'success': 'check-circle-fill',
+        'error': 'exclamation-triangle-fill',
+        'info': 'info-circle-fill',
+        'warning': 'exclamation-triangle-fill'
+      }[type] || 'info-circle-fill';
+      
+      statusMessage.innerHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+          <i class="bi bi-${icon} me-2"></i>
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      `;
+      statusMessage.classList.remove('d-none');
+      
+      // Auto-ocultar después de 5 segundos para mensajes de éxito
+      if (type === 'success') {
+        setTimeout(() => {
+          const alert = statusMessage.querySelector('.alert');
+          if (alert) {
+            alert.remove();
+          }
+        }, 5000);
+      }
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', renderTable);
+
     table.addEventListener('click', async e => {
       const tr = e.target.closest('tr');
       const id = tr?.dataset.id;
-      const action = e.target.dataset.action;
-      if (!id) return;
+      const action = e.target.closest('button')?.dataset.action;
+      
+      if (!id || !action) return;
+      
       if (action === 'edit') {
         editingId = id;
         renderTable();
+        // Enfocar el primer input después del re-render
+        setTimeout(() => {
+          const newTr = table.querySelector(`tr[data-id="${id}"]`);
+          const firstInput = newTr?.querySelector('input');
+          if (firstInput) {
+            firstInput.focus();
+          }
+        }, 100);
+        
       } else if (action === 'cancel') {
+        if (id.startsWith('nuevo-')) {
+          fertilizantes = fertilizantes.filter(f => f.id !== id);
+        }
         editingId = null;
         renderTable();
+        
       } else if (action === 'save') {
-        const inputs = tr.querySelectorAll('input');
-        const update = {};
-        inputs.forEach(inp => update[inp.dataset.field] = inp.value);
-        await supabase.from('fertilizantes').update(update).eq('id', id);
-        editingId = null;
-        fetchFertilizantes();
+        const btn = e.target.closest('button');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+        
+        try {
+          const inputs = tr.querySelectorAll('input[data-field]');
+          const values = {};
+          inputs.forEach(input => {
+            const field = input.dataset.field;
+            const value = input.value.trim();
+            if (field === 'producto') {
+              values[field] = value || null;
+            } else if (['n','p','k','ca','mg','s','fe','mn','zn','cu','bo','mo'].includes(field)) {
+              values[field] = value ? parseFloat(value) : null;
+            } else {
+              values[field] = value || null;
+            }
+          });
+          
+          if (!values.producto) {
+            throw new Error('El nombre del producto es obligatorio');
+          }
+          
+          if (id.startsWith('nuevo-')) {
+            delete values.id;
+            const { error } = await supabase.from('fertilizantes').insert([values]);
+            if (error) throw error;
+            showStatus('Fertilizante agregado correctamente', 'success');
+          } else {
+            const { error } = await supabase.from('fertilizantes')
+              .update(values)
+              .eq('id', id);
+            if (error) throw error;
+            showStatus('Fertilizante actualizado correctamente', 'success');
+          }
+          editingId = null;
+          await fetchFertilizantes();
+        } catch (err) {
+          showStatus('Error al guardar: ' + err.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+        
       } else if (action === 'delete') {
-        if (confirm('¿Eliminar este fertilizante?')) {
-          await supabase.from('fertilizantes').delete().eq('id', id);
-          fetchFertilizantes();
+        const fertilizante = fertilizantes.find(f => String(f.id) === String(id));
+        const nombreFertilizante = fertilizante?.producto || 'este fertilizante';
+        
+        if (confirm(`¿Está seguro de eliminar "${nombreFertilizante}"?\\n\\nEsta acción no se puede deshacer.`)) {
+          try {
+            const { error } = await supabase.from('fertilizantes')
+              .delete()
+              .eq('id', id);
+            if (error) throw error;
+            showStatus('Fertilizante eliminado correctamente', 'success');
+            await fetchFertilizantes();
+          } catch (err) {
+            showStatus('Error al eliminar: ' + err.message, 'error');
+          }
         }
       }
     });
 
     addBtn.addEventListener('click', () => {
       const nuevo = {
-        id: 'nuevo-'+Math.random(), producto:'', formula:'', n:'', p:'', k:'', ca:'', mg:'', s:'', fe:'', mn:'', zn:'', cu:'', bo:'', mo:'', cl:'', ph:'', otro:''
+        id: 'nuevo-' + Date.now(),
+        producto: '',
+        formula: '',
+        n: '', p: '', k: '', ca: '', mg: '', s: '',
+        fe: '', mn: '', zn: '', cu: '', bo: '', mo: ''
       };
       fertilizantes.unshift(nuevo);
       editingId = nuevo.id;
       renderTable();
+      
+      // Enfocar el primer input
+      setTimeout(() => {
+        const firstInput = table.querySelector('input');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 100);
     });
 
-    table.addEventListener('click', async e => {
-      const tr = e.target.closest('tr');
-      if (!tr || !tr.dataset.id?.startsWith('nuevo-')) return;
-      if (e.target.dataset.action === 'save') {
-        const inputs = tr.querySelectorAll('input');
-        const nuevo = {};
-        inputs.forEach(inp => nuevo[inp.dataset.field] = inp.value);
-        await supabase.from('fertilizantes').insert([nuevo]);
-        editingId = null;
-        fetchFertilizantes();
-      } else if (e.target.dataset.action === 'cancel') {
-        fertilizantes.shift();
-        editingId = null;
-        renderTable();
-      }
-    });
-
-    searchInput.addEventListener('input', renderTable);
-    fetchFertilizantes();
+    // Inicializar
+    await fetchFertilizantes();
   </script>
 </body>
 </html>

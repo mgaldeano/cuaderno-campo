@@ -20,7 +20,18 @@ cuarteles,departamento,text,SI
 cuarteles,created_at,timestamp with time zone,SI
 cuarteles,nombre,text,NO
 cuarteles,especie,text,SI
+cuarteles,especie_id,uuid,SI
 cuarteles,variedad,text,SI
+cuarteles_completos,id,bigint,SI
+cuarteles_completos,nombre,text,SI
+cuarteles_completos,superficie,numeric,SI
+cuarteles_completos,nro_viñedo,text,SI
+cuarteles_completos,especie_texto,text,SI
+cuarteles_completos,especie_nombre,text,SI
+cuarteles_completos,especie_id,uuid,SI
+cuarteles_completos,nombre_finca,text,SI
+cuarteles_completos,finca_id,bigint,SI
+cuarteles_completos,created_at,timestamp with time zone,SI
 especies,id,uuid,NO
 especies,nombre,text,NO
 fertilizantes,id,uuid,NO
@@ -47,6 +58,8 @@ fincas,usuario_id,uuid,SI
 fincas,created_at,timestamp with time zone,SI
 fincas,direccion,text,SI
 fincas,superficie,numeric,SI
+fincas,provincia,text,SI
+fincas,departamento,text,SI
 fitosanitarios,id,bigint,NO
 fitosanitarios,nombre_comercial,text,NO
 fitosanitarios,principio_activo,text,SI
@@ -113,6 +126,263 @@ variedades,id,uuid,NO
 variedades,nombre,text,NO
 variedades,color,text,SI
 variedades,tipo_destino,text,SI
+variedades,especie_id,uuid,SI
+visitas,id,integer,NO
+visitas,fecha,timestamp without time zone,NO
+visitas,texto,text,NO
+visitas,id_productor,uuid,NO
+visitas,id_finca,bigint,SI
+visitas,id_cuartel,bigint,SI
+visitas,id_ingeniero,uuid,NO
+visitas,adjuntos,jsonb,SI
+visitas,enviado_mail,boolean,SI
+
+# FUNCIONES SQL DISPONIBLES
+
+## Funciones de Cuarteles
+CREATE OR REPLACE FUNCTION actualizar_cuartel(
+    cuartel_id BIGINT,
+    nueva_finca_id BIGINT,
+    nuevo_nombre TEXT,
+    nueva_superficie NUMERIC,
+    nuevo_nro_vinedo TEXT,
+    nueva_especie TEXT,
+    nueva_especie_id UUID
+) RETURNS RECORD AS $$
+BEGIN
+    -- Log para debugging
+    RAISE NOTICE 'Actualizando cuartel: %, finca: %, nombre: %', cuartel_id, nueva_finca_id, nuevo_nombre;
+    
+    -- Realizar actualización
+    UPDATE cuarteles 
+    SET 
+        finca_id = nueva_finca_id,
+        nombre = nuevo_nombre,
+        superficie = nueva_superficie,
+        nro_viñedo = nuevo_nro_vinedo,
+        especie = nueva_especie,
+        especie_id = nueva_especie_id
+    WHERE cuarteles.id = cuartel_id;
+    
+    -- Verificar si se actualizó
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No se encontró el cuartel con ID: %', cuartel_id;
+    END IF;
+    
+    -- Retornar el registro actualizado
+    RETURN QUERY
+    SELECT c.id, c.nombre, c.finca_id, c.superficie, c.nro_viñedo, c.especie, c.especie_id
+    FROM cuarteles c
+    WHERE c.id = cuartel_id;
+END;
+$$ LANGUAGE plpgsql;
+
+## Funciones de Especies
+CREATE OR REPLACE FUNCTION actualizar_especie(
+    especie_id UUID,
+    nuevo_nombre TEXT
+) RETURNS RECORD AS $$
+BEGIN
+    -- Log para debugging
+    RAISE NOTICE 'Actualizando especie: %, nombre: %', especie_id, nuevo_nombre;
+    
+    -- Realizar actualización
+    UPDATE especies 
+    SET nombre = nuevo_nombre
+    WHERE especies.id = especie_id;
+    
+    -- Verificar si se actualizó
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No se encontró la especie con ID: %', especie_id;
+    END IF;
+    
+    -- Retornar el registro actualizado
+    RETURN QUERY
+    SELECT e.id, e.nombre
+    FROM especies e
+    WHERE e.id = especie_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION eliminar_especie(
+    especie_id UUID
+) RETURNS BOOLEAN AS $$
+BEGIN
+    -- Log para debugging
+    RAISE NOTICE 'Eliminando especie: %', especie_id;
+    
+    -- Verificar si tiene variedades asociadas
+    IF EXISTS (SELECT 1 FROM variedades WHERE especie_id = especie_id) THEN
+        RAISE EXCEPTION 'No se puede eliminar la especie porque tiene variedades asociadas';
+    END IF;
+    
+    -- Eliminar el registro
+    DELETE FROM especies WHERE id = especie_id;
+    
+    -- Verificar si se eliminó
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No se encontró la especie con ID: %', especie_id;
+    END IF;
+    
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+## Funciones de Variedades
+CREATE OR REPLACE FUNCTION actualizar_variedad(
+    variedad_id UUID,
+    nueva_especie_id UUID,
+    nuevo_nombre TEXT,
+    nuevo_color TEXT,
+    nuevo_tipo_destino TEXT
+) RETURNS RECORD AS $$
+BEGIN
+    -- Log para debugging
+    RAISE NOTICE 'Actualizando variedad: %, especie: %, nombre: %', variedad_id, nueva_especie_id, nuevo_nombre;
+    
+    -- Realizar actualización
+    UPDATE variedades 
+    SET 
+        especie_id = nueva_especie_id,
+        nombre = nuevo_nombre,
+        color = nuevo_color,
+        tipo_destino = nuevo_tipo_destino
+    WHERE variedades.id = variedad_id;
+    
+    -- Verificar si se actualizó
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No se encontró la variedad con ID: %', variedad_id;
+    END IF;
+    
+    -- Retornar el registro actualizado
+    RETURN QUERY
+    SELECT v.id, v.nombre, v.especie_id, v.color, v.tipo_destino
+    FROM variedades v
+    WHERE v.id = variedad_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION eliminar_variedad(
+    variedad_id UUID
+) RETURNS BOOLEAN AS $$
+BEGIN
+    -- Log para debugging
+    RAISE NOTICE 'Eliminando variedad: %', variedad_id;
+    
+    -- Eliminar el registro
+    DELETE FROM variedades WHERE id = variedad_id;
+    
+    -- Verificar si se eliminó
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No se encontró la variedad con ID: %', variedad_id;
+    END IF;
+    
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_variedades_por_especie(
+    especie_id_param UUID
+) RETURNS TABLE(id UUID, nombre TEXT, color TEXT, tipo_destino TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT v.id, v.nombre, v.color, v.tipo_destino
+    FROM variedades v
+    WHERE v.especie_id = especie_id_param
+    ORDER BY v.nombre;
+END;
+$$ LANGUAGE plpgsql;
+
+## Funciones de Usuarios y Autenticación
+CREATE OR REPLACE FUNCTION get_user_role(user_id UUID) RETURNS TEXT AS $$
+    SELECT rol FROM public.usuarios WHERE id = user_id;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.usuarios (id, nombre, rol, organizacion_id)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.email, 'sin_email_' || NEW.id),
+    'productor',
+    (SELECT id FROM public.organizaciones LIMIT 1)
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insertar_usuario_auth() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO usuarios (id, email, rol)
+  VALUES (NEW.id, NEW.email, 'productor');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION set_finca_user() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.usuario_id := auth.uid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+## Funciones de Reportes
+CREATE OR REPLACE FUNCTION reporte_tareas_resumen()
+RETURNS TABLE(cuartel_id BIGINT, tipo TEXT, total BIGINT) AS $$
+BEGIN
+  RETURN QUERY
+    SELECT cuartel_id, tipo_tarea_id::text AS tipo, COUNT(*) AS total
+    FROM public.tareas
+    GROUP BY cuartel_id, tipo_tarea_id;
+END;
+$$ LANGUAGE plpgsql;
+# EJEMPLOS DE USO DE FUNCIONES SQL
+
+## Cuarteles
+-- Actualizar un cuartel completo
+SELECT * FROM actualizar_cuartel(
+    1, -- cuartel_id
+    1, -- nueva_finca_id
+    'Cuartel Norte Renovado', -- nuevo_nombre
+    25.5, -- nueva_superficie
+    'V001', -- nuevo_nro_vinedo
+    'Uva', -- nueva_especie
+    'uuid-de-especie-uva' -- nueva_especie_id
+);
+
+## Especies
+-- Actualizar nombre de especie
+SELECT * FROM actualizar_especie('uuid-especie', 'Nuevo Nombre Especie');
+
+-- Eliminar especie (solo si no tiene variedades)
+SELECT eliminar_especie('uuid-especie');
+
+## Variedades
+-- Obtener variedades de una especie
+SELECT * FROM get_variedades_por_especie('uuid-especie-uva');
+
+-- Actualizar variedad completa
+SELECT * FROM actualizar_variedad(
+    'uuid-variedad', -- variedad_id
+    'uuid-especie', -- nueva_especie_id
+    'Malbec Premium', -- nuevo_nombre
+    'Tinto', -- nuevo_color
+    'Vino de guarda' -- nuevo_tipo_destino
+);
+
+-- Eliminar variedad
+SELECT eliminar_variedad('uuid-variedad');
+
+## Usuarios
+-- Obtener rol de usuario
+SELECT get_user_role('uuid-usuario');
+
+## Reportes
+-- Resumen de tareas por cuartel y tipo
+SELECT * FROM reporte_tareas_resumen();
+
 # Ejemplos de consultas útiles para reportes y auditoría
 
 -- Resumen de tareas por finca y tipo
@@ -143,3 +413,6 @@ GROUP BY cuartel_id, operador_id;
 
 # FUTURA TAREA
 - Revisar y agregar funciones SQL específicas para reportes y auditoría al final del proyecto, según necesidades reales de gestión y certificación.
+- Implementar funciones para manejo de aplicaciones de agroquímicos y fertilizaciones
+- Crear funciones de validación de datos y restricciones de negocio
+- Desarrollar funciones para cálculos de superficies y rendimientos

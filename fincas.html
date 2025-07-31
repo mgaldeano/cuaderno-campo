@@ -1,167 +1,1103 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fincas | Cuaderno de Campo</title>
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Fincas - Cuaderno de Campo</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Estilos personalizados -->
+    <link href="estilos.css" rel="stylesheet">
+    
     <style>
-      .btn-small {
-        font-size: 0.7em;
-        padding: 0.1em 0.4em;
-        margin: 0 0.1em;
-        vertical-align: middle;
-      }
-      .finca-item {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 0.5em;
-        flex-wrap: wrap;
-      }
-      .finca-info {
-        flex: 1;
-        min-width: 180px;
-      }
-      .finca-actions {
-        display: flex;
-        gap: 0.2em;
-        align-items: center;
-      }
-      .info-secundaria {
-        font-size: 0.85em;
-        color: #666;
-        display: block;
-        margin-left: 1em;
-      }
+        .badge-lg { 
+            font-size: 0.9em; 
+            padding: 0.5rem 0.75rem; 
+        }
+        .card-header-custom {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        .list-group-item:hover { 
+            background-color: #f8f9fa; 
+        }
+        #formulario-finca {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        #fincas-list {
+            display: block;
+            min-height: 200px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        
+        /* Mejorar legibilidad del botón principal */
+        #toggle-form-btn {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        }
+        
+        #toggle-form-btn:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        #toggle-form-btn:focus {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5);
+        }
     </style>
-  </head>
-  <body>
-  <div id="header-container"></div>
-  <main class="container">
-      <hgroup>
-        <h2>Fincas</h2>
-      </hgroup>
-      <form>
-        <input type="text" id="nombre_finca" placeholder="Nombre de la finca" required />
-        <input type="text" id="direccion_finca" placeholder="Dirección (opcional)" />
-        <input type="number" id="superficie_finca" placeholder="Superficie (ha, opcional)" min="0" step="any" />
-        <button type="submit">Guardar</button>
-      </form>
-      <p id="status"></p>
+</head>
+<body class="bg-light">
+    <!-- Header Container -->
+    <div id="header-container">
+        <!-- Header simple mientras carga -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-leaf"></i> Cuaderno de Campo
+                </a>
+            </div>
+        </nav>
+    </div>
 
-      <h3>Fincas registradas</h3>
-      <ul id="fincas-list"></ul>
-    </main>
-    <script type="module">
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
+    <div class="container-fluid mt-4">
+        <!-- Título principal -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1 text-dark font-weight-bold">
+                            <i class="bi bi-geo-alt-fill text-success me-2"></i>
+                            Gestión de Fincas
+                        </h2>
+                        <p class="text-muted mb-0">Administra las propiedades de tu organización</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span id="contador-fincas" class="badge badge-secondary badge-lg me-3">
+                            Cargando...
+                        </span>
+                        <button type="button" id="toggle-form-btn" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar Finca
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="busqueda-fincas" 
+                           placeholder="Buscar fincas por nombre, provincia, departamento..."
+                           autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="limpiar-busqueda">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+                <small class="text-muted">Resultados en tiempo real mientras escribes</small>
+            </div>
+            <div class="col-md-4">
+                <!-- Estadísticas de búsqueda -->
+                <div id="busqueda-stats" class="text-muted small">
+                    <span id="resultados-count"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes de estado -->
+        <div id="status" class="mb-3"></div>
+
+        <!-- Formulario de finca (oculto por defecto) -->
+        <div id="formulario-finca">
+            <div class="card shadow">
+                <div class="card-header card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span id="form-title">Nueva Finca</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="finca-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre_finca" class="form-label font-weight-bold">
+                                    <i class="bi bi-tag-fill text-primary me-1"></i>
+                                    Nombre de la Finca *
+                                </label>
+                                <input type="text" class="form-control" id="nombre_finca" 
+                                       placeholder="Ej: Finca San Pedro" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="superficie_finca" class="form-label font-weight-bold">
+                                    <i class="bi bi-rulers text-warning me-1"></i>
+                                    Superficie (hectáreas)
+                                </label>
+                                <input type="number" step="0.1" min="0" class="form-control" id="superficie_finca" 
+                                       placeholder="Ej: 15.5">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="provincia_finca" class="form-label font-weight-bold">
+                                    <i class="bi bi-geo-alt-fill text-info me-1"></i>
+                                    Provincia
+                                </label>
+                                <input type="text" class="form-control" id="provincia_finca" 
+                                       placeholder="Ej: Mendoza">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="departamento_finca" class="form-label font-weight-bold">
+                                    <i class="bi bi-geo text-info me-1"></i>
+                                    Departamento
+                                </label>
+                                <input type="text" class="form-control" id="departamento_finca" 
+                                       placeholder="Ej: Maipú">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="direccion_finca" class="form-label font-weight-bold">
+                                <i class="bi bi-map text-secondary me-1"></i>
+                                Dirección
+                            </label>
+                            <textarea class="form-control" id="direccion_finca" rows="2" 
+                                      placeholder="Dirección completa de la finca"></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="button" id="cancelEdit" class="btn btn-secondary" style="display: none;">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Cancelar
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save me-1"></i>
+                                <span id="btn-text">Guardar Finca</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de fincas -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 text-secondary">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Lista de Fincas
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <!-- Lista principal -->
+                <div id="fincas-list" class="list-group list-group-flush">
+                    <!-- Las fincas se cargarán aquí dinámicamente -->
+                </div>
+
+                <!-- Estado vacío -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt display-1 text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">No hay fincas registradas</h5>
+                    <p class="text-muted mb-4">
+                        Comienza agregando tu primera finca para gestionar tus propiedades.
+                    </p>
+                    <button type="button" class="btn btn-success" onclick="document.getElementById('toggle-form-btn').click()">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Agregar Primera Finca
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    // Variables globales
+    let supabase = null;
+    let currentUser = null;
+    let fincasData = [];
+    let fincasOriginales = []; // Para búsqueda
+    let editId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM cargado, inicializando...');
+        inicializarPagina();
+    });
+
+    async function inicializarPagina() {
+        try {
+            // Intentar conectar con Supabase
+            await conectarSupabase();
+            
+            // Configurar funcionalidades
+            configurarToggleForm();
+            configurarFormulario();
+            
+            // Cargar datos
+            await cargarFincas();
+            
+            // Intentar cargar header dinámico
+            cargarHeaderDinamico();
+            
+            console.log('✅ Página completamente inicializada');
+        } catch (error) {
+            console.error('Error inicializando página:', error);
+        }
     }
 
-      const form = document.querySelector("form");
-      const status = document.querySelector("#status");
-      const lista = document.querySelector("#fincas-list");
-      const nombreInput = document.querySelector("#nombre_finca");
-      const direccionInput = document.querySelector("#direccion_finca");
-      const superficieInput = document.querySelector("#superficie_finca");
-
-      let editId = null;
-
-      // Obtener usuario actual
-      // user ya está definido globalmente arriba
-      const userId = user?.id;
-
-      async function cargarFincas() {
-        const { data, error } = await supabase
-          .from("fincas")
-          .select("*")
-          .eq("usuario_id", userId);
-
-        if (error) return (status.textContent = "❌ Error cargando fincas");
-        lista.innerHTML = "";
-        data.forEach(f => {
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <span class="finca-info">
-              #${f.id}: ${f.nombre_finca}
-              ${f.direccion ? `<small class="info-secundaria">Dirección: ${f.direccion}</small>` : ""}
-              ${f.superficie ? `<small class="info-secundaria">Superficie: ${f.superficie} ha</small>` : ""}
-            </span>
-            <span class="finca-actions">
-              <button data-id="${f.id}" class="edit btn-small">Editar</button>
-              <button data-id="${f.id}" class="delete btn-small">Eliminar</button>
-            </span>
-          `;
-          li.classList.add("finca-item");
-          lista.appendChild(li);
-        });
-
-        // Editar finca
-        lista.querySelectorAll(".edit").forEach(btn => {
-          btn.onclick = () => {
-            editId = btn.dataset.id;
-            const finca = data.find(f => f.id == editId);
-            nombreInput.value = finca.nombre_finca;
-            direccionInput.value = finca.direccion || "";
-            superficieInput.value = finca.superficie || "";
-            status.textContent = "Editando finca #" + editId;
-          };
-        });
-
-        // Eliminar finca
-        lista.querySelectorAll(".delete").forEach(btn => {
-          btn.onclick = async () => {
-            const id = btn.dataset.id;
-            if (!confirm("¿Seguro que deseas eliminar esta finca?")) return;
-            const { error } = await supabase.from("fincas").delete().eq("id", id);
-            if (error) status.textContent = "❌ Error al eliminar";
-            else status.textContent = "✅ Finca eliminada";
-            cargarFincas();
-          };
-        });
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const nombre = nombreInput.value;
-        const direccion = direccionInput.value || null;
-        const superficie = superficieInput.value ? Number(superficieInput.value) : null;
-
-        if (editId) {
-          // Editar finca
-          const { error } = await supabase
-            .from("fincas")
-            .update({ nombre_finca: nombre, direccion, superficie })
-            .eq("id", editId);
-          if (error) return (status.textContent = "❌ Error al editar finca");
-          status.textContent = "✅ Finca editada";
-          editId = null;
-        } else {
-          // Crear finca
-          const { error } = await supabase
-            .from("fincas")
-            .insert({ nombre_finca: nombre, usuario_id: userId, direccion, superficie });
-          if (error) return (status.textContent = "❌ Error al guardar finca");
-          status.textContent = "✅ Finca registrada";
+    async function conectarSupabase() {
+        try {
+            console.log('🔗 Intentando conectar con Supabase...');
+            const supabaseModule = await import('./supabaseClient.js');
+            supabase = supabaseModule.supabase;
+            
+            if (supabase) {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (user && !error) {
+                    currentUser = user;
+                    console.log('✅ Usuario autenticado:', user.email);
+                    mostrarMensaje('✅ Conectado a Supabase como: ' + user.email, 'success');
+                    return true;
+                } else {
+                    console.warn('❌ No hay usuario autenticado, redirigiendo al login...');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+            } else {
+                console.warn('❌ Supabase no disponible, redirigiendo al login...');
+                window.location.href = 'login.html';
+                return false;
+            }
+        } catch (error) {
+            console.warn('⚠️ Error conectando con Supabase:', error.message);
+            
+            // En desarrollo local, permitir modo demo
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
+                console.log('🎭 Modo demo activado para desarrollo local');
+                mostrarMensaje('⚠️ Modo demo - Desarrollo local', 'warning');
+                return false; // false = modo demo
+            } else {
+                // En producción, redirigir al login
+                window.location.href = 'login.html';
+                return false;
+            }
         }
-        form.reset();
-        cargarFincas();
-      });
+    }
 
-      // Cargar header y manejar logout
-      fetch('header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header-container').innerHTML = html;
-          import('./header.js');
-          // Eliminar el manejo de logoutBtn ya que se maneja en header.js
+    function mostrarMensaje(mensaje, tipo = 'info') {
+        const status = document.getElementById('status');
+        if (!status) return;
+        
+        const clases = {
+            'success': 'alert-success',
+            'error': 'alert-danger', 
+            'warning': 'alert-warning',
+            'info': 'alert-info'
+        };
+        
+        status.innerHTML = `
+            <div class="alert ${clases[tipo]} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+                ${mensaje}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        // Auto-ocultar después de 5 segundos para mensajes de info y success
+        if (tipo === 'info' || tipo === 'success') {
+            setTimeout(() => {
+                const alert = status.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+    }
+
+    async function cargarFincas() {
+        console.log('📋 Cargando fincas...');
+        
+        try {
+            if (supabase && currentUser) {
+                console.log('🔗 Cargando desde Supabase...');
+                const { data, error } = await supabase
+                    .from("fincas")
+                    .select("*")
+                    .eq("usuario_id", currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                fincasData = data;
+                fincasOriginales = [...data]; // Copia para búsqueda
+                console.log('✅ Fincas cargadas desde Supabase:', data.length);
+                
+                if (data.length === 0) {
+                    mostrarMensaje('ℹ️ No tienes fincas registradas. ¡Agrega tu primera finca!', 'info');
+                }
+                
+                configurarBusqueda(); // Configurar búsqueda después de cargar datos
+                
+            } else {
+                console.log('🎭 Cargando datos demo...');
+                cargarDatosDemo();
+            }
+            
+            actualizarContador();
+            renderizarFincas();
+            
+        } catch (error) {
+            console.error('❌ Error cargando fincas:', error);
+            mostrarMensaje('❌ Error cargando fincas: ' + error.message, 'error');
+            cargarDatosDemo();
+        }
+    }
+
+    function cargarDatosDemo() {
+        fincasData = [
+            {
+                id: 1,
+                nombre_finca: "Finca Demo 1",
+                superficie: 15.5,
+                provincia: "Mendoza",
+                departamento: "Maipú",
+                direccion: "Ruta Provincial 50, Km 12",
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                nombre_finca: "Finca Demo 2", 
+                superficie: 22.0,
+                provincia: "San Juan",
+                departamento: "Pocito",
+                direccion: "Calle Los Olivos 123",
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 3,
+                nombre_finca: "Finca Demo 3",
+                superficie: 8.3,
+                provincia: "La Rioja",
+                departamento: "Capital",
+                direccion: null,
+                created_at: new Date().toISOString()
+            }
+        ];
+        
+        fincasOriginales = [...fincasData]; // Copia para búsqueda
+        console.log('✅ Datos demo cargados');
+        configurarBusqueda(); // Configurar búsqueda después de cargar datos
+    }
+
+    function actualizarContador() {
+        const contador = document.getElementById('contador-fincas');
+        if (!contador) return;
+        
+        const cantidad = fincasData.length;
+        const texto = `${cantidad} finca${cantidad !== 1 ? 's' : ''}`;
+        
+        if (supabase && currentUser) {
+            contador.textContent = texto;
+            contador.className = cantidad > 0 ? 'badge badge-success badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+        } else {
+            contador.textContent = texto + ' (demo)';
+            contador.className = 'badge badge-warning badge-lg me-3';
+        }
+    }
+
+    function renderizarFincas() {
+        const lista = document.getElementById('fincas-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!lista || !emptyState) return;
+        
+        if (fincasData.length === 0) {
+            lista.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+        
+        lista.style.display = 'block';
+        emptyState.style.display = 'none';
+        lista.innerHTML = '';
+        
+        fincasData.forEach((finca) => {
+            const fincaItem = document.createElement("div");
+            fincaItem.className = "list-group-item border-0 py-3";
+            fincaItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <h6 class="mb-0 font-weight-bold text-primary">${finca.nombre_finca}</h6>
+                            <span class="badge badge-light ms-2">#${finca.id}</span>
+                            ${finca.superficie ? `<span class="badge badge-secondary ms-1">${finca.superficie} ha</span>` : ''}
+                        </div>
+                        <div class="row">
+                            ${finca.provincia || finca.departamento ? `
+                                <div class="col-md-6">
+                                    <small class="text-muted d-flex align-items-center mb-1">
+                                        <i class="bi bi-geo-alt me-2"></i>
+                                        ${finca.provincia || ''} ${finca.departamento ? (finca.provincia ? ', ' + finca.departamento : finca.departamento) : ''}
+                                    </small>
+                                </div>
+                            ` : ''}
+                            ${finca.direccion ? `
+                                <div class="col-md-6">
+                                    <small class="text-muted d-flex align-items-center mb-1">
+                                        <i class="bi bi-map me-2"></i>
+                                        ${finca.direccion}
+                                    </small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary btn-sm btn-editar" 
+                                data-id="${finca.id}" title="Editar finca">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar" 
+                                data-id="${finca.id}" title="Eliminar finca">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            lista.appendChild(fincaItem);
         });
+        
+        // Agregar event listeners a los botones
+        agregarEventListenersAcciones();
+    }
 
-      cargarFincas();
+    function agregarEventListenersAcciones() {
+        // Botones de editar
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                editarFinca(id);
+            });
+        });
+        
+        // Botones de eliminar
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                eliminarFinca(id);
+            });
+        });
+    }
+
+    function configurarToggleForm() {
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        const formularioFinca = document.getElementById('formulario-finca');
+        
+        if (toggleFormBtn && formularioFinca) {
+            toggleFormBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Toggle clickeado!');
+                
+                const isHidden = formularioFinca.style.display === 'none' || formularioFinca.style.display === '';
+                
+                if (isHidden) {
+                    // Mostrar formulario
+                    console.log('Mostrando formulario...');
+                    formularioFinca.style.display = 'block';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+                    
+                    // Scroll al formulario
+                    setTimeout(() => {
+                        formularioFinca.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } else {
+                    // Ocultar formulario
+                    console.log('Ocultando formulario...');
+                    formularioFinca.style.display = 'none';
+                    toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Finca';
+                }
+            });
+            
+            console.log('✅ Toggle configurado correctamente');
+        } else {
+            console.error('No se encontraron elementos del formulario');
+        }
+    }
+
+    function configurarFormulario() {
+        const form = document.getElementById('finca-form');
+        const nombreInput = document.getElementById('nombre_finca');
+        const superficieInput = document.getElementById('superficie_finca');
+        const provinciaInput = document.getElementById('provincia_finca');
+        const departamentoInput = document.getElementById('departamento_finca');
+        const direccionInput = document.getElementById('direccion_finca');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+        
+        if (!form) return;
+        
+        // Validaciones en tiempo real
+        if (nombreInput) {
+            nombreInput.addEventListener('input', validarNombre);
+        }
+        
+        if (superficieInput) {
+            superficieInput.addEventListener('input', validarSuperficie);
+        }
+        
+        if (provinciaInput) {
+            provinciaInput.addEventListener('input', validarCampoOpcional);
+        }
+        
+        if (departamentoInput) {
+            departamentoInput.addEventListener('input', validarCampoOpcional);
+        }
+        
+        // Botón cancelar edición
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', cancelarEdicion);
+        }
+        
+        // Envío del formulario
+        form.addEventListener('submit', manejarEnvioFormulario);
+        
+        console.log('📝 Formulario configurado con validaciones');
+    }
+
+    function validarNombre(e) {
+        const valor = e.target.value.trim();
+        if (valor.length > 0) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            if (e.target.value !== '') {
+                e.target.classList.add('is-invalid');
+            }
+        }
+    }
+
+    function validarSuperficie(e) {
+        const valor = parseFloat(e.target.value);
+        if (e.target.value === '') {
+            e.target.classList.remove('is-valid', 'is-invalid');
+        } else if (isNaN(valor) || valor <= 0) {
+            e.target.classList.remove('is-valid');
+            e.target.classList.add('is-invalid');
+        } else {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        }
+    }
+
+    function validarCampoOpcional(e) {
+        const valor = e.target.value.trim();
+        if (valor.length > 0) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+
+    async function manejarEnvioFormulario(e) {
+        e.preventDefault();
+        
+        // Validar formulario completo
+        if (!validarFormularioCompleto()) {
+            return;
+        }
+        
+        const nombreInput = document.getElementById('nombre_finca');
+        const superficieInput = document.getElementById('superficie_finca');
+        const provinciaInput = document.getElementById('provincia_finca');
+        const departamentoInput = document.getElementById('departamento_finca');
+        const direccionInput = document.getElementById('direccion_finca');
+        
+        // Obtener y formatear valores
+        const datosOriginales = {
+            nombre: nombreInput.value,
+            superficie: superficieInput.value,
+            provincia: provinciaInput.value,
+            departamento: departamentoInput.value,
+            direccion: direccionInput.value
+        };
+        
+        const datos = formatearDatos(datosOriginales);
+        
+        // Preparar UI para guardado
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        mostrarCargando(submitBtn, editId ? 'Actualizando...' : 'Guardando...');
+        
+        try {
+            if (editId) {
+                await actualizarFinca({ id: editId, ...datos });
+            } else {
+                await crearFinca(datos);
+            }
+            
+            // Resetear formulario después del éxito
+            resetearFormulario();
+            
+            // Recargar lista
+            await cargarFincas();
+            
+            // Mantener búsqueda activa si hay un término
+            const busquedaInput = document.getElementById('busqueda-fincas');
+            if (busquedaInput && busquedaInput.value.trim()) {
+                const termino = busquedaInput.value.trim().toLowerCase();
+                buscarFincas(termino);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error guardando finca:', error);
+            mostrarMensaje('❌ Error guardando finca: ' + error.message, 'error');
+        } finally {
+            ocultarCargando(submitBtn, originalText);
+        }
+    }
+
+    async function crearFinca(datosNuevos) {
+        console.log('➕ Creando nueva finca:', datosNuevos);
+        
+        if (supabase && currentUser) {
+            // Crear en Supabase
+            const { data, error } = await supabase
+                .from("fincas")
+                .insert({
+                    nombre_finca: datosNuevos.nombre,
+                    superficie: datosNuevos.superficie,
+                    provincia: datosNuevos.provincia,
+                    departamento: datosNuevos.departamento,
+                    direccion: datosNuevos.direccion,
+                    usuario_id: currentUser.id
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            mostrarMensaje('✅ Finca creada exitosamente', 'success');
+            console.log('✅ Finca creada en Supabase:', data);
+            
+        } else {
+            // Crear en modo demo
+            const nuevoId = Math.max(...fincasData.map(f => f.id), 0) + 1;
+            const nuevaFinca = {
+                id: nuevoId,
+                nombre_finca: datosNuevos.nombre,
+                superficie: datosNuevos.superficie,
+                provincia: datosNuevos.provincia,
+                departamento: datosNuevos.departamento,
+                direccion: datosNuevos.direccion,
+                created_at: new Date().toISOString()
+            };
+            
+            fincasData.push(nuevaFinca);
+            fincasOriginales.push(nuevaFinca); // Actualizar datos originales también
+            mostrarMensaje('✅ Finca creada exitosamente (modo demo)', 'success');
+            console.log('✅ Finca creada en modo demo:', nuevaFinca);
+        }
+    }
+
+    async function actualizarFinca(datosActualizados) {
+        console.log('✏️ Actualizando finca:', datosActualizados);
+        
+        if (supabase && currentUser) {
+            // Actualizar en Supabase
+            const { data, error } = await supabase
+                .from("fincas")
+                .update({
+                    nombre_finca: datosActualizados.nombre,
+                    superficie: datosActualizados.superficie,
+                    provincia: datosActualizados.provincia,
+                    departamento: datosActualizados.departamento,
+                    direccion: datosActualizados.direccion
+                })
+                .eq("id", datosActualizados.id)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            mostrarMensaje('✅ Finca actualizada exitosamente', 'success');
+            console.log('✅ Finca actualizada en Supabase:', data);
+            
+        } else {
+            // Actualizar en modo demo
+            const index = fincasData.findIndex(f => f.id === datosActualizados.id);
+            if (index !== -1) {
+                fincasData[index] = {
+                    ...fincasData[index],
+                    nombre_finca: datosActualizados.nombre,
+                    superficie: datosActualizados.superficie,
+                    provincia: datosActualizados.provincia,
+                    departamento: datosActualizados.departamento,
+                    direccion: datosActualizados.direccion
+                };
+                
+                // Actualizar en ambos arrays
+                const indexOriginal = fincasOriginales.findIndex(f => f.id === datosActualizados.id);
+                if (indexOriginal !== -1) {
+                    fincasOriginales[indexOriginal] = { ...fincasData[index] };
+                }
+                
+                mostrarMensaje('✅ Finca actualizada exitosamente (modo demo)', 'success');
+                console.log('✅ Finca actualizada en modo demo:', fincasData[index]);
+            }
+        }
+    }
+
+    function editarFinca(id) {
+        console.log('✏️ Editando finca con ID:', id);
+        
+        const finca = fincasData.find(f => f.id === id);
+        if (!finca) {
+            mostrarMensaje('❌ Finca no encontrada', 'error');
+            return;
+        }
+        
+        // Establecer modo edición
+        editId = id;
+        
+        // Llenar formulario con datos existentes de forma segura
+        const nombreInput = document.getElementById('nombre_finca');
+        const superficieInput = document.getElementById('superficie_finca');
+        const provinciaInput = document.getElementById('provincia_finca');
+        const departamentoInput = document.getElementById('departamento_finca');
+        const direccionInput = document.getElementById('direccion_finca');
+        
+        if (nombreInput) nombreInput.value = finca.nombre_finca || '';
+        if (superficieInput) superficieInput.value = finca.superficie || '';
+        if (provinciaInput) provinciaInput.value = finca.provincia || '';
+        if (departamentoInput) departamentoInput.value = finca.departamento || '';
+        if (direccionInput) direccionInput.value = finca.direccion || '';
+        
+        // Cambiar textos del formulario de forma segura
+        const formTitle = document.getElementById('form-title');
+        const btnText = document.getElementById('btn-text');
+        const cancelEdit = document.getElementById('cancelEdit');
+        
+        if (formTitle) formTitle.textContent = 'Editar Finca';
+        if (btnText) btnText.textContent = 'Actualizar Finca';
+        if (cancelEdit) cancelEdit.style.display = 'inline-block';
+        
+        // Mostrar formulario
+        const formularioFinca = document.getElementById('formulario-finca');
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        
+        if (formularioFinca) formularioFinca.style.display = 'block';
+        if (toggleFormBtn) toggleFormBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+        
+        // Scroll al formulario
+        setTimeout(() => {
+            if (formularioFinca) {
+                formularioFinca.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (nombreInput) nombreInput.focus();
+        }, 300);
+        
+        mostrarMensaje(`✏️ Editando finca: ${finca.nombre_finca}`, 'info');
+    }
+
+    function cancelarEdicion() {
+        resetearFormulario();
+        mostrarMensaje('ℹ️ Edición cancelada', 'info');
+    }
+
+    function resetearFormulario() {
+        // Resetear formulario
+        const form = document.getElementById('finca-form');
+        if (form) form.reset();
+        
+        // Resetear estado de edición
+        editId = null;
+        
+        // Resetear textos de forma segura
+        const formTitle = document.getElementById('form-title');
+        const btnText = document.getElementById('btn-text');
+        const cancelEdit = document.getElementById('cancelEdit');
+        
+        if (formTitle) formTitle.textContent = 'Nueva Finca';
+        if (btnText) btnText.textContent = 'Guardar Finca';
+        if (cancelEdit) cancelEdit.style.display = 'none';
+        
+        // Limpiar validaciones
+        ['nombre_finca', 'superficie_finca', 'provincia_finca', 'departamento_finca'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.classList.remove('is-valid', 'is-invalid');
+        });
+        
+        // Ocultar formulario
+        const formularioFinca = document.getElementById('formulario-finca');
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        
+        if (formularioFinca && toggleFormBtn) {
+            formularioFinca.style.display = 'none';
+            toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Finca';
+        }
+        
+        console.log('🔄 Formulario reseteado');
+    }
+
+    function eliminarFinca(id) {
+        console.log('🗑️ Eliminar finca:', id);
+        
+        const finca = fincasData.find(f => f.id === id);
+        if (!finca) {
+            mostrarMensaje('❌ Finca no encontrada', 'error');
+            return;
+        }
+        
+        // Mostrar confirmación
+        if (confirm(`¿Estás seguro de que deseas eliminar la finca "${finca.nombre_finca}"?\n\nEsta acción no se puede deshacer.`)) {
+            eliminarFincaConfirmado(id);
+        }
+    }
+    
+    async function eliminarFincaConfirmado(id) {
+        try {
+            if (supabase && currentUser) {
+                console.log('🗑️ Eliminando de Supabase...');
+                const { error } = await supabase
+                    .from("fincas")
+                    .delete()
+                    .eq("id", id)
+                    .eq("usuario_id", currentUser.id);
+                
+                if (error) throw error;
+                
+                mostrarMensaje('✅ Finca eliminada exitosamente', 'success');
+                console.log('✅ Finca eliminada de Supabase');
+                
+            } else {
+                console.log('🗑️ Eliminando en modo demo...');
+                // Eliminar de ambos arrays
+                fincasData = fincasData.filter(f => f.id !== id);
+                fincasOriginales = fincasOriginales.filter(f => f.id !== id);
+                
+                mostrarMensaje('✅ Finca eliminada exitosamente (modo demo)', 'success');
+                console.log('✅ Finca eliminada en modo demo');
+                
+                // Actualizar vista inmediatamente en modo demo
+                renderizarFincas();
+                actualizarContador();
+                
+                // Mantener búsqueda activa si hay un término
+                const busquedaInput = document.getElementById('busqueda-fincas');
+                if (busquedaInput && busquedaInput.value.trim()) {
+                    const termino = busquedaInput.value.trim().toLowerCase();
+                    buscarFincas(termino);
+                }
+                return; // Salir aquí para modo demo
+            }
+            
+            // Solo para Supabase: recargar datos
+            await cargarFincas();
+            
+            // Mantener búsqueda activa si hay un término
+            const busquedaInput = document.getElementById('busqueda-fincas');
+            if (busquedaInput && busquedaInput.value.trim()) {
+                const termino = busquedaInput.value.trim().toLowerCase();
+                buscarFincas(termino);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error eliminando finca:', error);
+            mostrarMensaje('❌ Error eliminando finca: ' + error.message, 'error');
+        }
+    }
+
+    // ===== STEP 3: FUNCIONALIDAD DE BÚSQUEDA =====
+    
+    function configurarBusqueda() {
+        console.log('🔍 Configurando búsqueda...');
+        
+        const busquedaInput = document.getElementById('busqueda-fincas');
+        const limpiarBtn = document.getElementById('limpiar-busqueda');
+        
+        if (!busquedaInput || !limpiarBtn) {
+            console.warn('⚠️ Elementos de búsqueda no encontrados');
+            return;
+        }
+        
+        // Búsqueda en tiempo real
+        busquedaInput.addEventListener('input', function() {
+            const termino = this.value.trim().toLowerCase();
+            buscarFincas(termino);
+        });
+        
+        // Limpiar búsqueda
+        limpiarBtn.addEventListener('click', function() {
+            busquedaInput.value = '';
+            buscarFincas('');
+            busquedaInput.focus();
+        });
+        
+        // Tecla Escape para limpiar
+        busquedaInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                buscarFincas('');
+            }
+        });
+        
+        console.log('✅ Búsqueda configurada');
+    }
+    
+    function buscarFincas(termino) {
+        if (!termino) {
+            // Mostrar todas las fincas
+            fincasData = [...fincasOriginales];
+            renderizarFincas();
+            actualizarEstadisticasBusqueda(fincasData.length, fincasOriginales.length);
+            return;
+        }
+        
+        // Buscar en nombre, provincia, departamento y dirección
+        const resultados = fincasOriginales.filter(finca => {
+            const nombre = (finca.nombre_finca || '').toLowerCase();
+            const provincia = (finca.provincia || '').toLowerCase();
+            const departamento = (finca.departamento || '').toLowerCase();
+            const direccion = (finca.direccion || '').toLowerCase();
+            
+            return nombre.includes(termino) || 
+                   provincia.includes(termino) || 
+                   departamento.includes(termino) || 
+                   direccion.includes(termino);
+        });
+        
+        fincasData = resultados;
+        renderizarFincas();
+        actualizarEstadisticasBusqueda(resultados.length, fincasOriginales.length);
+        
+        if (resultados.length === 0) {
+            mostrarMensaje(`🔍 No se encontraron fincas que coincidan con "${termino}"`, 'info');
+        }
+    }
+    
+    function actualizarEstadisticasBusqueda(encontrados, total) {
+        const statsElement = document.getElementById('resultados-count');
+        if (statsElement) {
+            if (encontrados === total) {
+                statsElement.textContent = `Mostrando ${total} fincas`;
+            } else {
+                statsElement.textContent = `${encontrados} de ${total} fincas`;
+            }
+        }
+    }
+
+    // ===== STEP 5: MEJORAS DE VALIDACIÓN Y UX =====
+    
+    function validarFormularioCompleto() {
+        const nombreInput = document.getElementById('nombre_finca');
+        const superficieInput = document.getElementById('superficie_finca');
+        
+        let esValido = true;
+        let errores = [];
+        
+        // Validar nombre (obligatorio)
+        if (!nombreInput.value.trim()) {
+            nombreInput.classList.add('is-invalid');
+            errores.push('El nombre de la finca es obligatorio');
+            esValido = false;
+        } else {
+            nombreInput.classList.remove('is-invalid');
+            nombreInput.classList.add('is-valid');
+        }
+        
+        // Validar superficie (opcional pero debe ser positiva si se ingresa)
+        if (superficieInput.value && (isNaN(superficieInput.value) || Number(superficieInput.value) <= 0)) {
+            superficieInput.classList.add('is-invalid');
+            errores.push('La superficie debe ser un número positivo');
+            esValido = false;
+        } else if (superficieInput.value) {
+            superficieInput.classList.remove('is-invalid');
+            superficieInput.classList.add('is-valid');
+        }
+        
+        if (errores.length > 0) {
+            mostrarMensaje('⚠️ ' + errores.join('. '), 'warning');
+        }
+        
+        return esValido;
+    }
+    
+    function formatearDatos(datos) {
+        return {
+            ...datos,
+            nombre: datos.nombre?.trim(),
+            superficie: datos.superficie ? Number(datos.superficie) : null,
+            provincia: datos.provincia?.trim() || null,
+            departamento: datos.departamento?.trim() || null,
+            direccion: datos.direccion?.trim() || null
+        };
+    }
+    
+    function mostrarCargando(elemento, texto = 'Cargando...') {
+        if (elemento) {
+            elemento.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>${texto}`;
+            elemento.disabled = true;
+        }
+    }
+    
+    function ocultarCargando(elemento, textoOriginal) {
+        if (elemento) {
+            elemento.innerHTML = textoOriginal;
+            elemento.disabled = false;
+        }
+    }
+
+    function cargarHeaderDinamico() {
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                const headerContainer = document.getElementById('header-container');
+                if (headerContainer) {
+                    headerContainer.innerHTML = html;
+                    console.log('✅ Header dinámico cargado');
+                    
+                    // Importar header.js después de cargar el HTML
+                    import('./header.js')
+                        .then(() => {
+                            console.log('✅ Header.js importado exitosamente');
+                        })
+                        .catch(error => {
+                            console.warn('⚠️ Error importando header.js:', error);
+                        });
+                }
+            })
+            .catch(error => {
+                console.warn('Header dinámico no disponible, usando header estático');
+            });
+    }
     </script>
-    <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
-  </body>
+</body>
 </html>

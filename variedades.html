@@ -4,7 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ABM Variedades</title>
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- Google Fonts Roboto -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- Tu CSS personalizado -->
+  <link rel="stylesheet" href="estilos.css">
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     .tabla-variedades-boton {
       font-size: 0.85em;
@@ -62,103 +71,626 @@
         import('./header.js');
       });
   </script>
-  <main class="container">
-    <h2>Gestión de Variedades</h2>
-    <form id="form-variedad" style="display:flex; gap:1em; flex-wrap:wrap; align-items:end;">
-      <input type="hidden" id="variedad-id" />
-      <div>
-        <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" required />
+  <main class="container py-4">
+    <!-- Header Section -->
+    <div class="container-fluid bg-light py-3 mb-4">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="h3 mb-1 text-primary font-weight-bold">
+              <i class="bi bi-grape text-success me-2"></i>
+              Gestión de Variedades
+            </h1>
+            <p class="text-muted mb-0">Administra las variedades de cultivos y plantas</p>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="badge badge-secondary badge-lg me-3" id="contador-variedades">0 variedades</span>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#formulario-variedad" aria-expanded="false" aria-controls="formulario-variedad" id="toggle-form-btn"
+                    style="background-color: #007bff !important; border-color: #007bff !important; color: #ffffff !important; font-weight: 600; box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);">
+              <i class="bi bi-plus-circle me-1"></i> Agregar Variedad
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="color">Color</label>
-        <select id="color" required>
-          <option value="">- Seleccione -</option>
-          <option value="tinta">Tinta</option>
-          <option value="blanca">Blanca</option>
-          <option value="rosada">Rosada</option>
-        </select>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-0" style="border-radius: 16px;">
+          <div class="card-body p-3">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                  </span>
+                  <input type="search" id="busqueda-variedades" class="form-control border-start-0" 
+                         placeholder="Buscar variedades por nombre, especie, color o tipo...">
+                </div>
+              </div>
+              <div class="col-md-4 mt-2 mt-md-0">
+                <div class="d-flex justify-content-end">
+                  <small class="text-muted" id="estadisticas-busqueda">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <span id="contador-filtrado">0</span> de <span id="contador-total">0</span> variedades
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="tipo_destino">Tipo/Destino</label>
-        <select id="tipo_destino" required>
-          <option value="">- Seleccione -</option>
-          <option value="mostera">Mostera</option>
-          <option value="tinto">Tinto</option>
-          <option value="blanco">Blanco</option>
-          <option value="otro">Otro</option>
-        </select>
+    </div>
+
+    <!-- Formulario Colapsable -->
+    <div class="collapse mb-4" id="formulario-variedad">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="bi bi-plus-circle text-success me-2"></i>
+                <span id="form-title">Nueva Variedad</span>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form id="form-variedad">
+                <input type="hidden" id="variedad-id" />
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="especie_id" class="form-label font-weight-medium">
+                      <i class="bi bi-flower1 me-1"></i> Especie *
+                    </label>
+                    <select class="form-select" id="especie_id" name="especie_id" required>
+                      <option value="">- Seleccione una especie -</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="nombre" class="form-label font-weight-medium">
+                      <i class="bi bi-tag me-1"></i> Nombre de la variedad *
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required />
+                  </div>
+                  <div class="col-md-2 mb-3">
+                    <label for="color" class="form-label font-weight-medium">
+                      <i class="bi bi-palette me-1"></i> Color
+                    </label>
+                    <select class="form-select" id="color" name="color">
+                      <option value="">- Seleccione -</option>
+                      <option value="tinta">Tinta</option>
+                      <option value="blanca">Blanca</option>
+                      <option value="rosada">Rosada</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2 mb-3">
+                    <label for="tipo_destino" class="form-label font-weight-medium">
+                      <i class="bi bi-target me-1"></i> Tipo/Destino
+                    </label>
+                    <select class="form-select" id="tipo_destino" name="tipo_destino">
+                      <option value="">- Seleccione -</option>
+                      <option value="mostera">Mostera</option>
+                      <option value="tinto">Tinto</option>
+                      <option value="blanco">Blanco</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-success btn-lg px-4" id="guardar">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="btn-text">Guardar Variedad</span>
+                  </button>
+                  <button type="button" id="cancelar" class="btn btn-outline-secondary" style="display:none;">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-      <button type="submit" id="guardar">Guardar</button>
-      <button type="button" id="cancelar" style="display:none;">Cancelar</button>
-    </form>
-    <p id="status"></p>
-    <table id="tabla-variedades" style="margin-top:1em;"></table>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-hover" id="tabla-variedades">
+          <thead class="table-light">
+            <tr>
+              <th>Especie</th>
+              <th>Nombre</th>
+              <th>Color</th>
+              <th>Tipo/Destino</th>
+              <th style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="status"></div>
   </main>
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    
+    // Verificar usuario autenticado
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) {
+      window.location.href = "login.html";
+      throw new Error("No autorizado");
+    }
+    
+    console.log('Usuario autenticado para variedades:', currentUser.id);
+    
     const form = document.getElementById('form-variedad');
     const status = document.getElementById('status');
     const tabla = document.getElementById('tabla-variedades');
     const cancelarBtn = document.getElementById('cancelar');
-    async function cargarVariedades() {
-      const { data, error } = await supabase.from('variedades').select('*').order('nombre');
-      if (error) { status.textContent = 'Error al cargar variedades'; return; }
-      let html = `<thead><tr><th>Nombre</th><th>Color</th><th>Tipo/Destino</th><th>Acciones</th></tr></thead><tbody>`;
-      data.forEach(v => {
-        html += `<tr>
-          <td>${v.nombre}</td>
-          <td>${v.color||''}</td>
-          <td>${v.tipo_destino||''}</td>
-          <td>
-            <button type='button' data-id='${v.id}' class='editar tabla-variedades-boton'>✎</button>
-            <button type='button' data-id='${v.id}' class='borrar tabla-variedades-boton' style='color:red;'>🗑</button>
-          </td>
-        </tr>`;
-      });
-      html += '</tbody>';
-      tabla.innerHTML = html;
-      tabla.querySelectorAll('.editar').forEach(btn => btn.onclick = () => editarVariedad(btn.dataset.id));
-      tabla.querySelectorAll('.borrar').forEach(btn => btn.onclick = () => borrarVariedad(btn.dataset.id));
-    }
-    form.onsubmit = async e => {
-      e.preventDefault();
-      const id = document.getElementById('variedad-id').value;
-      const nombre = document.getElementById('nombre').value.trim();
-      const color = document.getElementById('color').value;
-      const tipo_destino = document.getElementById('tipo_destino').value;
-      if (!nombre || !color || !tipo_destino) { status.textContent = 'Complete todos los campos.'; return; }
-      status.textContent = 'Guardando...';
-      if (id) {
-        const { error } = await supabase.from('variedades').update({ nombre, color, tipo_destino }).eq('id', id);
-        if (error) { status.textContent = 'Error al actualizar'; return; }
-      } else {
-        const { error } = await supabase.from('variedades').insert([{ nombre, color, tipo_destino }]);
-        if (error) { status.textContent = 'Error al crear'; return; }
+    const toggleBtn = document.getElementById('toggle-form-btn');
+    const formulario = document.getElementById('formulario-variedad');
+    
+    // 🔍 ELEMENTOS DE BÚSQUEDA
+    const busquedaInput = document.getElementById('busqueda-variedades');
+    const contadorFiltrado = document.getElementById('contador-filtrado');
+    const contadorTotal = document.getElementById('contador-total');
+    
+    // 📊 VARIABLES GLOBALES
+    let variedadesOriginales = []; // Para mantener datos sin filtrar
+
+    // 🌱 CARGAR ESPECIES EN EL SELECT
+    async function cargarEspecies() {
+      try {
+        const { data: especies, error } = await supabase
+          .from('especies')
+          .select('id, nombre')
+          .order('nombre');
+        
+        if (error) {
+          console.error('Error cargando especies:', error);
+          return;
+        }
+
+        const selectEspecie = document.getElementById('especie_id');
+        selectEspecie.innerHTML = '<option value="">- Seleccione una especie -</option>';
+        
+        especies.forEach(especie => {
+          const option = document.createElement('option');
+          option.value = especie.id;
+          option.textContent = especie.nombre;
+          selectEspecie.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error de conexión cargando especies:', error);
       }
-      form.reset();
-      cancelarBtn.style.display = 'none';
-      status.textContent = 'Guardado';
-      cargarVariedades();
+    }
+
+    // Función para mostrar mensajes con estilo Bootstrap
+    function mostrarStatus(mensaje, tipo = 'info') {
+      const alertClass = tipo === 'success' ? 'alert-success' : 
+                        tipo === 'error' ? 'alert-danger' : 
+                        tipo === 'warning' ? 'alert-warning' : 'alert-info';
+      
+      const icon = tipo === 'success' ? 'bi-check-circle' : 
+                  tipo === 'error' ? 'bi-exclamation-triangle' : 
+                  tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+      
+      status.innerHTML = `
+        <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+          <i class="bi ${icon} me-2"></i>
+          <div>${mensaje}</div>
+        </div>
+      `;
+      
+      // Auto-ocultar después de 5 segundos para mensajes de éxito
+      if (tipo === 'success') {
+        setTimeout(() => { status.innerHTML = ''; }, 5000);
+      }
+    }
+
+    // Función para actualizar contador
+    function actualizarContador(cantidad) {
+      const contador = document.getElementById('contador-variedades');
+      if (contador) {
+        contador.textContent = `${cantidad} variedad${cantidad !== 1 ? 'es' : ''}`;
+        contador.className = cantidad > 0 ? 'badge badge-success badge-lg me-3' : 'badge badge-secondary badge-lg me-3';
+      }
+    }
+
+    // Toggle del formulario
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        setTimeout(() => {
+          const isVisible = formulario.classList.contains('show');
+          toggleBtn.innerHTML = isVisible ? 
+            '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario' : 
+            '<i class="bi bi-plus-circle me-1"></i> Agregar Variedad';
+        }, 150);
+      });
+    }
+
+    // 📊 CARGAR VARIEDADES CON ESPECIES
+    async function cargarVariedades() {
+      try {
+        mostrarStatus('Cargando variedades...', 'info');
+        const { data: variedades, error } = await supabase
+          .from('variedades')
+          .select(`
+            id, 
+            nombre, 
+            color, 
+            tipo_destino,
+            especie_id,
+            especies(nombre)
+          `)
+          .order('nombre');
+        
+        if (error) { 
+          mostrarStatus('Error al cargar variedades: ' + error.message, 'error');
+          return; 
+        }
+        
+        // Guardar datos originales para búsqueda
+        variedadesOriginales = variedades;
+        
+        // Actualizar contadores
+        actualizarContador(variedades.length);
+        actualizarEstadisticasBusqueda(variedades.length, variedades.length);
+        
+        // Renderizar tabla
+        renderizarVariedades(variedades);
+        
+        status.innerHTML = '';
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    }
+
+    // 🎨 RENDERIZAR VARIEDADES EN TABLA
+    function renderizarVariedades(variedades) {
+      const tbody = tabla.querySelector('tbody');
+      tbody.innerHTML = '';
+      
+      if (variedades.length === 0) {
+        const esBusqueda = busquedaInput.value.trim() !== '';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              <i class="bi bi-${esBusqueda ? 'search' : 'inbox'} display-4 d-block mb-2"></i>
+              ${esBusqueda ? 
+                'No se encontraron variedades que coincidan con la búsqueda' : 
+                'No hay variedades registradas. <strong>¡Agrega la primera!</strong>'
+              }
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      variedades.forEach(variedad => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>
+            ${variedad.especies?.nombre || 
+              '<span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Sin especie</span>'}
+          </td>
+          <td><strong>${variedad.nombre}</strong></td>
+          <td>
+            <span class="badge ${
+              variedad.color === 'tinta' ? 'bg-dark' : 
+              variedad.color === 'blanca' ? 'bg-light text-dark' : 
+              variedad.color === 'rosada' ? 'bg-warning' : 'bg-secondary'
+            }">
+              ${variedad.color || 'N/A'}
+            </span>
+          </td>
+          <td>
+            <span class="badge bg-secondary">${variedad.tipo_destino || 'N/A'}</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary tabla-variedades-boton" 
+                    onclick="editarVariedad('${variedad.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger tabla-variedades-boton" 
+                    onclick="borrarVariedad('${variedad.id}', '${variedad.nombre}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    // 🔍 FUNCIÓN DE BÚSQUEDA
+    function buscarVariedades(termino) {
+      if (!termino.trim()) {
+        renderizarVariedades(variedadesOriginales);
+        actualizarEstadisticasBusqueda(variedadesOriginales.length, variedadesOriginales.length);
+        return;
+      }
+
+      const terminoLower = termino.toLowerCase();
+      const variedadesFiltradas = variedadesOriginales.filter(variedad => {
+        const nombre = (variedad.nombre || '').toLowerCase();
+        const especie = (variedad.especies?.nombre || '').toLowerCase();
+        const color = (variedad.color || '').toLowerCase();
+        const tipo = (variedad.tipo_destino || '').toLowerCase();
+        
+        return nombre.includes(terminoLower) || 
+               especie.includes(terminoLower) || 
+               color.includes(terminoLower) || 
+               tipo.includes(terminoLower);
+      });
+
+      renderizarVariedades(variedadesFiltradas);
+      actualizarEstadisticasBusqueda(variedadesFiltradas.length, variedadesOriginales.length);
+    }
+
+    // 📊 ACTUALIZAR ESTADÍSTICAS DE BÚSQUEDA
+    function actualizarEstadisticasBusqueda(encontrados, total) {
+      contadorFiltrado.textContent = encontrados;
+      contadorTotal.textContent = total;
+      
+      // Cambiar color según resultados
+      const estadisticas = document.getElementById('estadisticas-busqueda');
+      if (encontrados === 0 && busquedaInput.value.trim()) {
+        estadisticas.className = 'text-warning';
+      } else if (encontrados < total) {
+        estadisticas.className = 'text-info';
+      } else {
+        estadisticas.className = 'text-muted';
+      }
+    }
+
+    // 💾 GUARDAR VARIEDAD CON ESPECIE
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const id = document.getElementById('variedad-id').value;
+      const especie_id = formData.get('especie_id');
+      const nombre = formData.get('nombre').trim();
+      const color = formData.get('color');
+      const tipo_destino = formData.get('tipo_destino');
+      
+      // Debug: verificar valores
+      console.log('Datos del formulario:', { id, especie_id, nombre, color, tipo_destino });
+      
+      if (!especie_id) {
+        mostrarStatus('Debe seleccionar una especie', 'warning');
+        return;
+      }
+      
+      if (!nombre) {
+        mostrarStatus('El nombre de la variedad es obligatorio', 'warning');
+        return;
+      }
+      
+      try {
+        mostrarStatus('Guardando variedad...', 'info');
+        
+        if (id && id.trim() !== '') {
+          // Verificar si el registro existe y es accesible
+          console.log('Verificando acceso al registro...');
+          const { data: existingRecord, error: checkError } = await supabase
+            .from('variedades')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          console.log('Registro existente:', existingRecord);
+          console.log('Error de verificación:', checkError);
+          
+          if (checkError || !existingRecord) {
+            console.error('No se puede acceder al registro para actualizar:', checkError);
+            mostrarStatus(`Error: No se puede actualizar la variedad. ${checkError?.message || 'Registro no encontrado'}`, 'error');
+            return;
+          }
+          
+          // Actualizar variedad existente
+          console.log('Actualizando variedad con ID:', id);
+          console.log('Usuario actual:', currentUser?.id);
+          console.log('Registro original:', existingRecord);
+          
+          // Preparar datos de actualización manteniendo valores existentes
+          const updateData = {
+            ...existingRecord, // Mantener todos los campos existentes
+            especie_id, 
+            nombre, 
+            color: color || null, 
+            tipo_destino: tipo_destino || null,
+            // Remover campos que no deben actualizarse
+            id: undefined,
+            created_at: undefined,
+            updated_at: undefined
+          };
+          
+          // Limpiar campos undefined
+          Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined) {
+              delete updateData[key];
+            }
+          });
+          
+          console.log('Datos para actualizar:', updateData);
+          
+          // Intentar UPDATE directo primero
+          const { data, error } = await supabase
+            .from('variedades')
+            .update(updateData)
+            .eq('id', id)
+            .select('*'); // Select all para ver el resultado completo
+          
+          console.log('Resultado de actualización directo:', { data, error });
+          
+          if (error) {
+            console.error('Error en actualización:', error);
+            mostrarStatus('Error al actualizar variedad: ' + error.message, 'error'); 
+            return; 
+          }
+          
+          // Si no se actualizó ningún registro, intentar con RPC
+          if (!data || data.length === 0) {
+            console.log('🔄 UPDATE normal falló, intentando con RPC...');
+            
+            const { data: rpcData, error: rpcError } = await supabase.rpc('actualizar_variedad', {
+              variedad_id: id,
+              nueva_especie_id: especie_id,
+              nuevo_nombre: nombre,
+              nuevo_color: color || null,
+              nuevo_tipo_destino: tipo_destino || null
+            });
+            
+            console.log('Resultado RPC:', { data: rpcData, error: rpcError });
+            
+            if (rpcError) {
+              console.error('Error en RPC:', rpcError);
+              mostrarStatus('Error al actualizar variedad (RPC): ' + rpcError.message, 'error');
+              return;
+            }
+            
+            if (rpcData && rpcData.length > 0) {
+              console.log('✅ Actualización exitosa con RPC');
+              mostrarStatus('Variedad actualizada correctamente', 'success');
+            } else {
+              mostrarStatus('No se pudo actualizar la variedad', 'warning');
+              return;
+            }
+          } else {
+            console.log('✅ Actualización exitosa con UPDATE directo');
+            mostrarStatus('Variedad actualizada correctamente', 'success');
+          }
+        } else {
+          // Crear nueva variedad
+          const { error } = await supabase
+            .from('variedades')
+            .insert([{ 
+              especie_id, 
+              nombre, 
+              color, 
+              tipo_destino 
+            }]);
+          
+          if (error) { 
+            mostrarStatus('Error al crear variedad: ' + error.message, 'error'); 
+            return; 
+          }
+          mostrarStatus('Variedad creada correctamente', 'success');
+        }
+        
+        form.reset();
+        document.getElementById('variedad-id').value = ''; // Limpiar ID explícitamente
+        cancelarBtn.style.display = 'none';
+        document.getElementById('form-title').textContent = 'Nueva Variedad';
+        document.getElementById('btn-text').textContent = 'Guardar Variedad';
+        cargarVariedades();
+        
+        // Ocultar el formulario después de agregar (solo si es nuevo)
+        if (!id) {
+          const collapseEl = document.getElementById('formulario-variedad');
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: false });
+          bsCollapse.hide();
+          
+          // Actualizar texto del botón
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Agregar Variedad';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
     };
-    async function editarVariedad(id) {
-      const { data, error } = await supabase.from('variedades').select('*').eq('id', id).single();
-      if (error) { status.textContent = 'Error al cargar variedad'; return; }
-      document.getElementById('variedad-id').value = data.id;
-      document.getElementById('nombre').value = data.nombre;
-      document.getElementById('color').value = data.color||'';
-      document.getElementById('tipo_destino').value = data.tipo_destino||'';
-      cancelarBtn.style.display = '';
-    }
-    async function borrarVariedad(id) {
-      if (!confirm('¿Borrar variedad?')) return;
-      const { error } = await supabase.from('variedades').delete().eq('id', id);
-      if (error) { status.textContent = 'Error al borrar'; return; }
-      status.textContent = 'Borrado';
-      cargarVariedades();
-    }
-    cancelarBtn.onclick = () => { form.reset(); cancelarBtn.style.display = 'none'; status.textContent = ''; };
+
+    // ✏️ EDITAR VARIEDAD
+    window.editarVariedad = async function(id) {
+      try {
+        const { data, error } = await supabase
+          .from('variedades')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) { 
+          mostrarStatus('Error al cargar variedad: ' + error.message, 'error'); 
+          return; 
+        }
+        
+        document.getElementById('variedad-id').value = data.id;
+        document.getElementById('especie_id').value = data.especie_id || '';
+        document.getElementById('nombre').value = data.nombre;
+        document.getElementById('color').value = data.color || '';
+        document.getElementById('tipo_destino').value = data.tipo_destino || '';
+        document.getElementById('form-title').textContent = 'Editar Variedad';
+        document.getElementById('btn-text').textContent = 'Actualizar Variedad';
+        cancelarBtn.style.display = 'inline-block';
+        
+        // Mostrar el formulario si está oculto
+        const collapseEl = document.getElementById('formulario-variedad');
+        if (!collapseEl.classList.contains('show')) {
+          const bsCollapse = new bootstrap.Collapse(collapseEl, { show: true });
+          bsCollapse.show();
+          
+          setTimeout(() => {
+            if (toggleBtn) {
+              toggleBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Ocultar Formulario';
+            }
+          }, 350);
+        }
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    // 🗑️ BORRAR VARIEDAD
+    window.borrarVariedad = async function(id, nombre) {
+      if (!confirm(`¿Está seguro de eliminar la variedad "${nombre}"?`)) return;
+      
+      try {
+        mostrarStatus('Eliminando variedad...', 'info');
+        const { error } = await supabase.from('variedades').delete().eq('id', id);
+        if (error) { 
+          mostrarStatus('Error al eliminar variedad: ' + error.message, 'error'); 
+          return; 
+        }
+        mostrarStatus('Variedad eliminada correctamente', 'success');
+        cargarVariedades();
+      } catch (error) {
+        mostrarStatus('Error de conexión: ' + error.message, 'error');
+      }
+    };
+
+    // 🚫 CANCELAR EDICIÓN
+    cancelarBtn.onclick = () => { 
+      form.reset(); 
+      document.getElementById('variedad-id').value = ''; // Limpiar ID explícitamente
+      cancelarBtn.style.display = 'none'; 
+      document.getElementById('form-title').textContent = 'Nueva Variedad';
+      document.getElementById('btn-text').textContent = 'Guardar Variedad';
+      status.innerHTML = ''; 
+    };
+
+    // 🚀 INICIALIZAR
+    cargarEspecies();
     cargarVariedades();
+    
+    // 🔍 CONFIGURAR BÚSQUEDA
+    busquedaInput.addEventListener('input', (e) => {
+      const termino = e.target.value;
+      buscarVariedades(termino);
+    });
+    
+    // Limpiar búsqueda al presionar Escape
+    busquedaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.target.value = '';
+        buscarVariedades('');
+      }
+    });
   </script>
 </body>
 </html>
