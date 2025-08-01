@@ -19,17 +19,38 @@
     <!-- Ejemplo para index.html, fincas.html, cuarteles.html, tareas.html -->
     <div id="header-container"></div>
     <main class="container">
-      <hgroup>
-        <h2>Gestión de Usuarios</h2>
-        <h3>Usuarios registrados en la aplicación</h3>
-      </hgroup>
-      <p id="status"></p>
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Nombre</th><th>Email</th><th>CUIT</th><th>Teléfono</th><th>Rol</th></tr>
-        </thead>
-        <tbody id="usuarios-list"></tbody>
-      </table>
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 class="mb-1">Gestión de Usuarios</h2>
+              <p class="text-muted mb-0">Usuarios registrados en la aplicación</p>
+            </div>
+          </div>
+          
+          <div id="status" class="alert d-none mb-3" role="alert"></div>
+          
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="border-0 px-3 py-3" style="width: 100px;">ID</th>
+                      <th class="border-0 px-3 py-3" style="width: 180px;">Información Personal</th>
+                      <th class="border-0 px-3 py-3" style="width: 250px;">Datos de Contacto</th>
+                      <th class="border-0 px-3 py-3" style="width: 150px;">Usuario/Email</th>
+                      <th class="border-0 px-3 py-3" style="width: 120px;">Rol</th>
+                      <th class="border-0 px-3 py-3" style="width: 100px;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usuarios-list"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
     <footer class="container"><small><a href="#">Privacidad</a> • <a href="#">Términos</a></small></footer>
     <script type="module">
@@ -43,6 +64,15 @@
       const tabla = document.querySelector("#usuarios-list");
       const status = document.querySelector("#status");
 
+      function mostrarMensaje(mensaje, tipo = 'info') {
+        status.className = `alert alert-${tipo}`;
+        status.textContent = mensaje;
+        status.classList.remove('d-none');
+        setTimeout(() => {
+          status.classList.add('d-none');
+        }, 5000);
+      }
+
       async function verificarUsuarioActual() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
@@ -51,7 +81,7 @@
         }
         const { data, error } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
         if (error || !data) {
-          status.textContent = "Acceso solo para usuarios registrados";
+          mostrarMensaje("Acceso solo para usuarios registrados", "warning");
           tabla.innerHTML = "";
           return null;
         }
@@ -67,7 +97,7 @@
           // Usuario común solo ve su propio registro
           ({ data, error } = await supabase.from("usuarios").select("*").eq("id", usuarioActual.id));
         }
-        if (error) return (status.textContent = "❌ Error cargando usuarios");
+        if (error) return mostrarMensaje("❌ Error cargando usuarios", "danger");
         tabla.innerHTML = "";
         data.forEach(u => {
           const esSuperadmin = usuarioActual.rol === "superadmin";
@@ -76,13 +106,48 @@
           const puedeEditarRol = esSuperadmin;
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${u.id}</td>
-            <td><input type="text" value="${u.nombre ?? ''}" data-id="${u.id}" class="edit-nombre" style="width:180px;" ${puedeEditar ? "" : "disabled"} /></td>
-            <td><input type="email" value="${u.email ?? ''}" data-id="${u.id}" class="edit-email" ${puedeEditar ? "" : "disabled"} /></td>
-            <td><input type="text" value="${u.cuit ?? ''}" data-id="${u.id}" class="edit-cuit" ${puedeEditar ? "" : "disabled"} /></td>
-            <td><input type="text" value="${u.telefono ?? ''}" data-id="${u.id}" class="edit-telefono" ${puedeEditar ? "" : "disabled"} /></td>
-            <td>
-              <select data-id="${u.id}" class="edit-rol" ${puedeEditarRol ? "" : "disabled"}>
+            <td class="px-3 py-3" rowspan="1">
+              <span class="badge bg-light text-dark" style="font-family: monospace; font-size: 0.75rem;">${u.id.slice(0, 8)}...</span>
+            </td>
+            <td class="px-3 py-3">
+              <div class="d-flex flex-column gap-2">
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Nombre</label>
+                  <input type="text" value="${u.nombre_pila ?? ''}" data-id="${u.id}" class="form-control form-control-sm edit-nombre-pila" ${puedeEditar ? "" : "disabled"} placeholder="Nombre de pila" />
+                </div>
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Apellido</label>
+                  <input type="text" value="${u.apellido ?? ''}" data-id="${u.id}" class="form-control form-control-sm edit-apellido" ${puedeEditar ? "" : "disabled"} placeholder="Apellido" />
+                </div>
+              </div>
+            </td>
+            <td class="px-3 py-3">
+              <div class="d-flex flex-column gap-2">
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">CUIT/DNI</label>
+                  <input type="text" value="${u.cuit ?? ''}" data-id="${u.id}" class="form-control form-control-sm edit-cuit" ${puedeEditar ? "" : "disabled"} placeholder="CUIT/DNI" />
+                </div>
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Teléfono</label>
+                  <input type="text" value="${u.telefono ?? ''}" data-id="${u.id}" class="form-control form-control-sm edit-telefono" ${puedeEditar ? "" : "disabled"} placeholder="Teléfono" />
+                </div>
+              </div>
+            </td>
+            <td class="px-3 py-3">
+              <div class="d-flex flex-column gap-2">
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Usuario</label>
+                  <code class="d-block text-muted" style="font-size: 0.8rem; background: #f8f9fa; padding: 4px 6px; border-radius: 4px; word-break: break-all;">${u.nombre ?? ''}</code>
+                </div>
+                <div>
+                  <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Email</label>
+                  <code class="d-block text-muted" style="font-size: 0.8rem; background: #f8f9fa; padding: 4px 6px; border-radius: 4px; word-break: break-all;">${u.email ?? ''}</code>
+                </div>
+              </div>
+            </td>
+            <td class="px-3 py-3">
+              <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Rol</label>
+              <select data-id="${u.id}" class="form-select form-select-sm edit-rol" ${puedeEditarRol ? "" : "disabled"}>
                 <option value="productor" ${u.rol === "productor" ? "selected" : ""}>Productor</option>
                 <option value="ingeniero" ${u.rol === "ingeniero" ? "selected" : ""}>Ingeniero</option>
                 <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operario</option>
@@ -90,8 +155,11 @@
                 <option value="superadmin" ${u.rol === "superadmin" ? "selected" : ""}>Superadmin</option>
               </select>
             </td>
-            <td>
-              <button data-id="${u.id}" class="guardar-usuario" ${puedeEditar ? "" : "disabled"}>Guardar</button>
+            <td class="px-3 py-3">
+              <button data-id="${u.id}" class="btn btn-primary btn-sm guardar-usuario d-flex align-items-center w-100" ${puedeEditar ? "" : "disabled"}>
+                <i class="bi bi-check-lg me-1"></i> 
+                <span class="d-none d-md-inline">Guardar</span>
+              </button>
             </td>
           `;
           tabla.appendChild(row);
@@ -101,11 +169,11 @@
       tabla.addEventListener("click", async (e) => {
         if (e.target.classList.contains("guardar-usuario")) {
           const id = e.target.dataset.id;
-          const nombre = tabla.querySelector(`.edit-nombre[data-id="${id}"]`).value;
-          // const email = tabla.querySelector(`.edit-email[data-id="${id}"]`).value; // No actualizar email
+          const nombre_pila = tabla.querySelector(`.edit-nombre-pila[data-id="${id}"]`).value;
+          const apellido = tabla.querySelector(`.edit-apellido[data-id="${id}"]`).value;
           const cuit = tabla.querySelector(`.edit-cuit[data-id="${id}"]`).value;
           const telefono = tabla.querySelector(`.edit-telefono[data-id="${id}"]`).value;
-          let updateData = { nombre, cuit, telefono };
+          let updateData = { nombre_pila, apellido, cuit, telefono };
           // Solo superadmin puede editar el rol
           const usuarioActual = await verificarUsuarioActual();
           if (usuarioActual && usuarioActual.rol === "superadmin") {
@@ -113,8 +181,8 @@
             updateData.rol = rol;
           }
           const { error } = await supabase.from("usuarios").update(updateData).eq("id", id);
-          if (error) status.textContent = "❌ Error al guardar";
-          else status.textContent = "✅ Usuario actualizado";
+          if (error) mostrarMensaje("❌ Error al guardar", "danger");
+          else mostrarMensaje("✅ Usuario actualizado correctamente", "success");
           cargarUsuarios(usuarioActual);
         }
       });

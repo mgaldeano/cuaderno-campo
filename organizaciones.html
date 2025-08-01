@@ -3,80 +3,451 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Organizaciones</title>
-  <!-- Bootstrap 4 -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-  <!-- Bootstrap Select -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
+  <title>Organizaciones | Cuaderno de Campo</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <!-- PicoCSS (opcional) -->
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
   <!-- Google Fonts Roboto -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
-  <!-- Tu CSS personalizado -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="estilos.css">
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Bootstrap Select JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       window.location.href = "login.html";
       throw new Error("No autorizado");
     }
-    // Removed duplicate import
+
+    let currentEditId = null;
+
+    function mostrarMensaje(mensaje, tipo = 'info') {
+      const status = document.getElementById('status');
+      status.className = `alert alert-${tipo}`;
+      status.textContent = mensaje;
+      status.classList.remove('d-none');
+      setTimeout(() => {
+        status.classList.add('d-none');
+      }, 5000);
+    }
+
+    async function subirLogo(file) {
+      if (!file) return null;
+      
+      // Validar archivo
+      if (!file.type.startsWith('image/')) {
+        mostrarMensaje('Por favor seleccione un archivo de imagen válido', 'warning');
+        return null;
+      }
+      
+      if (file.size > 2 * 1024 * 1024) { // 2MB máximo
+        mostrarMensaje('El archivo es muy grande. Máximo 2MB permitido', 'warning');
+        return null;
+      }
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const filePath = `organizaciones/${fileName}`;
+
+        const { data, error } = await supabase.storage
+          .from('logos')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Error subiendo archivo:', error);
+          mostrarMensaje('Error al subir el logo: ' + error.message, 'danger');
+          return null;
+        }
+
+        return filePath;
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('Error inesperado al subir el logo', 'danger');
+        return null;
+      }
+    }
 
     async function registrarOrganizacion(e) {
       e.preventDefault();
-      const nombre = document.getElementById("nombre").value;
-      const { error } = await supabase.from("organizaciones").insert({ nombre });
-      if (error) alert("❌ Error: " + error.message);
-      else {
-        alert("✅ Organización registrada correctamente");
+      const formData = new FormData(e.target);
+      const nombre = formData.get('nombre');
+      const logo_url = formData.get('logo_url') || null;
+      const color_base = formData.get('color_base') || null;
+      const logoFile = formData.get('logo_file');
+
+      let logo_storage_path = null;
+      
+      if (logoFile && logoFile.size > 0) {
+        logo_storage_path = await subirLogo(logoFile);
+        if (!logo_storage_path) return; // Error en la subida
+      }
+
+      const { error } = await supabase.from("organizaciones").insert({ 
+        nombre, 
+        logo_url, 
+        logo_storage_path,
+        color_base 
+      });
+      
+      if (error) {
+        mostrarMensaje("❌ Error: " + error.message, 'danger');
+      } else {
+        mostrarMensaje("✅ Organización registrada correctamente", 'success');
         document.querySelector("form").reset();
         cargarOrganizaciones();
       }
     }
 
+    async function actualizarOrganizacion(e) {
+      e.preventDefault();
+      if (!currentEditId) return;
+
+      const formData = new FormData(e.target);
+      const nombre = formData.get('nombre');
+      const logo_url = formData.get('logo_url') || null;
+      const color_base = formData.get('color_base') || null;
+      const logoFile = formData.get('logo_file');
+
+      let updateData = { nombre, logo_url, color_base };
+      
+      if (logoFile && logoFile.size > 0) {
+        const logo_storage_path = await subirLogo(logoFile);
+        if (logo_storage_path) {
+          updateData.logo_storage_path = logo_storage_path;
+        }
+      }
+
+      const { error } = await supabase.from("organizaciones")
+        .update(updateData)
+        .eq('id', currentEditId);
+      
+      if (error) {
+        mostrarMensaje("❌ Error actualizando: " + error.message, 'danger');
+      } else {
+        mostrarMensaje("✅ Organización actualizada correctamente", 'success');
+        cancelarEdicion();
+        cargarOrganizaciones();
+      }
+    }
+
+    function editarOrganizacion(id, nombre, logo_url, color_base) {
+      currentEditId = id;
+      document.getElementById('nombre').value = nombre || '';
+      document.getElementById('logo_url').value = logo_url || '';
+      document.getElementById('color_base').value = color_base || '#1976d2';
+      
+      document.getElementById('form-title').textContent = 'Editar Organización';
+      document.getElementById('submit-btn').textContent = 'Actualizar';
+      document.getElementById('cancel-btn').classList.remove('d-none');
+      
+      document.querySelector('form').removeEventListener('submit', registrarOrganizacion);
+      document.querySelector('form').addEventListener('submit', actualizarOrganizacion);
+    }
+
+    function cancelarEdicion() {
+      currentEditId = null;
+      document.querySelector('form').reset();
+      document.getElementById('form-title').textContent = 'Crear Nueva Organización';
+      document.getElementById('submit-btn').textContent = 'Registrar';
+      document.getElementById('cancel-btn').classList.add('d-none');
+      
+      document.querySelector('form').removeEventListener('submit', actualizarOrganizacion);
+      document.querySelector('form').addEventListener('submit', registrarOrganizacion);
+    }
+
     async function cargarOrganizaciones() {
+      console.log('🔄 Cargando organizaciones...');
       const tabla = document.getElementById("tabla");
       tabla.innerHTML = "";
-      const { data, error } = await supabase.from("organizaciones").select("*").order("created_at", { ascending: false });
-      if (error) return (tabla.innerHTML = `<tr><td colspan='2'>❌ Error al cargar: ${error.message}</td></tr>`);
+      
+      const { data, error } = await supabase.from("organizaciones")
+        .select("*");
+      
+      console.log('📊 Datos recibidos:', data);
+      console.log('❌ Error:', error);
+      
+      if (error) {
+        console.error('Error al cargar organizaciones:', error);
+        tabla.innerHTML = `<tr><td colspan='5' class='text-center text-danger'>❌ Error al cargar: ${error.message}</td></tr>`;
+        return;
+      }
+      
+      if (!data || data.length === 0) {
+        tabla.innerHTML = `<tr><td colspan='5' class='text-center text-muted'>📭 No hay organizaciones registradas</td></tr>`;
+        return;
+      }
+      
       data.forEach((org) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${org.nombre}</td><td>${new Date(org.created_at).toLocaleDateString()}</td>`;
+        
+        // Lógica híbrida para mostrar logo
+        let logoSrc = 'logo.png'; // fallback por defecto
+        if (org.logo_storage_path) {
+          try {
+            const { data: { publicUrl } } = supabase.storage
+              .from('logos')
+              .getPublicUrl(org.logo_storage_path);
+            if (publicUrl) {
+              logoSrc = publicUrl;
+            }
+          } catch (error) {
+            console.warn('Error obteniendo URL del logo:', error);
+          }
+        } else if (org.logo_url) {
+          logoSrc = org.logo_url;
+        }
+        
+        tr.innerHTML = `
+          <td>
+            <img src="${logoSrc}" alt="Logo" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;" 
+                 onerror="this.src='logo.png'">
+          </td>
+          <td><strong>${org.nombre}</strong></td>
+          <td>
+            <span class="badge" style="background-color: ${org.color_base || '#1976d2'}; color: white;">
+              ${org.color_base || '#1976d2'}
+            </span>
+          </td>
+          <td><small class="text-muted">ID: ${org.id.substring(0, 8)}...</small></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="editarOrganizacion('${org.id}', '${org.nombre}', '${org.logo_url || ''}', '${org.color_base || '#1976d2'}')">
+              <i class="bi bi-pencil"></i> Editar
+            </button>
+          </td>
+        `;
         tabla.appendChild(tr);
       });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelector("form").addEventListener("submit", registrarOrganizacion);
+    // Función de debug - agregar organización de prueba
+    window.crearOrgPrueba = async function() {
+      const { data, error } = await supabase.from("organizaciones").insert({
+        nombre: "Organización de Prueba",
+        logo_url: "https://via.placeholder.com/100x100/1976d2/white?text=LOGO",
+        color_base: "#1976d2"
+      });
+      
+      if (error) {
+        console.error('Error creando org de prueba:', error);
+        mostrarMensaje('Error: ' + error.message, 'danger');
+      } else {
+        console.log('✅ Org de prueba creada');
+        mostrarMensaje('Organización de prueba creada', 'success');
+        cargarOrganizaciones();
+      }
+    };
+    
+    // Función de debug - verificar tabla
+    window.verificarTabla = async function() {
+      const { data, error, count } = await supabase
+        .from("organizaciones")
+        .select("*", { count: 'exact' });
+      
+      console.log('🔍 Verificación de tabla organizaciones:');
+      console.log('- Datos:', data);
+      console.log('- Error:', error);
+      console.log('- Cantidad:', count);
+      
+      return { data, error, count };
+    };
+
+    // Event listeners - verificar si DOM ya está listo
+    const inicializarApp = () => {
+      console.log('🚀 Iniciando aplicación organizaciones.html');
+      
+      // Verificar que los elementos existen
+      const form = document.querySelector("form");
+      const cancelBtn = document.getElementById('cancel-btn');
+      const tabla = document.getElementById("tabla");
+      
+      console.log('📝 Elementos encontrados:', { form, cancelBtn, tabla });
+      
+      if (form) {
+        form.addEventListener("submit", registrarOrganizacion);
+        console.log('✅ Event listener de formulario agregado');
+      }
+      
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', cancelarEdicion);
+        console.log('✅ Event listener de cancelar agregado');
+      }
+      
+      // Cargar organizaciones
+      console.log('🔄 Iniciando carga de organizaciones...');
       cargarOrganizaciones();
-    });
+    };
+
+    // Ejecutar según el estado del DOM
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inicializarApp);
+    } else {
+      // DOM ya está listo
+      inicializarApp();
+    }
+
+    // Hacer funciones globales para onclick
+    window.editarOrganizacion = editarOrganizacion;
+    window.cargarOrganizaciones = cargarOrganizaciones;
   </script>
 </head>
 <body>
+  <!-- Header -->
+  <div id="header-container"></div>
+  
   <main class="container">
-    <hgroup>
-      <h2>Organizaciones</h2>
-      <h3>Crear una nueva organización</h3>
-    </hgroup>
-    <form>
-      <label for="nombre">Nombre de la organización</label>
-      <input type="text" id="nombre" name="nombre" required>
-      <button type="submit">Registrar</button>
-    </form>
-    <h3>Organizaciones registradas</h3>
-    <table>
-      <thead><tr><th>Nombre</th><th>Creado</th></tr></thead>
-      <tbody id="tabla"></tbody>
-    </table>
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 class="mb-1">Gestión de Organizaciones</h2>
+            <p class="text-muted mb-0">Administrar organizaciones y sus configuraciones</p>
+          </div>
+        </div>
+        
+        <div id="status" class="alert d-none mb-3" role="alert"></div>
+        
+        <!-- Formulario -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" id="form-title">
+              <i class="bi bi-building-add me-2"></i>Crear Nueva Organización
+            </h5>
+          </div>
+          <div class="card-body">
+            <form enctype="multipart/form-data">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la organización *</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required 
+                           placeholder="Ej: Cooperativa Valle Verde">
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="color_base" class="form-label">Color corporativo</label>
+                    <div class="input-group">
+                      <input type="color" class="form-control form-control-color" id="color_base" name="color_base" 
+                             value="#1976d2" title="Seleccionar color">
+                      <input type="text" class="form-control" value="#1976d2" readonly>
+                    </div>
+                    <div class="form-text">Color que se usará en el header y elementos de la interfaz</div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="logo_file" class="form-label">Logo (Supabase Storage) - Recomendado</label>
+                    <input type="file" class="form-control" id="logo_file" name="logo_file" 
+                           accept="image/*" onchange="previsualizarLogo(this)">
+                    <div class="form-text">JPG, PNG, GIF. Máximo 2MB. Se almacena de forma segura.</div>
+                    <div id="logo-preview" class="mt-2"></div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="logo_url" class="form-label">URL del logo (Fallback)</label>
+                    <input type="url" class="form-control" id="logo_url" name="logo_url" 
+                           placeholder="https://ejemplo.com/logo.png">
+                    <div class="form-text">URL externa como respaldo. Se usa si no hay logo en Storage.</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                  <i class="bi bi-check-lg me-1"></i>Registrar
+                </button>
+                <button type="button" class="btn btn-secondary d-none" id="cancel-btn">
+                  <i class="bi bi-x-lg me-1"></i>Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Tabla de organizaciones -->
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-buildings me-2"></i>Organizaciones Registradas
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="border-0 px-3 py-3">Logo</th>
+                    <th class="border-0 px-3 py-3">Nombre</th>
+                    <th class="border-0 px-3 py-3">Color</th>
+                    <th class="border-0 px-3 py-3">ID</th>
+                    <th class="border-0 px-3 py-3">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <script>
+    function previsualizarLogo(input) {
+      const preview = document.getElementById('logo-preview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+              <img src="${e.target.result}" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;">
+              <div>
+                <small class="text-muted d-block">Vista previa</small>
+                <small class="text-success">${input.files[0].name}</small>
+              </div>
+            </div>
+          `;
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.innerHTML = '';
+      }
+    }
+
+    // Color picker sync
+    document.getElementById('color_base').addEventListener('input', function() {
+      document.querySelector('input[type="text"][readonly]').value = this.value;
+    });
+  </script>
+
+  <!-- Cargar header -->
+  <script>
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+        return import('./header.js');
+      })
+      .then(() => {
+        console.log('🔗 Header cargado, verificando organizaciones...');
+        // Asegurar que las organizaciones se cargan después del header
+        if (document.readyState === 'complete') {
+          setTimeout(() => {
+            console.log('⏰ Timeout: Intentando cargar organizaciones nuevamente');
+            if (window.cargarOrganizaciones) {
+              window.cargarOrganizaciones();
+            }
+          }, 500);
+        }
+      })
+      .catch(error => {
+        console.error('Error cargando header:', error);
+      });
+  </script>
 </body>
 </html>

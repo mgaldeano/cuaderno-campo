@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cerrando sesión...</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f8f9fa;
+    }
+    .logout-container {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e3e3e3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="logout-container">
+    <div class="spinner"></div>
+    <h3>Cerrando sesión...</h3>
+    <p>Limpiando datos y redirigiendo...</p>
+  </div>
+
+  <script type="module">
+    async function forceLogout() {
+      try {
+        // Importar Supabase
+        const { supabase } = await import('./supabaseClient.js');
+        
+        // Cerrar sesión en Supabase
+        await supabase.auth.signOut();
+        console.log('✅ Sesión de Supabase cerrada');
+      } catch (error) {
+        console.log('⚠️ Error cerrando sesión Supabase:', error);
+      }
+      
+      // Limpiar todo el storage
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('✅ Storage local limpiado');
+      } catch (error) {
+        console.log('⚠️ Error limpiando storage:', error);
+      }
+      
+      // Limpiar cookies de autenticación
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      console.log('✅ Logout completo');
+      
+      // Redirigir al login después de 2 segundos
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    }
+    
+    // Ejecutar logout al cargar la página
+    forceLogout();
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Sesión</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h1>🧹 Limpiando Sesión...</h1>
+        <p>Se están eliminando todos los datos de sesión almacenados.</p>
+        <div id="mensaje"></div>
+    </div>
+
+    <script>
+        async function limpiarTodo() {
+            try {
+                console.log('🧹 Iniciando limpieza completa...');
+                
+                // 1. Cerrar sesión en Supabase
+                await supabase.auth.signOut();
+                console.log('✅ Sesión de Supabase cerrada');
+                
+                // 2. Limpiar localStorage
+                localStorage.clear();
+                console.log('✅ localStorage limpio');
+                
+                // 3. Limpiar sessionStorage
+                sessionStorage.clear();
+                console.log('✅ sessionStorage limpio');
+                
+                // 4. Limpiar cookies relacionadas con auth
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                console.log('✅ Cookies limpias');
+                
+                document.getElementById('mensaje').innerHTML = `
+                    <div style="color: green; margin: 20px 0;">
+                        ✅ Limpieza completada<br>
+                        <strong>Ahora puedes cerrar esta pestaña y volver a login.html</strong>
+                    </div>
+                `;
+                
+                // Auto redirigir después de 3 segundos
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('❌ Error en limpieza:', error);
+                document.getElementById('mensaje').innerHTML = `
+                    <div style="color: red;">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Ejecutar automáticamente al cargar
+        document.addEventListener('DOMContentLoaded', limpiarTodo);
+    </script>
+</body>
+</html>

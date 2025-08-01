@@ -53,7 +53,7 @@ async function mostrarHeaderInfo(user) {
   console.log("Ejecutando mostrarHeaderInfo");
   const { data: usuario, error: errorUsuario } = await supabase
     .from("usuarios")
-    .select("nombre, organizacion_id, rol")
+    .select("nombre, nombre_pila, organizacion_id, rol")
     .eq("id", user.id)
     .single();
   console.log("usuario:", usuario);
@@ -63,7 +63,8 @@ async function mostrarHeaderInfo(user) {
     return;
   }
 
-  let nombre = usuario?.nombre ?? "Usuario";
+  // Priorizar nombre_pila, si no existe usar nombre (username/email)
+  let nombre = (usuario?.nombre_pila?.trim() || usuario?.nombre) ?? "Usuario";
   let organizacion = "";
   let logoUrl = "";
   let rol = usuario?.rol ?? "usuario";
@@ -71,28 +72,71 @@ async function mostrarHeaderInfo(user) {
   if (usuario?.organizacion_id) {
     const { data: org, error: errorOrg } = await supabase
       .from("organizaciones")
-      .select("nombre, logo_url")
+      .select("nombre, logo_url, logo_storage_path, color_base")
       .eq("id", usuario.organizacion_id)
       .single();
     console.log("organizacion:", org);
     if (errorOrg) {
       console.log("Error organizacion:", errorOrg);
     }
+    
     organizacion = org?.nombre ?? "";
-    logoUrl = org?.logo_url ?? "";
+    
+    // Lógica híbrida para el logo: Storage → URL → logo.svg por defecto
+    let logoFinal = "logo.svg"; // fallback SVG por defecto
+    
+    if (org?.logo_storage_path) {
+      try {
+        const { data: { publicUrl } } = supabase.storage
+          .from('logos')
+          .getPublicUrl(org.logo_storage_path);
+        logoFinal = publicUrl;
+        console.log("✅ Usando logo de Supabase Storage:", logoFinal);
+      } catch (error) {
+        console.warn("Error obteniendo logo de Storage, usando fallback:", error);
+        logoFinal = org?.logo_url || "logo.svg";
+      }
+    } else if (org?.logo_url) {
+      logoFinal = org.logo_url;
+      console.log("✅ Usando logo de URL:", logoFinal);
+    } else {
+      console.log("✅ Usando logo por defecto:", logoFinal);
+    }
+    
+    logoUrl = logoFinal;
+    
     // Actualizar nombre de la organización en el header
     const orgNombre = document.getElementById("org-nombre");
     if (orgNombre) orgNombre.textContent = organizacion;
+    
     // Actualizar logo de la organización en el header
     const orgLogo = document.getElementById("org-logo");
-    if (orgLogo && logoUrl) orgLogo.src = logoUrl;
+    if (orgLogo) {
+      orgLogo.src = logoUrl;
+      // Agregar fallback en caso de error de carga
+      orgLogo.onerror = function() {
+        console.warn("Error cargando logo, usando fallback");
+        this.src = "logo.svg";
+        this.onerror = null; // Evitar bucle infinito
+      };
+    }
+    
+    // Actualizar color corporativo si está disponible
+    if (org?.color_base) {
+      const root = document.documentElement;
+      root.style.setProperty('--color-primary', org.color_base);
+      console.log("✅ Color corporativo actualizado:", org.color_base);
+    }
   }
 
-  // Usar logo local en desarrollo para evitar bloqueos de navegador
-  if (!logoUrl || logoUrl.trim() === "" || location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-    logoUrl = "logo.png";
+  // En desarrollo, siempre usar logo local para evitar problemas de CORS/red
+  if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    logoUrl = "logo.svg";
     const orgLogo = document.getElementById("org-logo");
-    if (orgLogo) orgLogo.src = logoUrl;
+    if (orgLogo) {
+      orgLogo.src = logoUrl;
+      console.log("🔧 Modo desarrollo: usando logo local");
+    }
   }
 
   // Actualizar saludo en navbar
