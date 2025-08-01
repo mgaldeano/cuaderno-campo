@@ -550,34 +550,34 @@
           // Actualizar información adicional en la tabla usuarios
           setTimeout(async () => {
             try {
-            const { error: updateError } = await supabase
-              .from("usuarios")
-              .update({
-                nombre: email, // usuario
-                email: email, // redundante
-                nombre_pila,
-                apellido,
-                cuit,
-                telefono,
-                rol,
-                organizacion_id
-              })
-              .eq("id", user.id);
-              
-              if (updateError) {
-                console.error('Error actualizando datos:', updateError);
-                showMessage('Cuenta creada pero hubo un error guardando datos adicionales.', 'warning');
-              } else {
-                showMessage('¡Registro exitoso! Revise su email para confirmar la cuenta.', 'success');
+              const { error: updateError } = await supabase
+                .from("usuarios")
+                .update({
+                  nombre: email, // usuario
+                  email: email, // redundante
+                  nombre_pila,
+                  apellido,
+                  cuit,
+                  telefono,
+                  rol,
+                  organizacion_id
+                })
+                .eq("id", user.id);
                 
-                // Cambiar a pestaña de login después del registro
-                setTimeout(() => {
-                  document.querySelector('.auth-tab[data-tab="login"]').click();
-                  document.getElementById('login-email').value = email;
-                }, 3000);
-              }
-            } catch (error) {
-              console.error('Error en actualización:', error);
+                if (updateError) {
+                  console.error('Error actualizando datos:', updateError);
+                  showMessage('Cuenta creada pero hubo un error guardando datos adicionales.', 'warning');
+                } else {
+                  showMessage('¡Registro exitoso! Revise su email para confirmar la cuenta.', 'success');
+                  
+                  // Cambiar a pestaña de login después del registro
+                  setTimeout(() => {
+                    document.querySelector('.auth-tab[data-tab="login"]').click();
+                    document.getElementById('login-email').value = email;
+                  }, 3000);
+                }
+              } catch (error) {
+                console.error('Error en actualización:', error);
               showMessage('Cuenta creada pero hubo un error. Puede iniciar sesión normalmente.', 'warning');
             }
           }, 1000);
