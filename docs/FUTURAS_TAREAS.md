@@ -177,4 +177,56 @@ Ejemplo: Si se consulta el reporte de un cuartel, se deben traer los informes ap
 Requiere definir la estructura de la tabla de informes, lógica de asociación y consulta jerárquica.
 
 
+---
+
+## [31/07/2025] Permisos de operadores por cuartel: implementación completa (backend y UI)
+
+### 1. SQL y backend
+
+- Se creó la tabla `operador_cuartel` para gestionar permisos de operadores sobre cada cuartel:
+
+```sql
+CREATE TABLE operador_cuartel (
+  operador_id uuid NOT NULL REFERENCES usuarios(id),
+  cuartel_id bigint NOT NULL REFERENCES cuarteles(id),
+  permiso text NOT NULL, -- 'lectura', 'registro', 'admin', etc.
+  estado text NOT NULL,  -- 'activo', 'pendiente', 'revocado', etc.
+  created_at timestamp with time zone DEFAULT now(),
+  PRIMARY KEY (operador_id, cuartel_id)
+);
+```
+
+- Supabase expone la tabla como endpoint RESTful para alta, baja y modificación de permisos.
+
+#### Ejemplos de uso desde Supabase JS:
+
+```js
+// Listar permisos de un cuartel
+await supabase.from('operador_cuartel').select('*').eq('cuartel_id', cuartelId);
+// Asignar permiso
+await supabase.from('operador_cuartel').insert([{ operador_id, cuartel_id, permiso: 'registro', estado: 'activo' }]);
+// Modificar permiso
+await supabase.from('operador_cuartel').update({ permiso: 'lectura' }).eq('operador_id', operadorId).eq('cuartel_id', cuartelId);
+// Revocar permiso
+await supabase.from('operador_cuartel').delete().eq('operador_id', operadorId).eq('cuartel_id', cuartelId);
+```
+
+### 2. UI e integración en cuarteles.html
+
+- Se agregó un botón "Permisos de operadores" en cada cuartel.
+- Al hacer clic, se abre un panel/modal donde el productor puede:
+  - Ver los operadores con acceso a ese cuartel y sus permisos.
+  - Agregar un operador por email y asignar tipo de permiso.
+  - Revocar permisos existentes.
+- Todo conectado al backend Supabase usando la tabla `operador_cuartel`.
+- El flujo y la lógica están documentados en estructura_bd_actualizada_2025.csv y el código fuente.
+
+#### Pendiente (mejoras futuras):
+- Permitir edición de tipo de permiso sin revocar.
+- Mejorar la búsqueda y autocompletado de emails de operadores.
+- Validaciones adicionales de RLS para máxima seguridad.
+
+---
+
+
 **Este archivo debe mantenerse actualizado a medida que se avanza en el desarrollo.**
