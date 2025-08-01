@@ -329,28 +329,24 @@
     authTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const tabType = tab.dataset.tab;
-        
+        if (tabType === currentTab) return; // Solo actuar si realmente cambia de pestaña
         // Actualizar pestañas activas
         authTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
         // Mostrar/ocultar formularios
         if (tabType === 'login') {
           loginForm.style.display = 'block';
           registerForm.style.display = 'none';
-          currentTab = 'login';
         } else {
           loginForm.style.display = 'none';
           registerForm.style.display = 'block';
-          currentTab = 'register';
         }
-        
         // Limpiar mensajes
         messageContainer.innerHTML = '';
-        
-        // Limpiar formularios
+        // Limpiar formularios SOLO si se cambia de pestaña
         loginForm.reset();
         registerForm.reset();
+        currentTab = tabType;
       });
     });
 
@@ -496,14 +492,15 @@
         const formData = new FormData(registerForm);
         const email = formData.get('email');
         const password = formData.get('password');
-        const nombre = formData.get('nombre');
+        const nombre_pila = formData.get('nombre_pila');
+        const apellido = formData.get('apellido');
         const organizacion_id = formData.get('organizacion_id');
         const rol = formData.get('rol');
         const cuit = formData.get('cuit') || null;
         const telefono = formData.get('telefono') || null;
         
         // Validaciones
-        if (!email || !password || !nombre || !organizacion_id || !rol) {
+        if (!email || !password || !organizacion_id || !rol) {
           showMessage('Por favor complete todos los campos requeridos (*).', 'warning');
           return;
         }
@@ -524,7 +521,10 @@
           password,
           options: {
             data: {
-              nombre: nombre,
+              nombre: email, // usuario
+              email: email, // redundante, pero útil para queries
+              nombre_pila: nombre_pila,
+              apellido: apellido,
               rol: rol
             }
           }
@@ -546,16 +546,19 @@
           // Actualizar información adicional en la tabla usuarios
           setTimeout(async () => {
             try {
-              const { error: updateError } = await supabase
-                .from("usuarios")
-                .update({
-                  nombre,
-                  cuit,
-                  telefono,
-                  rol,
-                  organizacion_id
-                })
-                .eq("id", user.id);
+            const { error: updateError } = await supabase
+              .from("usuarios")
+              .update({
+                nombre: email, // usuario
+                email: email, // redundante
+                nombre_pila,
+                apellido,
+                cuit,
+                telefono,
+                rol,
+                organizacion_id
+              })
+              .eq("id", user.id);
               
               if (updateError) {
                 console.error('Error actualizando datos:', updateError);
@@ -584,18 +587,102 @@
       }
     });
 
+    // --- Registro/Login con Google: completar datos si es necesario ---
+    async function completarDatosGoogle(user) {
+      // Verificar si el usuario ya existe en la tabla usuarios
+      const { data: usuario, error } = await supabase
+        .from('usuarios')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      if (!usuario) {
+        // Mostrar formulario emergente para completar datos
+        const nombre_pila = prompt('Ingrese su nombre (de pila) para finalizar el registro con Google:');
+        if (!nombre_pila) {
+          showMessage('Debes completar tu nombre para continuar.', 'warning');
+          return;
+        }
+        const apellido = prompt('Ingrese su apellido (opcional):') || null;
+        // Selección de rol
+        let rol = prompt('Indica tu rol: productor, ingeniero u operador (escribe uno):', 'productor');
+        if (!rol || !['productor','ingeniero','operador'].includes(rol)) {
+          showMessage('Rol inválido. Debe ser productor, ingeniero u operador.', 'warning');
+          return;
+        }
+        // Selección de organización (solo id, simple)
+        let organizacion_id = prompt('Ingrese el ID de su organización (pida a su admin si no lo sabe):');
+        if (!organizacion_id) {
+          showMessage('Debe ingresar una organización.', 'warning');
+          return;
+        }
+        // Otros campos opcionales
+        let telefono = prompt('Teléfono (opcional):') || null;
+        let cuit = prompt('CUIT (opcional):') || null;
+        // Insertar en la tabla usuarios
+        // Intentar update primero
+        const email = user.email;
+        const { data: updateData, error: updateError, count } = await supabase
+          .from("usuarios")
+          .update({
+            nombre: email, // usuario
+            email: email, // redundante
+            nombre_pila,
+            apellido,
+            cuit,
+            telefono,
+            rol,
+            organizacion_id
+          }, { count: 'exact' })
+          .eq("id", user.id);
+
+        if (updateError) {
+          console.error('Error actualizando datos:', updateError);
+          showMessage('Cuenta creada pero hubo un error guardando datos adicionales.', 'warning');
+        } else if (updateData && updateData.length === 0) {
+          // Si no se actualizó ningún registro, hacer insert
+          const { error: insertError } = await supabase
+            .from("usuarios")
+            .insert({
+              id: user.id,
+              email: email,
+              nombre: email,
+              nombre_pila,
+              apellido,
+              cuit,
+              telefono,
+              rol,
+              organizacion_id
+            });
+          if (insertError) {
+            console.error('Error insertando datos:', insertError);
+            showMessage('Cuenta creada pero hubo un error guardando datos adicionales.', 'warning');
+          } else {
+            showMessage('¡Registro exitoso! Revise su email para confirmar la cuenta.', 'success');
+            setTimeout(() => {
+              document.querySelector('.auth-tab[data-tab="login"]').click();
+              document.getElementById('login-email').value = email;
+            }, 3000);
+          }
+        } else {
+          showMessage('¡Registro exitoso! Revise su email para confirmar la cuenta.', 'success');
+          setTimeout(() => {
+            document.querySelector('.auth-tab[data-tab="login"]').click();
+            document.getElementById('login-email').value = email;
+          }, 3000);
+        }
+      }
+    }
+
     // Manejar login con Google
     document.getElementById('google-login').addEventListener('click', async () => {
       messageContainer.innerHTML = '';
-      
       try {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/index.html`
+            redirectTo: window.location.href // Volver a login.html para completar datos
           }
         });
-        
         if (error) {
           showMessage('Error con Google: ' + error.message, 'error');
         }
@@ -608,15 +695,13 @@
     // Manejar registro con Google
     document.getElementById('google-register').addEventListener('click', async () => {
       messageContainer.innerHTML = '';
-      
       try {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/index.html`
+            redirectTo: window.location.href // Volver a login.html para completar datos
           }
         });
-        
         if (error) {
           showMessage('Error con Google: ' + error.message, 'error');
         }
@@ -629,19 +714,17 @@
     // Inicialización
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 DOM cargado, iniciando aplicación...');
-      
       // Verificar si ya está logueado
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          console.log('👤 Usuario ya logueado, redirigiendo...');
-          window.location.href = "index.html";
+          // Si viene de Google, completar datos si es necesario
+          await completarDatosGoogle(user);
           return;
         }
       } catch (error) {
         console.log('ℹ️ No hay sesión activa');
       }
-      
       // Esperar a que jQuery esté disponible
       const waitForJQuery = () => {
         return new Promise((resolve) => {
@@ -654,15 +737,12 @@
           }
         });
       };
-      
       // Esperar a jQuery y luego cargar organizaciones
       await waitForJQuery();
-      
       // Pequeño delay adicional para asegurar que todo esté listo
       setTimeout(async () => {
         console.log('📊 Cargando organizaciones...');
         await cargarOrganizaciones();
-        
         // Focus en el primer campo
         const emailInput = document.getElementById('login-email');
         if (emailInput) {
@@ -774,21 +854,12 @@
       <!-- Formulario de Registro -->
       <form id="register-form" class="auth-form" style="display: none;">
         <div class="form-floating">
-          <input type="text" class="form-control" id="register-name" name="nombre" 
-                 placeholder="Nombre completo" required>
-          <label for="register-name">
-            <i class="bi bi-person me-2"></i>Nombre completo *
-          </label>
-        </div>
-        
-        <div class="form-floating">
           <input type="email" class="form-control" id="register-email" name="email" 
                  placeholder="correo@ejemplo.com" autocomplete="email" required>
           <label for="register-email">
             <i class="bi bi-envelope me-2"></i>Correo electrónico *
           </label>
         </div>
-        
         <div class="form-floating">
           <input type="password" class="form-control" id="register-password" name="password" 
                  placeholder="Contraseña" autocomplete="new-password" required minlength="6">
@@ -796,6 +867,20 @@
             <i class="bi bi-lock me-2"></i>Contraseña *
           </label>
           <div class="form-text">Mínimo 6 caracteres</div>
+        </div>
+        <div class="form-floating">
+          <input type="text" class="form-control" id="register-nombre-pila" name="nombre_pila" 
+                 placeholder="Nombre">
+          <label for="register-nombre-pila">
+            <i class="bi bi-person me-2"></i>Nombre
+          </label>
+        </div>
+        <div class="form-floating">
+          <input type="text" class="form-control" id="register-apellido" name="apellido" 
+                 placeholder="Apellido (opcional)">
+          <label for="register-apellido">
+            <i class="bi bi-person me-2"></i>Apellido
+          </label>
         </div>
         
         <div class="mb-3">

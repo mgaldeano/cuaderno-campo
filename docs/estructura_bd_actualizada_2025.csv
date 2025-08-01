@@ -1,4 +1,76 @@
 tabla,columna,tipo,nullable
+# --- CAMBIOS 31/07/2025 ---
+# - Se eliminó la vista/tabla 'cuarteles_completos' para evitar redundancia y confusión. Ahora toda la lógica y reportes usan la tabla principal 'cuarteles' y JOINs según necesidad.
+# - Se actualizó la lógica de registro/login: el campo 'nombre' de usuarios ahora es el username (igual al email), y los campos reales de nombre y apellido son 'nombre_pila' y 'apellido'.
+#   Los registros antiguos fueron migrados y los formularios actualizados para pedir nombre y apellido por separado.
+# - Se mantiene la tabla de relación 'operario_finca' para soportar que un operario pueda trabajar en varias fincas del mismo productor (relación muchos a muchos). 'aplicadores_operarios' almacena los datos personales y 'operario_finca' las asignaciones.
+#   Actualmente, la lógica principal usa 'aplicadores_operarios', pero la estructura está lista para futuras implementaciones multi-finca.
+#
+# --- MODELO DE PERMISOS Y ASIGNACIÓN DE OPERADORES ---
+#
+# Para permitir que un productor asigne permisos a los operadores (usuarios con acceso al sistema) para registrar y ver datos de sus fincas/cuarteles, se recomienda:
+#
+# 1. Usar la tabla 'usuarios' para los operadores (usuarios con acceso al sistema).
+# 2. Usar la tabla 'fincas' para registrar la relación entre productor y finca (campo usuario_id).
+# 3. Usar la tabla 'operario_finca' para asignar qué operadores pueden operar en cada finca. Esta tabla permite una relación muchos a muchos entre operadores y fincas.
+# 4. (Opcional) Si se requiere granularidad a nivel de cuartel, se puede crear una tabla 'operador_cuartel' similar a 'operario_finca'.
+#
+# --- DISEÑO DE PERMISOS POR CUARTEL ---
+#
+# Si la lógica de permisos debe ser a nivel de cuartel (y no solo de finca), se recomienda:
+#
+# 1. Crear la tabla 'operador_cuartel' con la siguiente estructura:
+#    operador_cuartel:
+#      - operador_id (uuid, NO NULL)  -- referencia a usuarios.id (el operador)
+#      - cuartel_id (bigint, NO NULL) -- referencia a cuarteles.id
+#      - permiso (text, NO NULL)      -- tipo de permiso: 'lectura', 'registro', 'admin', etc.
+#      - estado (text, NO NULL)       -- 'activo', 'pendiente', 'revocado', etc.
+#      - created_at (timestamp, SI)
+#
+# 2. La asignación de permisos puede hacerse:
+#    a) Antes de registrar el operador: el productor preasigna permisos a un email/usuario, y al registrarse se vincula automáticamente.
+#    b) Después del registro: el productor busca y asigna permisos a operadores ya registrados.
+#
+# 3. La gestión de permisos debe estar disponible en la UI para el productor, permitiendo agregar, modificar o revocar permisos sobre cada cuartel.
+#
+# 4. La lógica de la app y las RLS deben consultar 'operador_cuartel' para determinar qué cuarteles puede ver o modificar cada operador.
+#
+# 5. Se recomienda mantener la tabla 'operario_finca' solo para casos donde se requiera asignación masiva o lógica heredada de permisos a nivel finca.
+#
+# Este modelo permite máxima granularidad y control sobre el acceso a los datos de cada cuartel.
+#
+# --- SQL DE CREACIÓN DE TABLA operador_cuartel ---
+#
+# CREATE TABLE operador_cuartel (
+#   operador_id uuid NOT NULL REFERENCES usuarios(id),
+#   cuartel_id bigint NOT NULL REFERENCES cuarteles(id),
+#   permiso text NOT NULL, -- 'lectura', 'registro', 'admin', etc.
+#   estado text NOT NULL,  -- 'activo', 'pendiente', 'revocado', etc.
+#   created_at timestamp with time zone DEFAULT now(),
+#   PRIMARY KEY (operador_id, cuartel_id)
+# );
+#
+# --- FLUJO DE GESTIÓN DE PERMISOS EN LA UI (INTERFAZ DE USUARIO) ---
+#
+# 1. El productor accede a la gestión de un cuartel específico.
+# 2. Ve una lista de operadores con acceso a ese cuartel y sus permisos actuales.
+# 3. Puede:
+#    - Agregar un operador (buscando por email o seleccionando de una lista de usuarios registrados).
+#    - Asignar el tipo de permiso ('lectura', 'registro', 'admin', etc.).
+#    - Cambiar o revocar permisos existentes.
+#    - Preasignar permisos a un email (si el usuario aún no está registrado).
+# 4. La app crea, actualiza o elimina registros en la tabla operador_cuartel según la acción.
+# 5. Los operadores solo podrán ver/registrar datos en los cuarteles donde tengan permiso y estado 'activo'.
+#
+# Este flujo puede implementarse como un panel dentro de la vista de detalle de cada cuartel, o como una sección general de "Permisos/Operadores".
+#
+# Ejemplo de flujo:
+# - El productor (usuario dueño de la finca) accede a la gestión de su finca y puede asignar operadores (usuarios) a través de la tabla 'operario_finca'.
+# - Los operadores asignados podrán registrar y ver datos solo de las fincas/cuarteles a los que tengan permiso, según la lógica de la aplicación y las RLS en la base de datos.
+# - La lógica de permisos se implementa en la app y en las políticas RLS de Supabase/Postgres, usando la relación de 'operario_finca'.
+#
+# Este modelo permite que el productor gestione los permisos de acceso de manera flexible y segura, y está preparado para futuras ampliaciones (por ejemplo, permisos por cuartel o por tipo de tarea).
+# --------------------------
 aplicadores_operarios,id,uuid,NO
 aplicadores_operarios,nombre,text,NO
 aplicadores_operarios,cuit,text,SI

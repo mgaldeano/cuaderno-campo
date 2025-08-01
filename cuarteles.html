@@ -714,6 +714,11 @@
                                 </small>
                             </div>
                         </div>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="mostrarPanelPermisos(${cuartel.id}, '${cuartel.nombre.replace(/'/g, '\'')}')">
+                                <i class="bi bi-person-lock"></i> Permisos de operadores
+                            </button>
+                        </div>
                     </div>
                     <div class="btn-group btn-group-sm">
                         <button type="button" class="btn btn-outline-primary btn-sm btn-editar" 
@@ -732,6 +737,144 @@
         
         // Agregar event listeners a los botones
         agregarEventListenersAcciones();
+    }
+
+    // Panel de gestión de permisos de operadores por cuartel
+    window.mostrarPanelPermisos = async function(cuartelId, cuartelNombre) {
+        // Crear modal si no existe
+        let modal = document.getElementById('modal-permisos');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-permisos';
+            modal.className = 'modal fade';
+            modal.tabIndex = -1;
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-person-lock"></i> Permisos de operadores</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="permisos-cuartel-info"></div>
+                            <div id="tabla-permisos-operadores"></div>
+                            <hr>
+                            <h6>Agregar operador</h6>
+                            <div class="input-group mb-2">
+                                <input type="email" class="form-control" id="nuevo-operador-email" placeholder="Email del operador">
+                                <select class="form-select" id="nuevo-operador-permiso">
+                                    <option value="lectura">Lectura</option>
+                                    <option value="registro">Registro</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <button class="btn btn-primary" id="btn-agregar-operador">Asignar</button>
+                            </div>
+                            <div id="msg-permisos-operadores" class="small"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        // Mostrar info
+        document.getElementById('permisos-cuartel-info').innerHTML = `<b>Cuartel:</b> ${cuartelNombre} <span class="text-muted">(#${cuartelId})</span>`;
+        // Cargar permisos
+        await cargarPermisosOperadores(cuartelId);
+        // Configurar botón agregar
+        document.getElementById('btn-agregar-operador').onclick = async function() {
+            await agregarPermisoOperador(cuartelId);
+        };
+        // Mostrar modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    };
+
+    async function cargarPermisosOperadores(cuartelId) {
+        const tablaDiv = document.getElementById('tabla-permisos-operadores');
+        if (!tablaDiv) return;
+        tablaDiv.innerHTML = '<div class="text-center text-muted">Cargando permisos...</div>';
+        if (!supabase || !currentUser) {
+            tablaDiv.innerHTML = '<div class="text-danger">No disponible en modo demo</div>';
+            return;
+        }
+        // Consultar permisos
+        const { data, error } = await supabase
+            .from('operador_cuartel')
+            .select('*,usuarios(email)')
+            .eq('cuartel_id', cuartelId);
+        if (error) {
+            tablaDiv.innerHTML = '<div class="text-danger">Error cargando permisos</div>';
+            return;
+        }
+        if (!data || data.length === 0) {
+            tablaDiv.innerHTML = '<div class="text-muted">No hay operadores asignados a este cuartel.</div>';
+            return;
+        }
+        let html = `<table class="table table-sm table-bordered"><thead><tr><th>Email</th><th>Permiso</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
+        data.forEach(permiso => {
+            html += `<tr>
+                <td>${permiso.usuarios?.email || permiso.operador_id}</td>
+                <td>${permiso.permiso}</td>
+                <td>${permiso.estado}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="revocarPermisoOperador('${permiso.operador_id}', ${cuartelId})">Revocar</button>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        tablaDiv.innerHTML = html;
+    }
+
+    window.revocarPermisoOperador = async function(operadorId, cuartelId) {
+        if (!supabase || !currentUser) return;
+        if (!confirm('¿Revocar acceso de este operador a este cuartel?')) return;
+        const { error } = await supabase
+            .from('operador_cuartel')
+            .delete()
+            .eq('operador_id', operadorId)
+            .eq('cuartel_id', cuartelId);
+        if (error) {
+            document.getElementById('msg-permisos-operadores').textContent = 'Error revocando permiso';
+        } else {
+            document.getElementById('msg-permisos-operadores').textContent = 'Permiso revocado';
+            await cargarPermisosOperadores(cuartelId);
+        }
+    };
+
+    async function agregarPermisoOperador(cuartelId) {
+        const email = document.getElementById('nuevo-operador-email').value.trim();
+        const permiso = document.getElementById('nuevo-operador-permiso').value;
+        const msgDiv = document.getElementById('msg-permisos-operadores');
+        msgDiv.textContent = '';
+        if (!email) {
+            msgDiv.textContent = 'Ingrese el email del operador';
+            return;
+        }
+        if (!supabase || !currentUser) {
+            msgDiv.textContent = 'No disponible en modo demo';
+            return;
+        }
+        // Buscar usuario
+        const { data: usuarios, error: errorUser } = await supabase
+            .from('usuarios')
+            .select('id')
+            .eq('email', email);
+        if (errorUser || !usuarios || usuarios.length === 0) {
+            msgDiv.textContent = 'Usuario no encontrado';
+            return;
+        }
+        const operador_id = usuarios[0].id;
+        // Insertar permiso
+        const { error } = await supabase.from('operador_cuartel').insert([
+            { operador_id, cuartel_id: cuartelId, permiso, estado: 'activo' }
+        ]);
+        if (error) {
+            msgDiv.textContent = 'Error asignando permiso';
+        } else {
+            msgDiv.textContent = 'Permiso asignado';
+            document.getElementById('nuevo-operador-email').value = '';
+            await cargarPermisosOperadores(cuartelId);
+        }
     }
 
     function agregarEventListenersAcciones() {
