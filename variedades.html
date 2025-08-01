@@ -61,7 +61,7 @@
     import { supabase } from "./supabaseClient.js";
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.location.href = "login.html";
+      window.location.href = "login-nuevo.html";
       throw new Error("No autorizado");
     }
     fetch('header.html')
@@ -219,7 +219,7 @@
     // Verificar usuario autenticado
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) {
-      window.location.href = "login.html";
+      window.location.href = "login-nuevo.html";
       throw new Error("No autorizado");
     }
     
