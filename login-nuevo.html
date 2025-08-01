@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acceso | Cuaderno de Campo</title>
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📔</text></svg>">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- Google Fonts Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --color-primary: #1976d2;
+      --color-primary-dark: #1565c0;
+      --color-secondary: #43a047;
+      --color-bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #f7f8fa 100%);
+      --color-card-shadow: rgba(25, 118, 210, 0.1);
+      --border-radius: 24px;
+      --border-radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--color-bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+    
+    .auth-container {
+      max-width: 400px;
+      width: 100%;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 20px 40px var(--color-card-shadow);
+      overflow: hidden;
+      position: relative;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .auth-header {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .auth-header::before {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 10px solid var(--color-primary-dark);
+    }
+
+    .auth-header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .auth-header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin: 0;
+      font-weight: 300;
+    }
+    
+    .auth-body {
+      padding: 2rem;
+    }
+
+    .auth-toggle {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-toggle p {
+      color: #666;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .auth-toggle button {
+      background: none;
+      border: none;
+      color: var(--color-primary);
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      padding: 0;
+    }
+
+    .auth-toggle button:hover {
+      color: var(--color-primary-dark);
+    }
+    
+    .form-floating {
+      margin-bottom: 1rem;
+    }
+
+    .form-floating .form-control {
+      border: 2px solid #e0e0e0;
+      border-radius: var(--border-radius-sm);
+      padding: 1rem 0.75rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-floating .form-control:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 0.25rem rgba(25, 118, 210, 0.15);
+    }
+
+    .form-floating label {
+      color: #777;
+      font-weight: 400;
+    }
+
+    .btn-auth {
+      width: 100%;
+      padding: 0.875rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .btn-primary-auth {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+      color: white;
+    }
+
+    .btn-primary-auth:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(25, 118, 210, 0.3);
+    }
+
+    .btn-google {
+      background: white;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-google:hover {
+      border-color: #ccc;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      color: #333;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 1.5rem 0;
+      position: relative;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+
+    .divider span {
+      background: white;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 1rem;
+      height: 1rem;
+      margin-right: 0.5rem;
+    }
+
+    .btn-auth.loading .loading-spinner {
+      display: inline-block;
+    }
+
+    .btn-auth.loading .btn-text {
+      opacity: 0.7;
+    }
+
+    .alert {
+      border-radius: var(--border-radius-sm);
+      border: none;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .alert-success {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .alert-danger {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .alert-warning {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .alert-info {
+      background: #e3f2fd;
+      color: var(--color-primary);
+    }
+
+    .forgot-password {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .forgot-password a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animaciones para cambio de modo */
+    .auth-form {
+      transition: all 0.3s ease;
+    }
+
+    .auth-form.switching {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .auth-container {
+        margin: 10px;
+        border-radius: 16px;
+      }
+      
+      .auth-header {
+        padding: 1.5rem 1rem;
+      }
+      
+      .auth-body {
+        padding: 1.5rem;
+      }
+      
+      .auth-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Estados de validación */
+    .form-control.is-invalid {
+      border-color: #dc3545;
+    }
+
+    .form-control.is-valid {
+      border-color: #28a745;
+    }
+
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+
+    .valid-feedback {
+      display: block;
+      color: #28a745;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Header con branding -->
+    <div class="auth-header">
+      <h1>
+        <i class="bi bi-journal-text"></i>
+        Cuaderno de Campo
+      </h1>
+      <p>Gestión integral de actividades agrícolas</p>
+    </div>
+    
+    <!-- Cuerpo del formulario -->
+    <div class="auth-body">
+      <!-- Toggle entre Login/Registro -->
+      <div class="auth-toggle">
+        <p id="toggle-text">¿No tienes cuenta?</p>
+        <button type="button" id="toggle-mode">Regístrate aquí</button>
+      </div>
+
+      <!-- Mensajes -->
+      <div id="message-container"></div>
+      
+      <!-- Botón de Google prominente -->
+      <button type="button" class="btn btn-auth btn-google" id="google-auth" style="margin-bottom: 1.5rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span><strong>Continuar con Google</strong></span>
+      </button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>o ingresa manualmente</span>
+      </div>
+      
+      <!-- Formulario Unificado -->
+      <form id="auth-form" class="auth-form">
+        <div class="form-floating">
+          <input type="email" class="form-control" id="email" name="email" 
+                 placeholder="correo@ejemplo.com" autocomplete="email" required>
+          <label for="email">
+            <i class="bi bi-envelope me-2"></i>Correo electrónico
+          </label>
+          <div class="invalid-feedback"></div>
+        </div>
+        
+        <div class="form-floating">
+          <input type="password" class="form-control" id="password" name="password" 
+                 placeholder="Contraseña" autocomplete="current-password" required>
+          <label for="password">
+            <i class="bi bi-lock me-2"></i>Contraseña
+          </label>
+          <div class="invalid-feedback"></div>
+          <div id="password-help" class="form-text" style="display: none;">
+            Mínimo 6 caracteres
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-auth btn-primary-auth" id="auth-submit">
+          <div class="spinner-border spinner-border-sm loading-spinner" role="status"></div>
+          <span class="btn-text" id="submit-text">Iniciar Sesión</span>
+        </button>
+        
+        <div class="forgot-password" id="forgot-password">
+          <a href="#" id="forgot-link">¿Olvidaste tu contraseña?</a>
+        </div>
+      </form>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    // Estado de la aplicación
+    let isLoginMode = true;
+    
+    // Elementos del DOM
+    const authForm = document.getElementById('auth-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitButton = document.getElementById('auth-submit');
+    const submitText = document.getElementById('submit-text');
+    const toggleButton = document.getElementById('toggle-mode');
+    const toggleText = document.getElementById('toggle-text');
+    const messageContainer = document.getElementById('message-container');
+    const forgotPassword = document.getElementById('forgot-password');
+    const passwordHelp = document.getElementById('password-help');
+    const googleAuthButton = document.getElementById('google-auth');
+
+    // Verificar si ya está logueado al cargar la página
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Si ya está logueado, redirigir al dashboard
+          window.location.href = 'index.html';
+          return;
+        }
+      } catch (error) {
+        console.log('No hay sesión activa');
+      }
+      
+      // Focus en el campo email
+      emailInput.focus();
+    });
+
+    // Toggle entre Login y Registro
+    toggleButton.addEventListener('click', () => {
+      authForm.classList.add('switching');
+      
+      setTimeout(() => {
+        isLoginMode = !isLoginMode;
+        updateFormMode();
+        authForm.classList.remove('switching');
+      }, 150);
+    });
+
+    function updateFormMode() {
+      if (isLoginMode) {
+        // Modo Login
+        submitText.textContent = 'Iniciar Sesión';
+        toggleText.textContent = '¿No tienes cuenta?';
+        toggleButton.textContent = 'Regístrate aquí';
+        forgotPassword.style.display = 'block';
+        passwordHelp.style.display = 'none';
+        passwordInput.setAttribute('autocomplete', 'current-password');
+        passwordInput.removeAttribute('minlength');
+      } else {
+        // Modo Registro
+        submitText.textContent = 'Crear Cuenta';
+        toggleText.textContent = '¿Ya tienes cuenta?';
+        toggleButton.textContent = 'Inicia sesión aquí';
+        forgotPassword.style.display = 'none';
+        passwordHelp.style.display = 'block';
+        passwordInput.setAttribute('autocomplete', 'new-password');
+        passwordInput.setAttribute('minlength', '6');
+      }
+      
+      // Limpiar mensajes y validaciones
+      clearMessages();
+      clearValidation();
+    }
+
+    // Manejar envío del formulario
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      // Validación básica
+      if (!validateForm(email, password)) {
+        return;
+      }
+      
+      // Mostrar loading
+      toggleLoading(true);
+      
+      try {
+        if (isLoginMode) {
+          await handleLogin(email, password);
+        } else {
+          await handleRegister(email, password);
+        }
+      } catch (error) {
+        console.error('Error en autenticación:', error);
+        showMessage('Error de conexión. Inténtelo más tarde.', 'danger');
+      } finally {
+        toggleLoading(false);
+      }
+    });
+
+    // Login
+    async function handleLogin(email, password) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          showMessage('Email o contraseña incorrectos.', 'danger');
+        } else {
+          showMessage('Error: ' + error.message, 'danger');
+        }
+        return;
+      }
+      
+      if (data.user) {
+        showMessage('¡Acceso exitoso! Redirigiendo...', 'success');
+        
+        // 🚀 VERIFICACIÓN TEMPRANA - reducir delay para usuarios completos
+        console.log('🔍 Verificando perfil antes de redirección...');
+        const needsSetup = await checkIfNeedsSetup(data.user.id);
+        console.log('🎯 Decisión final login - Necesita setup:', needsSetup);
+        
+        // Redirección inmediata para usuarios completos, delay para nuevos
+        const redirectDelay = needsSetup ? 1500 : 500; // Menos delay si va al dashboard
+        
+        setTimeout(() => {
+          if (needsSetup) {
+            console.log('🧙‍♂️ Enviando al wizard para completar setup');
+            window.location.href = 'setup-wizard.html';
+          } else {
+            console.log('🚀 Enviando directo al dashboard');
+            window.location.href = 'index.html';
+          }
+        }, redirectDelay);
+      }
+    }
+
+    // Registro
+    async function handleRegister(email, password) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            email: email,
+            needs_setup: true
+          }
+        }
+      });
+      
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          showMessage('Este email ya está registrado. ¿Quieres iniciar sesión?', 'warning');
+          setTimeout(() => {
+            isLoginMode = true;
+            updateFormMode();
+          }, 3000);
+        } else if (error.message.includes('Password should be')) {
+          showMessage('La contraseña debe tener al menos 6 caracteres.', 'warning');
+        } else {
+          showMessage('Error: ' + error.message, 'danger');
+        }
+        return;
+      }
+      
+      if (data.user) {
+        // Crear registro básico en tabla usuarios
+        await createUserRecord(data.user);
+        
+        showMessage('¡Cuenta creada! Revisa tu email para confirmar.', 'success');
+        
+        setTimeout(() => {
+          isLoginMode = true;
+          updateFormMode();
+          emailInput.value = email;
+        }, 3000);
+      }
+    }
+
+    // Google OAuth
+    googleAuthButton.addEventListener('click', async () => {
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/setup-wizard.html'
+          }
+        });
+        
+        if (error) {
+          showMessage('Error con Google: ' + error.message, 'danger');
+        }
+      } catch (error) {
+        showMessage('Error de conexión con Google.', 'danger');
+      }
+    });
+
+    // Crear registro inicial en tabla usuarios
+    async function createUserRecord(user) {
+      try {
+        const { error } = await supabase
+          .from('usuarios')
+          .insert({
+            id: user.id,
+            nombre: user.email, // Temporal, se actualizará en setup
+            email: user.email,
+            rol: 'productor',
+            perfil_completo: false
+          });
+        
+        if (error) {
+          console.error('Error creando registro de usuario:', error);
+        }
+      } catch (error) {
+        console.error('Error en createUserRecord:', error);
+      }
+    }
+
+    // Verificar si necesita completar setup
+    async function checkIfNeedsSetup(userId) {
+      try {
+        console.log('🔍 Verificando setup para usuario:', userId);
+        
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('perfil_completo, nombre_pila, apellido, nombre, email')
+          .eq('id', userId)
+          .single();
+        
+        console.log('📊 Datos obtenidos:', data);
+        console.log('❌ Error:', error);
+        
+        if (error) {
+          console.log('❌ Error en consulta, enviando a setup');
+          return true; // Si hay error, ir al setup
+        }
+        
+        if (!data) {
+          console.log('❌ No hay datos, enviando a setup');
+          return true; // Si no hay datos, ir al setup
+        }
+        
+        // 🔧 VERIFICACIÓN MÁS ESTRICTA
+        const perfilCompleto = data.perfil_completo === true;
+        const tieneNombrePila = data.nombre_pila && data.nombre_pila.trim().length > 0;
+        const tieneApellido = data.apellido && data.apellido.trim().length > 0;
+        
+        console.log('🎯 Análisis detallado:');
+        console.log('   - perfil_completo:', data.perfil_completo, '→', perfilCompleto);
+        console.log('   - nombre_pila:', `"${data.nombre_pila}"`, '→', tieneNombrePila);
+        console.log('   - apellido:', `"${data.apellido}"`, '→', tieneApellido);
+        
+        // Para ir al dashboard, DEBE tener perfil completo Y nombre
+        const puedeIrAlDashboard = perfilCompleto && tieneNombrePila;
+        const needsSetup = !puedeIrAlDashboard;
+        
+        console.log('🚀 Decisión final:');
+        console.log('   - Puede ir al dashboard:', puedeIrAlDashboard);
+        console.log('   - Necesita setup:', needsSetup);
+        
+        return needsSetup;
+      } catch (error) {
+        console.log('💥 Excepción en checkIfNeedsSetup:', error);
+        return true; // En caso de error, ir al setup por seguridad
+      }
+    }
+
+    // Olvidé contraseña
+    document.getElementById('forgot-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      if (!email) {
+        showMessage('Ingresa tu email para recuperar la contraseña.', 'warning');
+        emailInput.focus();
+        return;
+      }
+      
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        
+        if (error) {
+          showMessage('Error: ' + error.message, 'danger');
+        } else {
+          showMessage('Se envió un email para restablecer tu contraseña.', 'success');
+        }
+      } catch (error) {
+        showMessage('Error enviando email de recuperación.', 'danger');
+      }
+    });
+
+    // Funciones de utilidad
+    function validateForm(email, password) {
+      clearValidation();
+      let isValid = true;
+      
+      // Validar email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        setFieldError(emailInput, 'El email es requerido');
+        isValid = false;
+      } else if (!emailRegex.test(email)) {
+        setFieldError(emailInput, 'Ingresa un email válido');
+        isValid = false;
+      } else {
+        setFieldValid(emailInput);
+      }
+      
+      // Validar contraseña
+      if (!password) {
+        setFieldError(passwordInput, 'La contraseña es requerida');
+        isValid = false;
+      } else if (!isLoginMode && password.length < 6) {
+        setFieldError(passwordInput, 'La contraseña debe tener al menos 6 caracteres');
+        isValid = false;
+      } else {
+        setFieldValid(passwordInput);
+      }
+      
+      return isValid;
+    }
+
+    function setFieldError(field, message) {
+      field.classList.add('is-invalid');
+      field.classList.remove('is-valid');
+      const feedback = field.parentNode.querySelector('.invalid-feedback');
+      if (feedback) {
+        feedback.textContent = message;
+      }
+    }
+
+    function setFieldValid(field) {
+      field.classList.add('is-valid');
+      field.classList.remove('is-invalid');
+    }
+
+    function clearValidation() {
+      const fields = [emailInput, passwordInput];
+      fields.forEach(field => {
+        field.classList.remove('is-invalid', 'is-valid');
+        const feedback = field.parentNode.querySelector('.invalid-feedback');
+        if (feedback) {
+          feedback.textContent = '';
+        }
+      });
+    }
+
+    function showMessage(message, type = 'info') {
+      messageContainer.innerHTML = `
+        <div class="alert alert-${type}" role="alert">
+          ${message}
+        </div>
+      `;
+      
+      // Auto-hide success/info messages
+      if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+          clearMessages();
+        }, 5000);
+      }
+    }
+
+    function clearMessages() {
+      messageContainer.innerHTML = '';
+    }
+
+    function toggleLoading(loading) {
+      submitButton.disabled = loading;
+      if (loading) {
+        submitButton.classList.add('loading');
+      } else {
+        submitButton.classList.remove('loading');
+      }
+    }
+
+    // Mejorar UX con Enter en campos
+    [emailInput, passwordInput].forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          authForm.dispatchEvent(new Event('submit'));
+        }
+      });
+    });
+
+    // Limpiar validación al escribir
+    [emailInput, passwordInput].forEach(input => {
+      input.addEventListener('input', () => {
+        if (input.classList.contains('is-invalid')) {
+          input.classList.remove('is-invalid');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

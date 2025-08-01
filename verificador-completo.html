@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificador Completo de BD - Cuaderno de Campo</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #569cd6;
+            border-bottom: 2px solid #569cd6;
+            padding-bottom: 5px;
+        }
+        .query-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            background: #252526;
+        }
+        .query-title {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sql-query {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #79c0ff;
+            overflow-x: auto;
+            max-height: 200px;
+            display: none;
+        }
+        .result {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .success {
+            border-left: 4px solid #238636;
+        }
+        .error {
+            border-left: 4px solid #da3633;
+        }
+        .warning {
+            border-left: 4px solid #fb8500;
+        }
+        button {
+            background: #0969da;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0860ca;
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #5a6268;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            color: #fb8500;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #3c3c3c;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background: #3c3c3c;
+            color: #569cd6;
+            position: sticky;
+            top: 0;
+        }
+        .status-ok { color: #238636; }
+        .status-error { color: #da3633; }
+        .status-warning { color: #fb8500; }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 12px;
+        }
+        .copy-btn {
+            background: #238636;
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+        .copy-btn:hover {
+            background: #2ea043;
+        }
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) {
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .admin-note {
+            background: #264f78;
+            border: 1px solid #569cd6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .admin-note h3 {
+            color: #569cd6;
+            margin-top: 0;
+        }
+        .metric-card {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+        .metric-label {
+            color: #cccccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificador Completo de Base de Datos - Cuaderno de Campo</h1>
+        
+        <div class="admin-note">
+            <h3>📋 Instrucciones para Acceso Completo</h3>
+            <p><strong>Opción 1:</strong> Usa las consultas SQL del archivo <code>consultas-sql-verificacion.sql</code> en Supabase Dashboard → SQL Editor</p>
+            <p><strong>Opción 2:</strong> Ejecuta las verificaciones básicas aquí (limitadas por RLS)</p>
+            <p><strong>📁 Archivo de consultas:</strong> <a href="./consultas-sql-verificacion.sql" target="_blank" style="color: #4ec9b0;">consultas-sql-verificacion.sql</a></p>
+        </div>
+
+        <!-- Métricas rápidas -->
+        <div class="query-section">
+            <div class="query-title">📊 Métricas Rápidas del Sistema</div>
+            <button onclick="loadQuickMetrics()">⚡ Cargar Métricas</button>
+            <div id="metrics-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+        </div>
+
+        <div class="section-grid">
+            <!-- Columna izquierda -->
+            <div>
+                <div class="query-section">
+                    <div class="query-title">
+                        🔌 Estado de Conexión
+                        <button class="secondary" onclick="toggleSQL('connection-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="testConnection()">🔌 Probar Conexión</button>
+                    <button onclick="copyToClipboard('SELECT COUNT(*) FROM organizaciones;')">📋 Copiar SQL</button>
+                    <div id="connection-sql" class="sql-query">SELECT COUNT(*) FROM organizaciones;</div>
+                    <div id="connection-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        📊 Verificar Tablas Existentes
+                        <button class="secondary" onclick="toggleSQL('tables-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkTables()">📊 Verificar Tablas</button>
+                    <button onclick="copyToClipboard(tablesSQL)">📋 Copiar SQL</button>
+                    <div id="tables-sql" class="sql-query"></div>
+                    <div id="tables-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        👥 Estructura de Usuarios
+                        <button class="secondary" onclick="toggleSQL('users-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkUsersStructure()">👥 Verificar Estructura</button>
+                    <button onclick="copyToClipboard(usersSQL)">📋 Copiar SQL</button>
+                    <div id="users-sql" class="sql-query"></div>
+                    <div id="users-structure-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        📈 Conteo de Registros
+                        <button class="secondary" onclick="toggleSQL('count-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="countRecords()">📈 Contar Registros</button>
+                    <button onclick="copyToClipboard(countSQL)">📋 Copiar SQL</button>
+                    <div id="count-sql" class="sql-query"></div>
+                    <div id="count-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        🎯 Campo Objetivo en Riegos
+                        <button class="secondary" onclick="toggleSQL('objetivo-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkRiegosObjetivo()">🎯 Análisis Objetivo</button>
+                    <button onclick="copyToClipboard(objetivoSQL)">📋 Copiar SQL</button>
+                    <div id="objetivo-sql" class="sql-query"></div>
+                    <div id="objetivo-result" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Columna derecha -->
+            <div>
+                <div class="query-section">
+                    <div class="query-title">
+                        🔐 Usuario Actual
+                        <button class="secondary" onclick="toggleSQL('user-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkCurrentUser()">🔐 Info Usuario</button>
+                    <button onclick="copyToClipboard('SELECT auth.uid(), auth.email();')">📋 Copiar SQL</button>
+                    <div id="user-sql" class="sql-query">SELECT auth.uid(), auth.email();</div>
+                    <div id="current-user-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        ✅ Integridad de Datos
+                        <button class="secondary" onclick="toggleSQL('integrity-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkDataIntegrity()">✅ Verificar Integridad</button>
+                    <button onclick="copyToClipboard(integritySQL)">📋 Copiar SQL</button>
+                    <div id="integrity-sql" class="sql-query"></div>
+                    <div id="integrity-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        🛡️ Políticas RLS
+                        <button class="secondary" onclick="toggleSQL('rls-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkRLS()">🛡️ Verificar RLS</button>
+                    <button onclick="copyToClipboard(rlsSQL)">📋 Copiar SQL</button>
+                    <div id="rls-sql" class="sql-query"></div>
+                    <div id="rls-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        🏢 Análisis por Organización
+                        <button class="secondary" onclick="toggleSQL('org-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="analyzeOrganizations()">🏢 Analizar Orgs</button>
+                    <button onclick="copyToClipboard(orgSQL)">📋 Copiar SQL</button>
+                    <div id="org-sql" class="sql-query"></div>
+                    <div id="org-result" class="result"></div>
+                </div>
+
+                <div class="query-section">
+                    <div class="query-title">
+                        📅 Actividad Reciente
+                        <button class="secondary" onclick="toggleSQL('activity-sql')">Ver SQL</button>
+                    </div>
+                    <button onclick="checkRecentActivity()">📅 Actividad</button>
+                    <button onclick="copyToClipboard(activitySQL)">📋 Copiar SQL</button>
+                    <div id="activity-sql" class="sql-query"></div>
+                    <div id="activity-result" class="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consulta personalizada -->
+        <div class="query-section">
+            <div class="query-title">⚡ Consulta Personalizada</div>
+            <textarea id="custom-query" placeholder="SELECT * FROM usuarios LIMIT 5;" style="width: 100%; height: 100px; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c; padding: 10px; font-family: 'Courier New', monospace;"></textarea>
+            <br>
+            <button onclick="executeCustomQuery()">⚡ Ejecutar</button>
+            <button onclick="copyToClipboard(document.getElementById('custom-query').value)">📋 Copiar</button>
+            <div id="custom-result" class="result"></div>
+        </div>
+
+        <!-- Verificación completa -->
+        <div class="query-section">
+            <div class="query-title">🚀 Verificación Completa</div>
+            <button onclick="runAllChecks()" style="background: #238636; font-size: 16px; padding: 12px 24px;">🚀 Ejecutar Todo</button>
+            <button onclick="copyAllSQL()" style="background: #fb8500; font-size: 16px; padding: 12px 24px;">📋 Copiar Todas las SQL</button>
+            <button onclick="downloadResults()" style="background: #6f42c1; font-size: 16px; padding: 12px 24px;">📄 Descargar Resultados</button>
+            <button onclick="runAndDownload()" style="background: #20c997; font-size: 16px; padding: 12px 24px;">🚀📄 Ejecutar y Descargar</button>
+            <div id="all-checks-result" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        // SQL queries para copiar
+        window.tablesSQL = `SELECT 
+    schemaname,
+    tablename,
+    tableowner,
+    rowsecurity as rls_enabled
+FROM pg_tables 
+WHERE schemaname = 'public'
+ORDER BY tablename;`;
+
+        window.usersSQL = `SELECT 
+    column_name,
+    data_type,
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_schema = 'public' 
+    AND table_name = 'usuarios'
+ORDER BY ordinal_position;`;
+
+        window.countSQL = `SELECT 
+    'usuarios' as tabla, COUNT(*) as registros FROM usuarios
+UNION ALL
+SELECT 
+    'organizaciones', COUNT(*) FROM organizaciones
+UNION ALL
+SELECT 
+    'fincas', COUNT(*) FROM fincas
+UNION ALL
+SELECT 
+    'cuarteles', COUNT(*) FROM cuarteles
+UNION ALL
+SELECT 
+    'riegos', COUNT(*) FROM riegos
+ORDER BY tabla;`;
+
+        window.objetivoSQL = `SELECT 
+    COUNT(*) as total_riegos,
+    COUNT(objetivo) as riegos_con_objetivo,
+    ROUND(COUNT(objetivo) * 100.0 / COUNT(*), 2) as porcentaje_completado
+FROM riegos;`;
+
+        window.integritySQL = `SELECT 
+    'Fincas sin usuario' as problema, COUNT(*) as cantidad
+FROM fincas WHERE usuario_id IS NULL
+UNION ALL
+SELECT 
+    'Cuarteles sin finca', COUNT(*)
+FROM cuarteles WHERE finca_id IS NULL
+UNION ALL
+SELECT 
+    'Riegos sin operador', COUNT(*)
+FROM riegos WHERE operador_id IS NULL;`;
+
+        window.rlsSQL = `SELECT 
+    tablename,
+    policyname,
+    cmd,
+    roles
+FROM pg_policies 
+WHERE schemaname = 'public'
+ORDER BY tablename;`;
+
+        window.orgSQL = `SELECT 
+    o.nombre as organizacion,
+    COUNT(u.id) as usuarios,
+    STRING_AGG(DISTINCT u.rol, ', ') as roles
+FROM organizaciones o
+LEFT JOIN usuarios u ON o.id = u.organizacion_id
+GROUP BY o.id, o.nombre
+ORDER BY usuarios DESC;`;
+
+        window.activitySQL = `SELECT 
+    r.fecha,
+    f.nombre_finca,
+    r.especie,
+    r.objetivo
+FROM riegos r
+LEFT JOIN fincas f ON r.finca_id = f.id
+WHERE r.fecha >= CURRENT_DATE - INTERVAL '7 days'
+ORDER BY r.fecha DESC
+LIMIT 10;`;
+
+        // Hacer disponibles las funciones globalmente
+        window.supabase = supabase;
+
+        // Variable global para almacenar resultados
+        window.verificationResults = {
+            timestamp: new Date().toISOString(),
+            metrics: null,
+            connection: null,
+            tables: null,
+            usersStructure: null,
+            recordCounts: null,
+            currentUser: null,
+            dataIntegrity: null,
+            riegosObjetivo: null,
+            rls: null,
+            organizations: null,
+            recentActivity: null,
+            customQueries: []
+        };
+
+        // Helper functions
+        function displayResult(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            
+            if (typeof data === 'string') {
+                element.innerHTML = `<pre>${data}</pre>`;
+            } else if (Array.isArray(data)) {
+                if (data.length === 0) {
+                    element.innerHTML = '<p class="status-warning">No se encontraron datos</p>';
+                } else {
+                    element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } else {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        }
+
+        function displayTable(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            
+            if (!data || data.length === 0) {
+                element.innerHTML = '<p class="status-warning">No se encontraron datos</p>';
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            let html = '<table><thead><tr>';
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    const value = row[header];
+                    html += `<td>${value !== null && value !== undefined ? value : ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            
+            element.innerHTML = html;
+        }
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<p class="loading">⏳ Ejecutando consulta...</p>';
+        }
+
+        // Toggle SQL visibility
+        window.toggleSQL = function(sqlId) {
+            const element = document.getElementById(sqlId);
+            if (element.style.display === 'none' || !element.style.display) {
+                element.style.display = 'block';
+                // Populate with corresponding SQL
+                const sqlContent = getSQLContent(sqlId);
+                if (sqlContent) {
+                    element.textContent = sqlContent;
+                }
+            } else {
+                element.style.display = 'none';
+            }
+        };
+
+        function getSQLContent(sqlId) {
+            const sqlMap = {
+                'tables-sql': window.tablesSQL,
+                'users-sql': window.usersSQL,
+                'count-sql': window.countSQL,
+                'objetivo-sql': window.objetivoSQL,
+                'integrity-sql': window.integritySQL,
+                'rls-sql': window.rlsSQL,
+                'org-sql': window.orgSQL,
+                'activity-sql': window.activitySQL
+            };
+            return sqlMap[sqlId] || '';
+        }
+
+        // Copy to clipboard
+        window.copyToClipboard = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copiado';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        };
+
+        window.copyAllSQL = function() {
+            const allSQL = `-- 🔍 TODAS LAS CONSULTAS SQL DEL VERIFICADOR
+-- Cuaderno de Campo - Verificación Completa
+
+-- 1. Verificar tablas
+${window.tablesSQL}
+
+-- 2. Estructura de usuarios
+${window.usersSQL}
+
+-- 3. Conteo de registros
+${window.countSQL}
+
+-- 4. Campo objetivo en riegos
+${window.objetivoSQL}
+
+-- 5. Integridad de datos
+${window.integritySQL}
+
+-- 6. Políticas RLS
+${window.rlsSQL}
+
+-- 7. Análisis por organización
+${window.orgSQL}
+
+-- 8. Actividad reciente
+${window.activitySQL}`;
+
+            copyToClipboard(allSQL);
+        };
+
+        // Metrics
+        window.loadQuickMetrics = async function() {
+            const container = document.getElementById('metrics-container');
+            container.innerHTML = '<p class="loading">⏳ Cargando métricas...</p>';
+
+            const metrics = [
+                { name: 'Usuarios', table: 'usuarios' },
+                { name: 'Fincas', table: 'fincas' },
+                { name: 'Cuarteles', table: 'cuarteles' },
+                { name: 'Riegos', table: 'riegos' },
+                { name: 'Organizaciones', table: 'organizaciones' }
+            ];
+
+            let html = '';
+            let metricsText = 'Métricas del Sistema:\n';
+            
+            for (const metric of metrics) {
+                try {
+                    const { count, error } = await supabase
+                        .from(metric.table)
+                        .select('*', { count: 'exact', head: true });
+                    
+                    const value = error ? 'Error' : count || 0;
+                    html += `
+                        <div class="metric-card">
+                            <div class="metric-value">${value}</div>
+                            <div class="metric-label">${metric.name}</div>
+                        </div>
+                    `;
+                    metricsText += `- ${metric.name}: ${value}\n`;
+                } catch (err) {
+                    html += `
+                        <div class="metric-card">
+                            <div class="metric-value status-error">Error</div>
+                            <div class="metric-label">${metric.name}</div>
+                        </div>
+                    `;
+                    metricsText += `- ${metric.name}: Error\n`;
+                }
+            }
+            
+            container.innerHTML = html;
+            captureResult('metrics', metricsText);
+        };
+
+        // Verification functions
+        window.testConnection = async function() {
+            showLoading('connection-result');
+            try {
+                const { data, error } = await supabase
+                    .from('organizaciones')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    const result = `❌ Error de conexión: ${error.message}`;
+                    displayResult('connection-result', result, 'error');
+                    captureResult('connection', result);
+                } else {
+                    const result = '✅ Conexión exitosa a Supabase';
+                    displayResult('connection-result', result, 'success');
+                    captureResult('connection', result);
+                }
+            } catch (err) {
+                const result = `❌ Error: ${err.message}`;
+                displayResult('connection-result', result, 'error');
+                captureResult('connection', result);
+            }
+        };
+
+        window.checkTables = async function() {
+            showLoading('tables-result');
+            try {
+                const tables = [
+                    'usuarios', 'organizaciones', 'fincas', 'cuarteles', 
+                    'especies', 'variedades', 'riegos', 'tareas', 'visitas',
+                    'aplicadores_operarios', 'fertilizantes', 'fitosanitarios',
+                    'metodos_de_aplicacion', 'tipos_tarea', 'cuartel_variedades', 'operario_finca'
+                ];
+
+                let results = [];
+                for (const table of tables) {
+                    try {
+                        const { data, error } = await supabase
+                            .from(table)
+                            .select('*')
+                            .limit(1);
+                        
+                        results.push({
+                            tabla: table,
+                            estado: error ? `❌ ${error.message}` : '✅ Existe',
+                            acceso: error ? 'Sin acceso' : 'Accesible'
+                        });
+                    } catch (err) {
+                        results.push({
+                            tabla: table,
+                            estado: `❌ ${err.message}`,
+                            acceso: 'Error'
+                        });
+                    }
+                }
+                
+                displayTable('tables-result', results);
+                captureResult('tables', results.map(r => `${r.tabla}: ${r.estado} (${r.acceso})`).join('\n'));
+            } catch (err) {
+                const result = `❌ Error: ${err.message}`;
+                displayResult('tables-result', result, 'error');
+                captureResult('tables', result);
+            }
+        };
+
+        window.checkUsersStructure = async function() {
+            showLoading('users-structure-result');
+            try {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('id, nombre, nombre_pila, apellido, email, rol, organizacion_id, created_at')
+                    .limit(5);
+                
+                if (error) {
+                    const result = `❌ Error: ${error.message}`;
+                    displayResult('users-structure-result', result, 'error');
+                    captureResult('users-structure', result);
+                } else {
+                    let analysis = `📊 Estructura de Usuarios (${data.length} registros de muestra):\n\n`;
+                    
+                    if (data.length > 0) {
+                        const sample = data[0];
+                        analysis += `Campos disponibles:\n`;
+                        Object.keys(sample).forEach(key => {
+                            analysis += `  • ${key}: ${typeof sample[key]} ${sample[key] ? '✅' : '⚠️'}\n`;
+                        });
+                        
+                        analysis += `\nDatos de muestra:\n`;
+                        analysis += JSON.stringify(data, null, 2);
+                    }
+                    
+                    displayResult('users-structure-result', analysis);
+                    captureResult('users-structure', analysis);
+                }
+            } catch (err) {
+                const result = `❌ Error: ${err.message}`;
+                displayResult('users-structure-result', result, 'error');
+                captureResult('users-structure', result);
+            }
+        };
+
+        window.countRecords = async function() {
+            showLoading('count-result');
+            const tables = [
+                'usuarios', 'organizaciones', 'fincas', 'cuarteles', 
+                'especies', 'variedades', 'riegos', 'tareas', 'visitas',
+                'aplicadores_operarios'
+            ];
+
+            let results = [];
+            for (const table of tables) {
+                try {
+                    const { count, error } = await supabase
+                        .from(table)
+                        .select('*', { count: 'exact', head: true });
+                    
+                    results.push({
+                        tabla: table,
+                        registros: error ? `❌ ${error.message}` : count || 0,
+                        estado: error ? 'Error' : (count > 0 ? '✅ Con datos' : '⚠️ Vacía')
+                    });
+                } catch (err) {
+                    results.push({
+                        tabla: table,
+                        registros: `❌ ${err.message}`,
+                        estado: 'Error'
+                    });
+                }
+            }
+            
+            displayTable('count-result', results);
+        };
+
+        window.checkCurrentUser = async function() {
+            showLoading('current-user-result');
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                let userInfo = `🔐 Información del Usuario Actual:\n\n`;
+                
+                if (user) {
+                    userInfo += `ID: ${user.id}\n`;
+                    userInfo += `Email: ${user.email}\n`;
+                    userInfo += `Autenticado: ✅ Sí\n`;
+                    userInfo += `Última conexión: ${user.last_sign_in_at}\n\n`;
+                    
+                    const { data: userData, error } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (userData) {
+                        userInfo += `Datos del perfil:\n`;
+                        userInfo += `  Nombre: ${userData.nombre_pila || 'No definido'}\n`;
+                        userInfo += `  Apellido: ${userData.apellido || 'No definido'}\n`;
+                        userInfo += `  Rol: ${userData.rol || 'No definido'}\n`;
+                        userInfo += `  Organización ID: ${userData.organizacion_id || 'No definido'}\n`;
+                    } else if (error) {
+                        userInfo += `⚠️ Error obteniendo datos del perfil: ${error.message}\n`;
+                    }
+                } else {
+                    userInfo += `❌ No hay usuario autenticado\n`;
+                }
+                
+                displayResult('current-user-result', userInfo);
+            } catch (err) {
+                displayResult('current-user-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        window.checkDataIntegrity = async function() {
+            showLoading('integrity-result');
+            
+            let integrity = `✅ Verificación de Integridad de Datos:\n\n`;
+            
+            try {
+                const { count: fincasSinUsuario } = await supabase
+                    .from('fincas')
+                    .select('*', { count: 'exact', head: true })
+                    .is('usuario_id', null);
+                
+                integrity += `Fincas sin usuario: ${fincasSinUsuario || 0}\n`;
+                
+                const { count: cuartelesSinFinca } = await supabase
+                    .from('cuarteles')
+                    .select('*', { count: 'exact', head: true })
+                    .is('finca_id', null);
+                
+                integrity += `Cuarteles sin finca: ${cuartelesSinFinca || 0}\n`;
+                
+                const { count: riegosSinOperador } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true })
+                    .is('operador_id', null);
+                
+                integrity += `Riegos sin operador: ${riegosSinOperador || 0}\n`;
+                
+                integrity += `\n✅ Verificación completada`;
+                
+            } catch (err) {
+                integrity += `❌ Error durante verificación: ${err.message}`;
+            }
+            
+            displayResult('integrity-result', integrity);
+        };
+
+        window.checkRiegosObjetivo = async function() {
+            showLoading('objetivo-result');
+            try {
+                const { count: totalRiegos } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true });
+
+                const { count: riegosConObjetivo } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true })
+                    .not('objetivo', 'is', null);
+
+                const porcentaje = totalRiegos ? ((riegosConObjetivo / totalRiegos) * 100).toFixed(2) : 0;
+
+                let objetivoInfo = `🎯 Análisis del Campo 'objetivo' en Riegos:\n\n`;
+                objetivoInfo += `Total de riegos: ${totalRiegos || 0}\n`;
+                objetivoInfo += `Riegos con objetivo: ${riegosConObjetivo || 0}\n`;
+                objetivoInfo += `Porcentaje completado: ${porcentaje}%\n\n`;
+
+                if (porcentaje < 50) {
+                    objetivoInfo += `⚠️ Menos del 50% de riegos tienen objetivo definido\n`;
+                } else {
+                    objetivoInfo += `✅ Buena cobertura del campo objetivo\n`;
+                }
+
+                const { data: objetivos } = await supabase
+                    .from('riegos')
+                    .select('objetivo')
+                    .not('objetivo', 'is', null)
+                    .limit(10);
+
+                if (objetivos && objetivos.length > 0) {
+                    objetivoInfo += `\nEjemplos de objetivos:\n`;
+                    objetivos.forEach((obj, index) => {
+                        objetivoInfo += `  ${index + 1}. "${obj.objetivo}"\n`;
+                    });
+                }
+
+                displayResult('objetivo-result', objetivoInfo);
+            } catch (err) {
+                displayResult('objetivo-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        window.checkRLS = async function() {
+            showLoading('rls-result');
+            
+            let rls_info = `🛡️ Verificación de RLS (Row Level Security)\n\n`;
+            rls_info += `Nota: Desde el cliente solo podemos probar el acceso, no ver las políticas directamente.\n\n`;
+            
+            const tests = [
+                { table: 'organizaciones', desc: 'Lectura pública' },
+                { table: 'especies', desc: 'Catálogo' },
+                { table: 'usuarios', desc: 'Usuarios' },
+                { table: 'fincas', desc: 'Fincas propias' }
+            ];
+
+            for (const test of tests) {
+                try {
+                    const { data, error } = await supabase
+                        .from(test.table)
+                        .select('*')
+                        .limit(1);
+                    
+                    rls_info += `✅ ${test.table} (${test.desc}): Acceso permitido\n`;
+                } catch (err) {
+                    rls_info += `❌ ${test.table} (${test.desc}): ${err.message}\n`;
+                }
+            }
+            
+            displayResult('rls-result', rls_info);
+        };
+
+        window.analyzeOrganizations = async function() {
+            showLoading('org-result');
+            try {
+                const { data, error } = await supabase
+                    .from('organizaciones')
+                    .select(`
+                        id,
+                        nombre,
+                        usuarios:usuarios(count)
+                    `);
+                
+                if (error) {
+                    displayResult('org-result', `❌ Error: ${error.message}`, 'error');
+                } else {
+                    let analysis = `🏢 Análisis de Organizaciones:\n\n`;
+                    analysis += `Total organizaciones: ${data.length}\n\n`;
+                    
+                    data.forEach((org, index) => {
+                        analysis += `${index + 1}. ${org.nombre}\n`;
+                        analysis += `   ID: ${org.id}\n`;
+                        analysis += `   Usuarios: ${org.usuarios?.[0]?.count || 0}\n\n`;
+                    });
+                    
+                    displayResult('org-result', analysis);
+                }
+            } catch (err) {
+                displayResult('org-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        window.checkRecentActivity = async function() {
+            showLoading('activity-result');
+            try {
+                const { data, error } = await supabase
+                    .from('riegos')
+                    .select(`
+                        fecha,
+                        especie,
+                        variedad,
+                        objetivo,
+                        fincas(nombre_finca),
+                        cuarteles(nombre)
+                    `)
+                    .gte('fecha', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+                    .order('fecha', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    displayResult('activity-result', `❌ Error: ${error.message}`, 'error');
+                } else {
+                    displayTable('activity-result', data);
+                }
+            } catch (err) {
+                displayResult('activity-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        window.executeCustomQuery = async function() {
+            const query = document.getElementById('custom-query').value.trim();
+            if (!query) {
+                displayResult('custom-result', '⚠️ Por favor ingresa una consulta', 'warning');
+                return;
+            }
+
+            showLoading('custom-result');
+            displayResult('custom-result', '⚠️ Las consultas personalizadas requieren usar el SQL Editor de Supabase directamente.\n\nPara consultas complejas, copia la query y ejecútala en:\nhttps://supabase.com/dashboard → SQL Editor', 'warning');
+        };
+
+        window.runAllChecks = async function() {
+            document.getElementById('all-checks-result').innerHTML = '<p class="loading">🚀 Ejecutando verificación completa...</p>';
+            
+            await loadQuickMetrics();
+            await testConnection();
+            await checkTables();
+            await checkUsersStructure();
+            await countRecords();
+            await checkCurrentUser();
+            await checkDataIntegrity();
+            await checkRiegosObjetivo();
+            await analyzeOrganizations();
+            
+            displayResult('all-checks-result', '✅ Verificación completa finalizada. Revisa los resultados arriba.', 'success');
+        };
+
+        // Auto-load metrics on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                loadQuickMetrics();
+            }, 1000);
+        });
+
+        // Funciones para generar y descargar resultados
+        window.downloadResults = function() {
+            const results = window.verificationResults;
+            const timestamp = new Date().toLocaleString('es-ES');
+            
+            let content = `# 📊 RESULTADOS DE VERIFICACIÓN DE BASE DE DATOS
+**Cuaderno de Campo - Análisis Completo**  
+**Fecha de ejecución:** ${timestamp}  
+**Ejecutado desde:** Verificador Completo  
+**Entorno:** ${window.location.hostname}
+
+---
+
+## 🎯 RESUMEN EJECUTIVO
+
+- **Timestamp:** ${results.timestamp}
+- **Total verificaciones ejecutadas:** ${Object.values(results).filter(v => v !== null && v !== results.timestamp).length}
+- **Estado general:** ${results.connection ? '✅ Operativo' : '❌ Con problemas de conexión'}
+
+---
+
+## 📊 MÉTRICAS RÁPIDAS DEL SISTEMA
+
+\`\`\`
+${results.metrics || 'No ejecutado - Ejecutar "⚡ Cargar Métricas"'}
+\`\`\`
+
+---
+
+## 🔌 ESTADO DE CONEXIÓN
+
+\`\`\`
+${results.connection || 'No ejecutado - Ejecutar "🔌 Probar Conexión"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+SELECT COUNT(*) FROM organizaciones;
+\`\`\`
+
+---
+
+## 📊 VERIFICACIÓN DE TABLAS EXISTENTES
+
+\`\`\`
+${results.tables || 'No ejecutado - Ejecutar "📊 Verificar Tablas"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.tablesSQL}
+\`\`\`
+
+---
+
+## 👥 ESTRUCTURA DE USUARIOS
+
+\`\`\`
+${results.usersStructure || 'No ejecutado - Ejecutar "👥 Estructura Usuarios"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.usersSQL}
+\`\`\`
+
+---
+
+## 📈 CONTEO DE REGISTROS POR TABLA
+
+\`\`\`
+${results.recordCounts || 'No ejecutado - Ejecutar "📈 Contar Registros"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.countSQL}
+\`\`\`
+
+---
+
+## 🔐 USUARIO ACTUAL
+
+\`\`\`
+${results.currentUser || 'No ejecutado - Ejecutar "🔐 Usuario Actual"'}
+\`\`\`
+
+---
+
+## ✅ INTEGRIDAD DE DATOS
+
+\`\`\`
+${results.dataIntegrity || 'No ejecutado - Ejecutar "✅ Integridad de Datos"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.integritySQL}
+\`\`\`
+
+---
+
+## 🎯 ANÁLISIS DEL CAMPO OBJETIVO EN RIEGOS
+
+\`\`\`
+${results.riegosObjetivo || 'No ejecutado - Ejecutar "🎯 Campo Objetivo"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.objetivoSQL}
+\`\`\`
+
+---
+
+## 🛡️ POLÍTICAS RLS (ROW LEVEL SECURITY)
+
+\`\`\`
+${results.rls || 'No ejecutado - Ejecutar "🛡️ Verificar RLS"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.rlsSQL}
+\`\`\`
+
+---
+
+## 🏢 ANÁLISIS POR ORGANIZACIÓN
+
+\`\`\`
+${results.organizations || 'No ejecutado - Ejecutar "🏢 Análisis por Organización"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.orgSQL}
+\`\`\`
+
+---
+
+## 📅 ACTIVIDAD RECIENTE
+
+\`\`\`
+${results.recentActivity || 'No ejecutado - Ejecutar "📅 Actividad Reciente"'}
+\`\`\`
+
+**SQL utilizada:**
+\`\`\`sql
+${window.activitySQL}
+\`\`\`
+
+---
+
+## 🔍 CONSULTAS PERSONALIZADAS EJECUTADAS
+
+${results.customQueries.length > 0 ? 
+    results.customQueries.map((query, index) => 
+        `### Consulta ${index + 1}
+\`\`\`sql
+${query.sql}
+\`\`\`
+
+**Resultado:**
+\`\`\`
+${query.result}
+\`\`\`
+
+**Timestamp:** ${query.timestamp}
+
+---`
+    ).join('\\n') : 
+    'No se ejecutaron consultas personalizadas'
+}
+
+---
+
+## 📋 CONSULTAS SQL PARA REPLICAR
+
+### Conteo completo de todas las tablas
+\`\`\`sql
+${window.countSQL}
+\`\`\`
+
+### Análisis de usuarios por rol
+\`\`\`sql
+SELECT 
+    rol,
+    COUNT(*) as cantidad_usuarios,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM usuarios), 2) as porcentaje
+FROM usuarios 
+WHERE rol IS NOT NULL
+GROUP BY rol
+ORDER BY cantidad_usuarios DESC;
+\`\`\`
+
+### Verificar relaciones Foreign Key
+\`\`\`sql
+SELECT 
+    tc.table_name as tabla_origen, 
+    kcu.column_name as columna_origen, 
+    ccu.table_name as tabla_destino,
+    ccu.column_name as columna_destino,
+    tc.constraint_name as nombre_constraint
+FROM 
+    information_schema.table_constraints AS tc 
+    JOIN information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+    JOIN information_schema.constraint_column_usage AS ccu
+      ON ccu.constraint_name = tc.constraint_name
+      AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY' 
+    AND tc.table_schema = 'public'
+ORDER BY tc.table_name;
+\`\`\`
+
+---
+
+## 🎯 CONCLUSIONES
+
+**Estado del sistema:** ${results.connection ? '✅ Operativo' : '❌ Requiere atención'}
+
+**Verificaciones completadas:** ${Object.values(results).filter(v => v !== null && v !== results.timestamp).length}/11
+
+**Recomendaciones:**
+- Ejecutar todas las verificaciones faltantes
+- Revisar problemas identificados en cada sección
+- Implementar mejoras sugeridas
+- Programar verificaciones periódicas
+
+---
+
+**Archivo generado automáticamente por:** Verificador Completo v2.0  
+**Timestamp:** ${timestamp}  
+**Verificador:** verificador-completo.html  
+**Documentación completa:** docs/ESTRUCTURA_BD_COMPLETA_2025.md
+`;
+
+            // Crear y descargar archivo
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `resultados-verificacion-bd-${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Feedback visual
+            displayResult('all-checks-result', '✅ Archivo de resultados descargado exitosamente!\\n\\nArchivo: resultados-verificacion-bd-' + new Date().toISOString().split('T')[0] + '.md', 'success');
+        };
+
+        // Función para ejecutar todo y descargar automáticamente
+        window.runAndDownload = async function() {
+            displayResult('all-checks-result', '🚀 Ejecutando verificación completa y generando archivo...', 'warning');
+            
+            // Ejecutar todas las verificaciones
+            await loadQuickMetrics();
+            await testConnection();
+            await checkTables();
+            await checkUsersStructure();
+            await countRecords();
+            await checkCurrentUser();
+            await checkDataIntegrity();
+            await checkRiegosObjetivo();
+            await checkRLS();
+            await analyzeOrganizations();
+            await checkRecentActivity();
+            
+            // Pequeña pausa para asegurar que todos los resultados se guarden
+            setTimeout(() => {
+                downloadResults();
+            }, 2000);
+        };
+
+        // Función para capturar resultados de verificaciones
+        function captureResult(verificationType, content) {
+            if (window.verificationResults) {
+                window.verificationResults[verificationType] = content;
+            }
+        };
+    </script>
+</body>
+</html>
