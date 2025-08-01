@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- jQuery (necesario para dropdowns) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <!-- Custom CSS -->
   <link rel="stylesheet" href="estilos.css">
   <!-- Google Fonts -->
@@ -15,22 +17,11 @@
 </head>
 <body>
   <div id="header-container"></div>
-  <script type="module">
-    import { supabase } from "./supabaseClient.js";
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("No autorizado");
-    }
-    fetch('header.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('header-container').innerHTML = html;
-        import('./header.js');
-      });
-  </script>
+  
   <main class="container">
-    <h4>Bienvenido</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Bienvenido</h4>
+    </div>
     <div class="dashboard-cards row" id="dashboard-cards">
       <!-- Tarjetas dinámicas -->
     </div>
@@ -38,8 +29,11 @@
       <small><a href="#">Privacidad</a> • <a href="#">Términos</a></small>
     </footer>
   </main>
+  
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Script principal del dashboard -->
   <script type="module">
     import { supabase } from "./supabaseClient.js";
     
@@ -57,7 +51,7 @@
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          window.location.href = "login.html";
+          window.location.href = "login-nuevo.html";
           return;
         }
         
@@ -80,7 +74,7 @@
           console.log('🎭 Modo demo para desarrollo local');
           cargarDashboardDemo();
         } else {
-          window.location.href = "login.html";
+          window.location.href = "login-nuevo.html";
         }
       }
     }
@@ -216,13 +210,14 @@
       inicializarDashboard();
     }
   </script>
+  
+  <!-- Scripts de jQuery para dropdowns -->
   <script>
     // Evita que el dropdown se cierre al hacer clic dentro del menú
     $(document).on('click', '.dropdown-menu', function (e) {
       e.stopPropagation();
     });
-  </script>
-  <script>
+    
     // Mantener abierto el dropdown mientras el mouse esté sobre el botón o el menú
     $(function() {
       var $dropdown = $('#nav-gestion');
@@ -233,6 +228,7 @@
         $dropdown.addClass('show');
         $menu.addClass('show');
       });
+      
       $dropdown.on('mouseleave', function() {
         $dropdown.removeClass('show');
         $menu.removeClass('show');

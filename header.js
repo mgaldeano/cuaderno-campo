@@ -159,7 +159,7 @@ function setLogoutListener() {
       } catch (err) {
         // Ignorar error, siempre redirigir
       } finally {
-        window.location.href = 'login.html';
+        window.location.href = 'login-nuevo.html';
       }
     });
   }

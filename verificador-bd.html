@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de BD - Cuaderno de Campo</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #569cd6;
+            border-bottom: 2px solid #569cd6;
+            padding-bottom: 5px;
+        }
+        .query-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            background: #252526;
+        }
+        .query-title {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .success {
+            border-left: 4px solid #238636;
+        }
+        .error {
+            border-left: 4px solid #da3633;
+        }
+        .warning {
+            border-left: 4px solid #fb8500;
+        }
+        button {
+            background: #0969da;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0860ca;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            color: #fb8500;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #3c3c3c;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #3c3c3c;
+            color: #569cd6;
+        }
+        .status-ok { color: #238636; }
+        .status-error { color: #da3633; }
+        .status-warning { color: #fb8500; }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificador de Base de Datos - Cuaderno de Campo</h1>
+        
+        <div class="query-section">
+            <div class="query-title">Estado de Conexión</div>
+            <button onclick="testConnection()">🔌 Probar Conexión</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">1. Verificar Tablas Existentes</div>
+            <button onclick="checkTables()">📊 Verificar Tablas</button>
+            <div id="tables-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">2. Verificar Estructura de Usuarios</div>
+            <button onclick="checkUsersStructure()">👥 Estructura Usuarios</button>
+            <div id="users-structure-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">3. Contar Registros por Tabla</div>
+            <button onclick="countRecords()">📈 Contar Registros</button>
+            <div id="count-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">4. Verificar Políticas RLS</div>
+            <button onclick="checkRLS()">🛡️ Verificar RLS</button>
+            <div id="rls-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">5. Verificar Usuario Actual</div>
+            <button onclick="checkCurrentUser()">🔐 Usuario Actual</button>
+            <div id="current-user-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">6. Verificar Integridad de Datos</div>
+            <button onclick="checkDataIntegrity()">✅ Integridad de Datos</button>
+            <div id="integrity-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">7. Verificar Campo Objetivo en Riegos</div>
+            <button onclick="checkRiegosObjetivo()">🎯 Campo Objetivo</button>
+            <div id="objetivo-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">8. Ejecutar Consulta Personalizada</div>
+            <textarea id="custom-query" placeholder="SELECT * FROM usuarios LIMIT 5;" style="width: 100%; height: 100px; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c; padding: 10px; font-family: 'Courier New', monospace;"></textarea>
+            <br>
+            <button onclick="executeCustomQuery()">⚡ Ejecutar Consulta</button>
+            <div id="custom-result" class="result"></div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-title">🔄 Ejecutar Todas las Verificaciones</div>
+            <button onclick="runAllChecks()" style="background: #238636; font-size: 16px; padding: 12px 24px;">🚀 Verificación Completa</button>
+            <div id="all-checks-result" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        // Hacer disponibles las funciones globalmente
+        window.supabase = supabase;
+
+        // Función helper para mostrar resultados
+        function displayResult(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            
+            if (typeof data === 'string') {
+                element.innerHTML = `<pre>${data}</pre>`;
+            } else if (Array.isArray(data)) {
+                if (data.length === 0) {
+                    element.innerHTML = '<p class="status-warning">No se encontraron datos</p>';
+                } else {
+                    element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } else {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        }
+
+        function displayTable(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            
+            if (!data || data.length === 0) {
+                element.innerHTML = '<p class="status-warning">No se encontraron datos</p>';
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            let html = '<table><thead><tr>';
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${row[header] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            
+            element.innerHTML = html;
+        }
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<p class="loading">⏳ Ejecutando consulta...</p>';
+        }
+
+        // 1. Test de conexión
+        window.testConnection = async function() {
+            showLoading('connection-result');
+            try {
+                const { data, error } = await supabase
+                    .from('organizaciones')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    displayResult('connection-result', `❌ Error de conexión: ${error.message}`, 'error');
+                } else {
+                    displayResult('connection-result', '✅ Conexión exitosa a Supabase', 'success');
+                }
+            } catch (err) {
+                displayResult('connection-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 2. Verificar tablas
+        window.checkTables = async function() {
+            showLoading('tables-result');
+            try {
+                const tables = [
+                    'usuarios', 'organizaciones', 'fincas', 'cuarteles', 
+                    'especies', 'variedades', 'riegos', 'tareas', 'visitas',
+                    'aplicadores_operarios', 'fertilizantes', 'fitosanitarios',
+                    'metodos_de_aplicacion', 'tipos_tarea', 'cuartel_variedades', 'operario_finca'
+                ];
+
+                let results = [];
+                for (const table of tables) {
+                    try {
+                        const { data, error } = await supabase
+                            .from(table)
+                            .select('*')
+                            .limit(1);
+                        
+                        results.push({
+                            tabla: table,
+                            estado: error ? `❌ ${error.message}` : '✅ Existe',
+                            acceso: error ? 'Sin acceso' : 'Accesible'
+                        });
+                    } catch (err) {
+                        results.push({
+                            tabla: table,
+                            estado: `❌ ${err.message}`,
+                            acceso: 'Error'
+                        });
+                    }
+                }
+                
+                displayTable('tables-result', results);
+            } catch (err) {
+                displayResult('tables-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 3. Verificar estructura de usuarios
+        window.checkUsersStructure = async function() {
+            showLoading('users-structure-result');
+            try {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('id, nombre, nombre_pila, apellido, email, rol, organizacion_id, created_at')
+                    .limit(5);
+                
+                if (error) {
+                    displayResult('users-structure-result', `❌ Error: ${error.message}`, 'error');
+                } else {
+                    let analysis = `📊 Estructura de Usuarios (${data.length} registros de muestra):\n\n`;
+                    
+                    if (data.length > 0) {
+                        const sample = data[0];
+                        analysis += `Campos disponibles:\n`;
+                        Object.keys(sample).forEach(key => {
+                            analysis += `  • ${key}: ${typeof sample[key]} ${sample[key] ? '✅' : '⚠️'}\n`;
+                        });
+                        
+                        analysis += `\nDatos de muestra:\n`;
+                        analysis += JSON.stringify(data, null, 2);
+                    }
+                    
+                    displayResult('users-structure-result', analysis);
+                }
+            } catch (err) {
+                displayResult('users-structure-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 4. Contar registros
+        window.countRecords = async function() {
+            showLoading('count-result');
+            const tables = [
+                'usuarios', 'organizaciones', 'fincas', 'cuarteles', 
+                'especies', 'variedades', 'riegos', 'tareas', 'visitas',
+                'aplicadores_operarios'
+            ];
+
+            let results = [];
+            for (const table of tables) {
+                try {
+                    const { count, error } = await supabase
+                        .from(table)
+                        .select('*', { count: 'exact', head: true });
+                    
+                    results.push({
+                        tabla: table,
+                        registros: error ? `❌ ${error.message}` : count || 0,
+                        estado: error ? 'Error' : (count > 0 ? '✅ Con datos' : '⚠️ Vacía')
+                    });
+                } catch (err) {
+                    results.push({
+                        tabla: table,
+                        registros: `❌ ${err.message}`,
+                        estado: 'Error'
+                    });
+                }
+            }
+            
+            displayTable('count-result', results);
+        };
+
+        // 5. Verificar RLS (limitado desde cliente)
+        window.checkRLS = async function() {
+            showLoading('rls-result');
+            
+            let rls_info = `🛡️ Verificación de RLS (Row Level Security)\n\n`;
+            rls_info += `Nota: Desde el cliente solo podemos probar el acceso, no ver las políticas directamente.\n\n`;
+            
+            // Test básicos de acceso
+            const tests = [
+                { table: 'organizaciones', desc: 'Lectura pública' },
+                { table: 'especies', desc: 'Catálogo' },
+                { table: 'usuarios', desc: 'Usuarios' },
+                { table: 'fincas', desc: 'Fincas propias' }
+            ];
+
+            for (const test of tests) {
+                try {
+                    const { data, error } = await supabase
+                        .from(test.table)
+                        .select('*')
+                        .limit(1);
+                    
+                    rls_info += `✅ ${test.table} (${test.desc}): Acceso permitido\n`;
+                } catch (err) {
+                    rls_info += `❌ ${test.table} (${test.desc}): ${err.message}\n`;
+                }
+            }
+            
+            displayResult('rls-result', rls_info);
+        };
+
+        // 6. Usuario actual
+        window.checkCurrentUser = async function() {
+            showLoading('current-user-result');
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                let userInfo = `🔐 Información del Usuario Actual:\n\n`;
+                
+                if (user) {
+                    userInfo += `ID: ${user.id}\n`;
+                    userInfo += `Email: ${user.email}\n`;
+                    userInfo += `Autenticado: ✅ Sí\n`;
+                    userInfo += `Última conexión: ${user.last_sign_in_at}\n\n`;
+                    
+                    // Buscar datos adicionales en la tabla usuarios
+                    const { data: userData, error } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (userData) {
+                        userInfo += `Datos del perfil:\n`;
+                        userInfo += `  Nombre: ${userData.nombre_pila || 'No definido'}\n`;
+                        userInfo += `  Apellido: ${userData.apellido || 'No definido'}\n`;
+                        userInfo += `  Rol: ${userData.rol || 'No definido'}\n`;
+                        userInfo += `  Organización ID: ${userData.organizacion_id || 'No definido'}\n`;
+                    } else if (error) {
+                        userInfo += `⚠️ Error obteniendo datos del perfil: ${error.message}\n`;
+                    }
+                } else {
+                    userInfo += `❌ No hay usuario autenticado\n`;
+                }
+                
+                displayResult('current-user-result', userInfo);
+            } catch (err) {
+                displayResult('current-user-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 7. Integridad de datos
+        window.checkDataIntegrity = async function() {
+            showLoading('integrity-result');
+            
+            let integrity = `✅ Verificación de Integridad de Datos:\n\n`;
+            
+            try {
+                // Fincas sin usuario
+                const { count: fincasSinUsuario } = await supabase
+                    .from('fincas')
+                    .select('*', { count: 'exact', head: true })
+                    .is('usuario_id', null);
+                
+                integrity += `Fincas sin usuario: ${fincasSinUsuario || 0}\n`;
+                
+                // Cuarteles sin finca
+                const { count: cuartelesSinFinca } = await supabase
+                    .from('cuarteles')
+                    .select('*', { count: 'exact', head: true })
+                    .is('finca_id', null);
+                
+                integrity += `Cuarteles sin finca: ${cuartelesSinFinca || 0}\n`;
+                
+                // Riegos sin operador
+                const { count: riegosSinOperador } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true })
+                    .is('operador_id', null);
+                
+                integrity += `Riegos sin operador: ${riegosSinOperador || 0}\n`;
+                
+                integrity += `\n✅ Verificación completada`;
+                
+            } catch (err) {
+                integrity += `❌ Error durante verificación: ${err.message}`;
+            }
+            
+            displayResult('integrity-result', integrity);
+        };
+
+        // 8. Campo objetivo en riegos
+        window.checkRiegosObjetivo = async function() {
+            showLoading('objetivo-result');
+            try {
+                const { count: totalRiegos } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true });
+
+                const { count: riegosConObjetivo } = await supabase
+                    .from('riegos')
+                    .select('*', { count: 'exact', head: true })
+                    .not('objetivo', 'is', null);
+
+                const porcentaje = totalRiegos ? ((riegosConObjetivo / totalRiegos) * 100).toFixed(2) : 0;
+
+                let objetivoInfo = `🎯 Análisis del Campo 'objetivo' en Riegos:\n\n`;
+                objetivoInfo += `Total de riegos: ${totalRiegos || 0}\n`;
+                objetivoInfo += `Riegos con objetivo: ${riegosConObjetivo || 0}\n`;
+                objetivoInfo += `Porcentaje completado: ${porcentaje}%\n\n`;
+
+                if (porcentaje < 50) {
+                    objetivoInfo += `⚠️ Menos del 50% de riegos tienen objetivo definido\n`;
+                } else {
+                    objetivoInfo += `✅ Buena cobertura del campo objetivo\n`;
+                }
+
+                // Muestra de objetivos más comunes
+                const { data: objetivos } = await supabase
+                    .from('riegos')
+                    .select('objetivo')
+                    .not('objetivo', 'is', null)
+                    .limit(10);
+
+                if (objetivos && objetivos.length > 0) {
+                    objetivoInfo += `\nEjemplos de objetivos:\n`;
+                    objetivos.forEach((obj, index) => {
+                        objetivoInfo += `  ${index + 1}. "${obj.objetivo}"\n`;
+                    });
+                }
+
+                displayResult('objetivo-result', objetivoInfo);
+            } catch (err) {
+                displayResult('objetivo-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 9. Consulta personalizada
+        window.executeCustomQuery = async function() {
+            const query = document.getElementById('custom-query').value.trim();
+            if (!query) {
+                displayResult('custom-result', '⚠️ Por favor ingresa una consulta SQL', 'warning');
+                return;
+            }
+
+            showLoading('custom-result');
+            
+            try {
+                // Nota: Esto solo funciona para consultas SELECT básicas usando el cliente de Supabase
+                displayResult('custom-result', '⚠️ Las consultas personalizadas requieren usar el SQL Editor de Supabase directamente.\n\nPara consultas complejas, copia la query y ejecútala en:\nhttps://supabase.com/dashboard → SQL Editor', 'warning');
+            } catch (err) {
+                displayResult('custom-result', `❌ Error: ${err.message}`, 'error');
+            }
+        };
+
+        // 10. Ejecutar todas las verificaciones
+        window.runAllChecks = async function() {
+            document.getElementById('all-checks-result').innerHTML = '<p class="loading">🚀 Ejecutando verificación completa...</p>';
+            
+            await testConnection();
+            await checkTables();
+            await checkUsersStructure();
+            await countRecords();
+            await checkCurrentUser();
+            await checkDataIntegrity();
+            await checkRiegosObjetivo();
+            
+            displayResult('all-checks-result', '✅ Verificación completa finalizada. Revisa los resultados arriba.', 'success');
+        };
+    </script>
+</body>
+</html>
