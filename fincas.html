@@ -289,12 +289,12 @@
                     return true;
                 } else {
                     console.warn('❌ No hay usuario autenticado, redirigiendo al login...');
-                    window.location.href = 'login.html';
+                    window.location.href = 'login-nuevo.html';
                     return false;
                 }
             } else {
                 console.warn('❌ Supabase no disponible, redirigiendo al login...');
-                window.location.href = 'login.html';
+                window.location.href = 'login-nuevo.html';
                 return false;
             }
         } catch (error) {
@@ -307,7 +307,7 @@
                 return false; // false = modo demo
             } else {
                 // En producción, redirigir al login
-                window.location.href = 'login.html';
+                window.location.href = 'login-nuevo.html';
                 return false;
             }
         }

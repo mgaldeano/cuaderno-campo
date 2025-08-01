@@ -331,7 +331,7 @@
       // Validar login y obtener user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        window.location.href = "login.html";
+        window.location.href = "login-nuevo.html";
         throw new Error("No autorizado");
       }
 
