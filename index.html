@@ -14,8 +14,34 @@
   <link rel="stylesheet" href="estilos.css">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  
+  <!-- CSS para ocultar contenido hasta verificar autenticación -->
+  <style>
+    body {
+      visibility: hidden;
+    }
+    body.authenticated {
+      visibility: visible;
+    }
+    .loading-auth {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      visibility: visible;
+    }
+  </style>
 </head>
 <body>
+  <!-- Indicador de carga mientras se verifica autenticación -->
+  <div class="loading-auth">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Verificando acceso...</span>
+    </div>
+    <p class="mt-2 text-muted">Verificando autenticación...</p>
+  </div>
+  
   <div id="header-container"></div>
   
   <main class="container">
@@ -37,6 +63,23 @@
   <script type="module">
     import { supabase } from "./supabaseClient.js";
     
+    // Verificación inmediata de autenticación antes de cargar el dashboard
+    async function verificacionPrevia() {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          console.log('🔒 Acceso no autorizado, redirigiendo al login...');
+          window.location.replace("login-nuevo.html");
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.log('🔒 Error verificando autenticación, redirigiendo al login...');
+        window.location.replace("login-nuevo.html");
+        return false;
+      }
+    }
+    
     // Variables globales
     let currentUser = null;
     let dashboardData = {
@@ -48,15 +91,17 @@
 
     // Verificar autenticación y cargar dashboard
     async function inicializarDashboard() {
+      // Verificación previa de autenticación
+      const estaAutenticado = await verificacionPrevia();
+      if (!estaAutenticado) {
+        return; // Ya se hizo la redirección en verificacionPrevia()
+      }
+      
       try {
+        // Obtener usuario ya verificado
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          window.location.href = "login-nuevo.html";
-          return;
-        }
-        
         currentUser = user;
-        console.log('✅ Usuario autenticado:', user.email);
+        console.log('✅ Dashboard iniciando para usuario:', user.email);
         
         // Cargar header
         await cargarHeader();
@@ -67,16 +112,33 @@
         // Renderizar dashboard
         renderizarDashboard();
         
+        // Mostrar contenido ahora que está todo cargado
+        mostrarContenido();
+        
       } catch (error) {
         console.error('❌ Error inicializando dashboard:', error);
         // En desarrollo local, mostrar dashboard demo
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
           console.log('🎭 Modo demo para desarrollo local');
           cargarDashboardDemo();
+          mostrarContenido();
         } else {
-          window.location.href = "login-nuevo.html";
+          console.log('🔒 Error del sistema, redirigiendo al login...');
+          window.location.replace("login-nuevo.html");
         }
       }
+    }
+
+    function mostrarContenido() {
+      // Ocultar el indicador de carga
+      const loadingIndicator = document.querySelector('.loading-auth');
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+      }
+      
+      // Mostrar el contenido del dashboard
+      document.body.classList.add('authenticated');
+      console.log('✅ Contenido del dashboard visible');
     }
 
     async function cargarHeader() {
