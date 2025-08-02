@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Labores | Cuaderno de Campo</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚜</text></svg>">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="estilos.css">
+    
+    <style>
+        .labor-card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .labor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .labor-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .preparacion { background: linear-gradient(45deg, #8B4513, #A0522D); }
+        .siembra { background: linear-gradient(45deg, #228B22, #32CD32); }
+        .mantenimiento { background: linear-gradient(45deg, #DAA520, #FFD700); }
+        .cosecha { background: linear-gradient(45deg, #FF8C00, #FFA500); }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 4px solid #8B4513;
+        }
+        
+        .section-title {
+            color: #8B4513;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+        
+        .btn-labor {
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-labor:hover {
+            background: linear-gradient(45deg, #A0522D, #CD853F);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <div class="container-fluid mt-4">
+        <!-- Título principal -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1 text-dark font-weight-bold">
+                            <i class="bi bi-tools text-warning me-2"></i>
+                            Labores
+                        </h2>
+                        <p class="text-muted mb-0">Registra y gestiona las actividades y tareas realizadas en las fincas</p>
+                    </div>
+                    <div>
+                        <a href="tareas.html" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Volver a Tareas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tipos de labores disponibles -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="mb-3 text-secondary">Tipos de Labores</h4>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card labor-card h-100" onclick="seleccionarTipoLabor('suelo')">
+                    <div class="card-body text-center">
+                        <div class="labor-icon preparacion">
+                            <i class="bi bi-tools"></i>
+                        </div>
+                        <h6 class="card-title">Suelo</h6>
+                        <p class="card-text small text-muted">Arado, rastreo, desorillada</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card labor-card h-100" onclick="seleccionarTipoLabor('cultivo')">
+                    <div class="card-body text-center">
+                        <div class="labor-icon siembra">
+                            <i class="bi bi-flower3"></i>
+                        </div>
+                        <h6 class="card-title">Cultivo</h6>
+                        <p class="card-text small text-muted">Injertos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card labor-card h-100" onclick="seleccionarTipoLabor('mantenimiento')">
+                    <div class="card-body text-center">
+                        <div class="labor-icon mantenimiento">
+                            <i class="bi bi-scissors"></i>
+                        </div>
+                        <h6 class="card-title">Mantenimiento</h6>
+                        <p class="card-text small text-muted">Poda, desmalezado, limpieza</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card labor-card h-100" onclick="seleccionarTipoLabor('cosecha')">
+                    <div class="card-body text-center">
+                        <div class="labor-icon cosecha">
+                            <i class="bi bi-basket"></i>
+                        </div>
+                        <h6 class="card-title">Cosecha</h6>
+                        <p class="card-text small text-muted">Recolección</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de registro -->
+        <div id="formulario-labor" style="display: none;">
+            <div class="card shadow">
+                <div class="card-header" style="background: linear-gradient(45deg, #8B4513, #A0522D); color: white;">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Registrar Labor
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="labor-form">
+                        <!-- Información básica -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-info-circle"></i>
+                                Información Básica
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tipo_labor" class="form-label">
+                                        Tarea <span class="required-field">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <select class="form-select" id="tipo_labor" required>
+                                            <option value="">Seleccionar tarea...</option>
+                                            <optgroup label="Labores de Suelo">
+                                                <option value="arado">Arado</option>
+                                                <option value="rastreo">Rastreo</option>
+                                                <option value="subsolado">Subsolado</option>
+                                                <option value="cultivada">Cultivada</option>
+                                                <option value="aporque">Aporque</option>
+                                                <option value="desorillada">Desorillada</option>
+                                            </optgroup>
+                                            <optgroup label="Cultivo">
+                                                <option value="injerto">Injerto</option>
+                                            </optgroup>
+                                            <optgroup label="Mantenimiento">
+                                                <option value="poda">Poda</option>
+                                                <option value="desmalezado">Desmalezado</option>
+                                                <option value="limpieza_general">Limpieza General</option>
+                                                <option value="mantenimiento_riego">Mantenimiento de Riego</option>
+                                            </optgroup>
+                                            <optgroup label="Cosecha">
+                                                <option value="cosecha">Cosecha</option>
+                                            </optgroup>
+                                            <option value="nueva_tarea">+ Agregar Nueva Tarea</option>
+                                        </select>
+                                        <button class="btn btn-outline-secondary" type="button" id="btn-nueva-tarea" style="display: none;">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" id="nueva-tarea" placeholder="Escriba el nombre de la nueva tarea..." style="display: none;">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_labor" class="form-label">
+                                        Fecha <span class="required-field">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" id="fecha_labor" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="finca_select" class="form-label">
+                                        Fincas <span class="required-field">*</span>
+                                        <small class="text-muted">(selección múltiple)</small>
+                                    </label>
+                                    <select class="selectpicker form-control" id="finca_select" multiple data-live-search="true" data-actions-box="true" title="Seleccionar fincas..." required>
+                                        <!-- Las opciones se cargarán dinámicamente -->
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="cuartel_select" class="form-label">
+                                        Cuarteles <span class="required-field">*</span>
+                                        <small class="text-muted">(selección múltiple)</small>
+                                    </label>
+                                    <select class="selectpicker form-control" id="cuartel_select" multiple data-live-search="true" data-actions-box="true" title="Primero selecciona una finca" required>
+                                        <option value="">Primero selecciona una finca</option>
+                                    </select>
+                                    <small class="form-text text-success mt-1">
+                                        <i class="bi bi-magic me-1"></i>
+                                        ✨ Selecciona múltiples cuarteles para registrar la misma labor en todos de una vez
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="objetivo" class="form-label">
+                                        Objetivo de la Labor <span class="required-field">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <select class="form-select" id="objetivo_select">
+                                            <option value="">Seleccionar objetivo anterior o escribir nuevo...</option>
+                                            <option value="nuevo_objetivo">+ Escribir Nuevo Objetivo</option>
+                                        </select>
+                                        <button class="btn btn-outline-secondary" type="button" id="btn-nuevo-objetivo" style="display: none;">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" id="objetivo" required 
+                                           placeholder="Ej: Preparar suelo para siembra de soja, eliminar malezas en vid, etc." 
+                                           style="display: block;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detalles de la labor -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-gear"></i>
+                                Detalles de la Labor
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tiempo_horas" class="form-label">
+                                        Tiempo (horas) <small class="text-muted">(opcional)</small>
+                                    </label>
+                                    <input type="number" step="0.5" min="0" class="form-control" id="tiempo_horas" placeholder="Ej: 4.5" value="0">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="operador" class="form-label">
+                                        Operador <span class="required-field">*</span>
+                                    </label>
+                                    <select class="form-select" id="operador" required>
+                                        <option value="">Seleccionar operador...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="maquinaria" class="form-label">
+                                        Maquinaria/Herramientas <small class="text-muted">(selección múltiple)</small>
+                                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="gestionarMaquinarias()">
+                                            <i class="bi bi-tools"></i> Gestionar
+                                        </button>
+                                    </label>
+                                    
+                                    <!-- Tags de maquinarias seleccionadas -->
+                                    <div id="maquinarias-selected" class="mb-2" style="min-height: 40px; border: 1px solid #dee2e6; border-radius: 6px; padding: 8px; background: #f8f9fa;">
+                                        <span class="text-muted">
+                                            <i class="bi bi-plus-circle me-1"></i>
+                                            Selecciona múltiples maquinarias usando el selector de abajo
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Select para agregar maquinarias -->
+                                    <div class="input-group">
+                                        <select class="form-select" id="maquinaria-select">
+                                            <option value="">+ Agregar maquinaria...</option>
+                                            <option value="tractor">Tractor</option>
+                                            <option value="arado">Arado</option>
+                                            <option value="rastra">Rastra</option>
+                                            <option value="subsolador">Subsolador</option>
+                                            <option value="sembradora">Sembradora</option>
+                                            <option value="cultivadora">Cultivadora</option>
+                                            <option value="cosechadora">Cosechadora</option>
+                                            <option value="podadora">Podadora</option>
+                                            <option value="desbrozadora">Desbrozadora</option>
+                                            <option value="pulverizador">Pulverizador</option>
+                                            <option value="manual">Herramientas Manuales</option>
+                                            <option value="nueva">+ Agregar Nueva Maquinaria</option>
+                                        </select>
+                                        <button class="btn btn-outline-primary" type="button" onclick="agregarMaquinaria()" title="Agregar maquinaria seleccionada">
+                                            <i class="bi bi-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" id="nueva-maquinaria" placeholder="Escriba el nombre de la nueva maquinaria..." style="display: none;">
+                                    <small class="form-text text-success mt-1">
+                                        <i class="bi bi-magic me-1"></i>
+                                        ✨ Selecciona múltiples maquinarias - aparecerán como etiquetas arriba
+                                    </small>
+                                    
+                                    <!-- Campo oculto para enviar las maquinarias -->
+                                    <input type="hidden" id="maquinaria" name="maquinaria" value="ninguna">
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="superficie_trabajada" class="form-label">
+                                        Superficie (ha) <small class="text-muted">(opcional)</small>
+                                    </label>
+                                    <input type="number" step="0.1" min="0" class="form-control" id="superficie_trabajada" placeholder="Ej: 2.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Costo y Resultado -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-currency-dollar"></i>
+                                Costo y Resultado
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="costo" class="form-label">
+                                        Costo Total <small class="text-muted">(opcional)</small>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control" id="costo" placeholder="0.00">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="resultado" class="form-label">
+                                        Resultado/Efectividad <small class="text-muted">(opcional)</small>
+                                    </label>
+                                    <select class="form-select" id="resultado">
+                                        <option value="">No especificado</option>
+                                        <option value="excelente">Excelente</option>
+                                        <option value="bueno">Bueno</option>
+                                        <option value="regular">Regular</option>
+                                        <option value="malo">Malo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-journal-text"></i>
+                                Observaciones
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <label for="observaciones" class="form-label">
+                                    Observaciones y Notas
+                                </label>
+                                <textarea class="form-control" id="observaciones" rows="3" 
+                                          placeholder="Describe detalles de la labor, problemas encontrados, resultados obtenidos, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="cancelarFormulario()">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-labor">
+                                <i class="bi bi-save me-1"></i>
+                                Registrar Labor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de labores registradas -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="mb-0 text-secondary">
+                                    <i class="bi bi-list-ul me-2"></i>
+                                    Labores Registradas
+                                </h5>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button class="btn btn-outline-primary btn-sm" onclick="mostrarFiltrosAvanzados()">
+                                    <i class="bi bi-funnel me-1"></i>
+                                    Filtros Avanzados
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Panel de filtros avanzados (oculto por defecto) -->
+                        <div id="filtros-avanzados" class="mt-3" style="display: none;">
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <label class="form-label small">Fincas:</label>
+                                    <select class="selectpicker form-control" id="filtro-fincas" multiple data-live-search="true" data-actions-box="true" title="Seleccionar fincas...">
+                                        <!-- Se cargarán dinámicamente -->
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Cuarteles:</label>
+                                    <select class="selectpicker form-control" id="filtro-cuarteles" multiple data-live-search="true" data-actions-box="true" title="Seleccionar cuarteles...">
+                                        <!-- Se cargarán dinámicamente -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small">Desde:</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtro-fecha-desde">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small">Hasta:</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtro-fecha-hasta">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small">&nbsp;</label>
+                                    <div>
+                                        <button class="btn btn-primary btn-sm w-100" onclick="aplicarFiltros()">
+                                            <i class="bi bi-search"></i> Filtrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="labores-list">
+                            <!-- Las labores se cargarán aquí dinámicamente -->
+                        </div>
+                        
+                        <!-- Estado vacío -->
+                        <div id="empty-state" class="text-center p-5">
+                            <i class="bi bi-tools display-1 text-muted"></i>
+                            <h5 class="text-muted mt-3">No hay labores registradas</h5>
+                            <p class="text-muted">Comienza registrando tu primera labor agrícola</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Paginación -->
+                    <div class="card-footer bg-white border-top">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <small class="text-muted" id="info-paginacion">
+                                    Mostrando 0 de 0 labores
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <nav aria-label="Paginación de labores">
+                                    <ul class="pagination pagination-sm justify-content-end mb-0" id="paginacion-labores">
+                                        <!-- Se generará dinámicamente -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalle de Labor -->
+    <div class="modal fade" id="modalDetalleLabor" tabindex="-1" aria-labelledby="modalDetalleLaborLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalDetalleLaborLabel">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Detalle de Labor
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="contenido-detalle-labor">
+                        <!-- El contenido se cargará dinámicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cerrar
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="btn-eliminar-labor-modal">
+                        <i class="bi bi-trash me-1"></i>
+                        Eliminar Labor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestión de Maquinarias -->
+    <div class="modal fade" id="modalGestionMaquinarias" tabindex="-1" aria-labelledby="modalGestionMaquinariasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalGestionMaquinariasLabel">
+                        <i class="bi bi-tools me-2"></i>
+                        Gestión de Maquinarias y Herramientas
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-plus-circle text-primary"></i> Agregar Nueva Maquinaria</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="nueva-maquinaria-modal" placeholder="Nombre de la maquinaria...">
+                                <button class="btn btn-primary" type="button" onclick="agregarMaquinariaModal()">
+                                    <i class="bi bi-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-list text-secondary"></i> Maquinarias Disponibles</h6>
+                            <div id="lista-maquinarias-modal" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                                <!-- Se cargarán dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-check"></i>
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+    <script type="module">
+        import { supabase } from "./supabaseClient.js";
+
+        // Variables globales
+        let currentUser = null;
+        let fincasData = [];
+        let operadoresData = [];
+        let laboresData = [];
+        let objetivosData = []; // Objetivos únicos del usuario
+        
+        // Variables de paginación
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalItems = 0;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await inicializarPagina();
+            } catch (error) {
+                console.error('Error inicializando página:', error);
+            }
+        });
+
+        async function inicializarPagina() {
+            // Verificar autenticación
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (!user || error) {
+                window.location.href = "login-nuevo.html";
+                return;
+            }
+            
+            currentUser = user;
+            console.log('✅ Usuario autenticado:', user.email);
+
+            // Cargar header
+            await cargarHeader();
+            
+            // Cargar datos
+            await Promise.all([
+                cargarFincas(),
+                cargarOperadores(),
+                cargarLabores(),
+                cargarObjetivos()
+            ]);
+            
+            // Configurar formulario
+            configurarFormulario();
+            
+            // Configurar event listeners adicionales
+            configurarEventListeners();
+            
+            // Establecer fecha actual por defecto
+            document.getElementById('fecha_labor').value = new Date().toISOString().split('T')[0];
+        }
+
+        function configurarEventListeners() {
+            // Event listener para Enter en modal de maquinarias
+            document.getElementById('nueva-maquinaria-modal').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    agregarMaquinariaModal();
+                }
+            });
+        }
+
+        async function cargarHeader() {
+            try {
+                const response = await fetch('header.html');
+                const html = await response.text();
+                document.getElementById('header-container').innerHTML = html;
+                await import('./header.js');
+            } catch (error) {
+                console.warn('⚠️ Error cargando header:', error);
+            }
+        }
+
+        async function cargarFincas() {
+            try {
+                const { data, error } = await supabase
+                    .from('fincas')
+                    .select('id, nombre_finca')
+                    .eq('usuario_id', currentUser.id)
+                    .order('nombre_finca');
+
+                if (error) throw error;
+
+                fincasData = data;
+                const select = document.getElementById('finca_select');
+                
+                // Limpiar todas las opciones existentes
+                select.innerHTML = '';
+                
+                // Agregar todas las fincas
+                data.forEach(finca => {
+                    const option = document.createElement('option');
+                    option.value = finca.id;
+                    option.textContent = finca.nombre_finca;
+                    select.appendChild(option);
+                });
+                
+                // Inicializar Bootstrap Select múltiple
+                $('#finca_select').selectpicker('refresh');
+                
+                console.log('✅ Fincas cargadas:', data.length);
+                
+                // Cargar opciones de filtros también
+                cargarOpcionesFiltros();
+                
+            } catch (error) {
+                console.error('❌ Error cargando fincas:', error);
+                mostrarMensaje('Error cargando fincas: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarOperadores() {
+            try {
+                const { data, error } = await supabase
+                    .from('aplicadores_operarios')
+                    .select('id, nombre, apellido')
+                    .eq('usuario_id', currentUser.id)
+                    .order('nombre');
+
+                if (error) throw error;
+
+                operadoresData = data;
+                const select = document.getElementById('operador');
+                
+                // Limpiar select
+                select.innerHTML = '<option value="">Seleccionar operador...</option>';
+                
+                data.forEach(operador => {
+                    const option = document.createElement('option');
+                    option.value = operador.id;
+                    // Mostrar nombre completo
+                    const nombreCompleto = operador.apellido 
+                        ? `${operador.nombre} ${operador.apellido}`
+                        : operador.nombre;
+                    option.textContent = nombreCompleto;
+                    select.appendChild(option);
+                });
+                
+                console.log('✅ Operadores cargados:', data.length);
+            } catch (error) {
+                console.error('❌ Error cargando operadores:', error);
+            }
+        }
+
+        async function cargarObjetivos() {
+            try {
+                const { data, error } = await supabase
+                    .from('labores_suelo')
+                    .select('objetivo')
+                    .eq('usuario_id', currentUser.id)
+                    .not('objetivo', 'is', null)
+                    .order('objetivo');
+
+                if (error) throw error;
+
+                // Obtener objetivos únicos
+                const objetivosUnicos = [...new Set(data.map(item => item.objetivo))];
+                objetivosData = objetivosUnicos;
+                
+                const select = document.getElementById('objetivo_select');
+                
+                // Limpiar opciones existentes (excepto las opciones por defecto)
+                const opcionesEstaticas = select.querySelectorAll('option[value=""], option[value="nuevo_objetivo"]');
+                select.innerHTML = '';
+                
+                // Restaurar opciones estáticas
+                opcionesEstaticas.forEach(opcion => select.appendChild(opcion.cloneNode(true)));
+                
+                // Agregar objetivos únicos
+                objetivosUnicos.forEach(objetivo => {
+                    const option = document.createElement('option');
+                    option.value = objetivo;
+                    option.textContent = objetivo;
+                    // Insertar antes de la opción "nuevo_objetivo"
+                    const opcionNueva = select.querySelector('option[value="nuevo_objetivo"]');
+                    select.insertBefore(option, opcionNueva);
+                });
+                
+                console.log('✅ Objetivos únicos cargados:', objetivosUnicos.length);
+            } catch (error) {
+                console.error('❌ Error cargando objetivos:', error);
+            }
+        }
+
+        async function cargarLabores() {
+            try {
+                const { data, error } = await supabase
+                    .from('labores_suelo')
+                    .select(`
+                        *,
+                        fincas(nombre_finca),
+                        cuarteles(nombre),
+                        aplicadores_operarios(nombre, apellido)
+                    `)
+                    .eq('usuario_id', currentUser.id)
+                    .order('fecha', { ascending: false });
+
+                if (error) throw error;
+
+                laboresData = data;
+                renderizarLabores();
+                
+                console.log('✅ Labores cargadas:', data.length);
+            } catch (error) {
+                console.error('❌ Error cargando labores:', error);
+                mostrarEstadoVacio();
+            }
+        }
+
+        function configurarFormulario() {
+            // Remover event listeners existentes para evitar duplicados
+            $('#finca_select').off('changed.bs.select');
+            
+            // Configurar cambio de fincas para cargar cuarteles (Bootstrap Select múltiple)
+            $('#finca_select').on('changed.bs.select', function(e) {
+                console.log('🔄 Cambio en selector de fincas detectado');
+                cargarCuarteles();
+            });
+            
+            // Configurar envío del formulario
+            document.getElementById('labor-form').addEventListener('submit', guardarLabor);
+            
+            // Configurar selector de tareas personalizadas
+            document.getElementById('tipo_labor').addEventListener('change', manejarTarea);
+            document.getElementById('btn-nueva-tarea').addEventListener('click', agregarNuevaTarea);
+            
+            // Configurar selector de objetivos reutilizables
+            document.getElementById('objetivo_select').addEventListener('change', manejarObjetivo);
+            document.getElementById('btn-nuevo-objetivo').addEventListener('click', agregarNuevoObjetivo);
+            
+            // Inicializar sistema de maquinarias múltiples
+            inicializarMaquinarias();
+        }
+
+        function manejarTarea() {
+            const select = document.getElementById('tipo_labor');
+            const btnNueva = document.getElementById('btn-nueva-tarea');
+            const inputNueva = document.getElementById('nueva-tarea');
+            
+            if (select.value === 'nueva_tarea') {
+                btnNueva.style.display = 'block';
+                inputNueva.style.display = 'block';
+                inputNueva.focus();
+            } else {
+                btnNueva.style.display = 'none';
+                inputNueva.style.display = 'none';
+                inputNueva.value = '';
+            }
+        }
+
+        function agregarNuevaTarea() {
+            const inputNueva = document.getElementById('nueva-tarea');
+            const select = document.getElementById('tipo_labor');
+            const nuevaTarea = inputNueva.value.trim();
+            
+            if (!nuevaTarea) {
+                alert('Por favor ingresa el nombre de la tarea');
+                return;
+            }
+            
+            // Crear nueva opción
+            const nuevaOpcion = document.createElement('option');
+            nuevaOpcion.value = nuevaTarea.toLowerCase().replace(/\s+/g, '_');
+            nuevaOpcion.textContent = nuevaTarea;
+            
+            // Insertar antes de la opción "Agregar Nueva Tarea"
+            const opcionAgregar = select.querySelector('option[value="nueva_tarea"]');
+            select.insertBefore(nuevaOpcion, opcionAgregar);
+            
+            // Seleccionar la nueva opción
+            select.value = nuevaOpcion.value;
+            
+            // Ocultar campos de nueva tarea
+            document.getElementById('btn-nueva-tarea').style.display = 'none';
+            inputNueva.style.display = 'none';
+            inputNueva.value = '';
+            
+            console.log('✅ Nueva tarea agregada:', nuevaTarea);
+        }
+
+        function manejarObjetivo() {
+            const select = document.getElementById('objetivo_select');
+            const btnNuevo = document.getElementById('btn-nuevo-objetivo');
+            const inputObjetivo = document.getElementById('objetivo');
+            
+            if (select.value === 'nuevo_objetivo') {
+                btnNuevo.style.display = 'block';
+                inputObjetivo.value = '';
+                inputObjetivo.focus();
+            } else if (select.value === '') {
+                btnNuevo.style.display = 'none';
+                inputObjetivo.value = '';
+            } else {
+                // Objetivo seleccionado de la lista
+                btnNuevo.style.display = 'none';
+                inputObjetivo.value = select.value;
+            }
+        }
+
+        function agregarNuevoObjetivo() {
+            const inputObjetivo = document.getElementById('objetivo');
+            const select = document.getElementById('objetivo_select');
+            const nuevoObjetivo = inputObjetivo.value.trim();
+            
+            if (!nuevoObjetivo) {
+                alert('Por favor ingresa el objetivo de la labor');
+                return;
+            }
+            
+            // Verificar si el objetivo ya existe
+            const objetivoExiste = objetivosData.includes(nuevoObjetivo);
+            
+            if (!objetivoExiste) {
+                // Crear nueva opción
+                const nuevaOpcion = document.createElement('option');
+                nuevaOpcion.value = nuevoObjetivo;
+                nuevaOpcion.textContent = nuevoObjetivo;
+                
+                // Insertar antes de la opción "Escribir Nuevo Objetivo"
+                const opcionAgregar = select.querySelector('option[value="nuevo_objetivo"]');
+                select.insertBefore(nuevaOpcion, opcionAgregar);
+                
+                // Agregar al array de objetivos
+                objetivosData.push(nuevoObjetivo);
+                
+                console.log('✅ Nuevo objetivo agregado:', nuevoObjetivo);
+            }
+            
+            // Seleccionar el objetivo (nuevo o existente)
+            select.value = nuevoObjetivo;
+            
+            // Ocultar botón
+            document.getElementById('btn-nuevo-objetivo').style.display = 'none';
+        }
+
+        // ===== SISTEMA DE MAQUINARIAS MÚLTIPLES =====
+        let maquinariasSeleccionadas = [];
+        let maquinariasDisponibles = [
+            'tractor', 'arado', 'rastra', 'subsolador', 'sembradora', 
+            'cultivadora', 'cosechadora', 'podadora', 'desbrozadora', 
+            'pulverizador', 'manual'
+        ];
+
+        function inicializarMaquinarias() {
+            actualizarVisualizacionMaquinarias();
+            
+            // Configurar event listener para Enter en nueva maquinaria
+            document.getElementById('nueva-maquinaria').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    agregarNuevaMaquinaria();
+                }
+            });
+        }
+
+        function agregarMaquinaria() {
+            const select = document.getElementById('maquinaria-select');
+            const valor = select.value;
+            
+            if (!valor) return;
+            
+            if (valor === 'nueva') {
+                mostrarInputNuevaMaquinaria();
+                return;
+            }
+            
+            if (!maquinariasSeleccionadas.includes(valor)) {
+                maquinariasSeleccionadas.push(valor);
+                actualizarVisualizacionMaquinarias();
+            }
+            
+            select.value = '';
+        }
+
+        function mostrarInputNuevaMaquinaria() {
+            const inputNueva = document.getElementById('nueva-maquinaria');
+            inputNueva.style.display = 'block';
+            inputNueva.focus();
+        }
+
+        function agregarNuevaMaquinaria() {
+            const inputNueva = document.getElementById('nueva-maquinaria');
+            const nuevaMaquinaria = inputNueva.value.trim();
+            
+            if (!nuevaMaquinaria) {
+                alert('Por favor ingresa el nombre de la maquinaria');
+                return;
+            }
+            
+            const valor = nuevaMaquinaria.toLowerCase().replace(/\s+/g, '_');
+            
+            // Agregar a la lista de disponibles
+            if (!maquinariasDisponibles.includes(valor)) {
+                maquinariasDisponibles.push(valor);
+                
+                // Agregar al select
+                const select = document.getElementById('maquinaria-select');
+                const nuevaOpcion = document.createElement('option');
+                nuevaOpcion.value = valor;
+                nuevaOpcion.textContent = nuevaMaquinaria;
+                
+                const opcionAgregar = select.querySelector('option[value="nueva"]');
+                select.insertBefore(nuevaOpcion, opcionAgregar);
+            }
+            
+            // Agregar a seleccionadas
+            if (!maquinariasSeleccionadas.includes(valor)) {
+                maquinariasSeleccionadas.push(valor);
+                actualizarVisualizacionMaquinarias();
+            }
+            
+            // Limpiar input
+            inputNueva.value = '';
+            inputNueva.style.display = 'none';
+            document.getElementById('maquinaria-select').value = '';
+        }
+
+        function removerMaquinaria(valor) {
+            maquinariasSeleccionadas = maquinariasSeleccionadas.filter(m => m !== valor);
+            actualizarVisualizacionMaquinarias();
+        }
+
+        function actualizarVisualizacionMaquinarias() {
+            const container = document.getElementById('maquinarias-selected');
+            const hiddenInput = document.getElementById('maquinaria');
+            
+            if (maquinariasSeleccionadas.length === 0) {
+                container.innerHTML = `
+                    <span class="text-muted">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Selecciona múltiples maquinarias usando el selector de abajo
+                    </span>
+                `;
+                hiddenInput.value = 'ninguna';
+                return;
+            }
+            
+            const tags = maquinariasSeleccionadas.map(valor => {
+                const nombre = getMaquinariaLabel(valor);
+                return `
+                    <span class="badge bg-primary me-1 mb-1" style="font-size: 0.9em;">
+                        <i class="bi bi-tools me-1"></i>${nombre}
+                        <button type="button" class="btn-close btn-close-white ms-1" 
+                                onclick="removerMaquinaria('${valor}')" 
+                                style="font-size: 0.7em;" title="Eliminar ${nombre}"></button>
+                    </span>
+                `;
+            }).join('');
+            
+            container.innerHTML = tags + `
+                <small class="text-muted d-block mt-1">
+                    <i class="bi bi-info-circle me-1"></i>
+                    ${maquinariasSeleccionadas.length} maquinaria${maquinariasSeleccionadas.length > 1 ? 's' : ''} seleccionada${maquinariasSeleccionadas.length > 1 ? 's' : ''}
+                </small>
+            `;
+            hiddenInput.value = maquinariasSeleccionadas.join(',');
+        }
+
+        function getMaquinariaLabel(valor) {
+            const labels = {
+                'tractor': 'Tractor',
+                'arado': 'Arado',
+                'rastra': 'Rastra',
+                'subsolador': 'Subsolador',
+                'sembradora': 'Sembradora',
+                'cultivadora': 'Cultivadora',
+                'cosechadora': 'Cosechadora',
+                'podadora': 'Podadora',
+                'desbrozadora': 'Desbrozadora',
+                'pulverizador': 'Pulverizador',
+                'manual': 'Herramientas Manuales'
+            };
+            return labels[valor] || valor.charAt(0).toUpperCase() + valor.slice(1).replace(/_/g, ' ');
+        }
+
+        // Función global para gestionar maquinarias
+        window.gestionarMaquinarias = function() {
+            // Cargar lista actual de maquinarias
+            actualizarListaMaquinariasModal();
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalGestionMaquinarias'));
+            modal.show();
+        };
+
+        function actualizarListaMaquinariasModal() {
+            const container = document.getElementById('lista-maquinarias-modal');
+            
+            const html = maquinariasDisponibles.map(maq => `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                    <span>
+                        <i class="bi bi-tools text-primary me-2"></i>
+                        ${getMaquinariaLabel(maq)}
+                    </span>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarMaquinariaModal('${maq}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html || '<p class="text-muted">No hay maquinarias registradas</p>';
+        }
+
+        window.agregarMaquinariaModal = function() {
+            const input = document.getElementById('nueva-maquinaria-modal');
+            const nuevaMaquinaria = input.value.trim();
+            
+            if (!nuevaMaquinaria) {
+                alert('Por favor ingresa el nombre de la maquinaria');
+                return;
+            }
+            
+            const valor = nuevaMaquinaria.toLowerCase().replace(/\s+/g, '_');
+            
+            if (maquinariasDisponibles.includes(valor)) {
+                alert('Esta maquinaria ya existe');
+                return;
+            }
+            
+            // Agregar a la lista de disponibles
+            maquinariasDisponibles.push(valor);
+            
+            // Agregar al select principal
+            const select = document.getElementById('maquinaria-select');
+            const nuevaOpcion = document.createElement('option');
+            nuevaOpcion.value = valor;
+            nuevaOpcion.textContent = nuevaMaquinaria;
+            
+            const opcionAgregar = select.querySelector('option[value="nueva"]');
+            select.insertBefore(nuevaOpcion, opcionAgregar);
+            
+            // Limpiar input y actualizar lista
+            input.value = '';
+            actualizarListaMaquinariasModal();
+            
+            mostrarMensaje(`Maquinaria "${nuevaMaquinaria}" agregada exitosamente`, 'success');
+        };
+
+        window.eliminarMaquinariaModal = function(valor) {
+            if (!confirm(`¿Estás seguro de eliminar "${getMaquinariaLabel(valor)}"?`)) {
+                return;
+            }
+            
+            // No permitir eliminar maquinarias básicas
+            const maquinariasBasicas = ['tractor', 'arado', 'rastra', 'subsolador', 'sembradora', 'cultivadora', 'cosechadora', 'podadora', 'desbrozadora', 'pulverizador', 'manual'];
+            if (maquinariasBasicas.includes(valor)) {
+                alert('No se pueden eliminar las maquinarias básicas del sistema');
+                return;
+            }
+            
+            // Remover de la lista
+            maquinariasDisponibles = maquinariasDisponibles.filter(m => m !== valor);
+            
+            // Remover del select principal
+            const select = document.getElementById('maquinaria-select');
+            const opcion = select.querySelector(`option[value="${valor}"]`);
+            if (opcion) {
+                opcion.remove();
+            }
+            
+            // Si estaba seleccionada, remover de selecciones
+            if (maquinariasSeleccionadas.includes(valor)) {
+                maquinariasSeleccionadas = maquinariasSeleccionadas.filter(m => m !== valor);
+                actualizarVisualizacionMaquinarias();
+            }
+            
+            // Actualizar lista modal
+            actualizarListaMaquinariasModal();
+            
+            mostrarMensaje(`Maquinaria "${getMaquinariaLabel(valor)}" eliminada`, 'success');
+        };
+
+        // Funciones globales para maquinarias
+        window.agregarMaquinaria = agregarMaquinaria;
+        window.removerMaquinaria = removerMaquinaria;
+
+        async function cargarCuarteles() {
+            const fincasSeleccionadas = $('#finca_select').selectpicker('val') || [];
+            const cuartelSelect = document.getElementById('cuartel_select');
+            
+            console.log('🔄 Cargando cuarteles para fincas:', fincasSeleccionadas);
+            
+            // Destruir completamente Bootstrap Select
+            $('#cuartel_select').selectpicker('destroy');
+            
+            // Limpiar el elemento HTML nativo
+            cuartelSelect.innerHTML = '';
+            
+            if (fincasSeleccionadas.length === 0) {
+                cuartelSelect.innerHTML = '<option value="">Primero selecciona una o más fincas</option>';
+                // Reinicializar Bootstrap Select
+                $('#cuartel_select').selectpicker({
+                    title: 'Primero selecciona una finca'
+                });
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('cuarteles')
+                    .select('id, nombre, finca_id, fincas(nombre_finca)')
+                    .in('finca_id', fincasSeleccionadas)
+                    .order('fincas(nombre_finca), nombre');
+
+                if (error) throw error;
+
+                // Construir HTML de opciones
+                let optionsHTML = '';
+                data.forEach(cuartel => {
+                    optionsHTML += `<option value="${cuartel.id}">${cuartel.nombre} (${cuartel.fincas?.nombre_finca})</option>`;
+                });
+                
+                // Asignar todo el HTML de una vez
+                cuartelSelect.innerHTML = optionsHTML;
+                
+                // Reinicializar Bootstrap Select con configuración completa
+                $('#cuartel_select').selectpicker({
+                    title: 'Seleccionar cuarteles...',
+                    liveSearch: true,
+                    actionsBox: true,
+                    selectedTextFormat: 'count > 2'
+                });
+                
+                console.log('✅ Cuarteles cargados:', data.length, `(fincas: ${fincasSeleccionadas.join(', ')})`);
+            } catch (error) {
+                console.error('❌ Error cargando cuarteles:', error);
+                cuartelSelect.innerHTML = '<option value="">Error cargando cuarteles</option>';
+                $('#cuartel_select').selectpicker({
+                    title: 'Error cargando cuarteles'
+                });
+            }
+        }
+
+        // Función global para seleccionar tipo de labor
+        window.seleccionarTipoLabor = function(tipo) {
+            // Mostrar formulario
+            document.getElementById('formulario-labor').style.display = 'block';
+            
+            // Scroll al formulario
+            document.getElementById('formulario-labor').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Preseleccionar tipo según categoría
+            const tipoSelect = document.getElementById('tipo_labor');
+            switch(tipo) {
+                case 'suelo':
+                    tipoSelect.value = 'arado';
+                    break;
+                case 'cultivo':
+                    tipoSelect.value = 'injerto';
+                    break;
+                case 'mantenimiento':
+                    tipoSelect.value = 'poda';
+                    break;
+                case 'cosecha':
+                    tipoSelect.value = 'cosecha';
+                    break;
+            }
+        };
+
+        // Función global para cancelar formulario
+        window.cancelarFormulario = function() {
+            document.getElementById('formulario-labor').style.display = 'none';
+            document.getElementById('labor-form').reset();
+            document.getElementById('fecha_labor').value = new Date().toISOString().split('T')[0];
+            
+            // Resetear valores por defecto
+            document.getElementById('tiempo_horas').value = '0';
+            document.getElementById('objetivo_select').value = '';
+            document.getElementById('objetivo').value = '';
+            
+            // Resetear selectores Bootstrap Select de forma completa
+            try {
+                // Fincas selector
+                $('#finca_select').selectpicker('deselectAll');
+                $('#finca_select').selectpicker('refresh');
+                
+                // Cuarteles selector - destruir y reinicializar
+                $('#cuartel_select').selectpicker('destroy');
+                const cuartelSelect = document.getElementById('cuartel_select');
+                cuartelSelect.innerHTML = '<option value="">Primero selecciona una finca</option>';
+                $('#cuartel_select').selectpicker({
+                    title: 'Primero selecciona una finca'
+                });
+                
+                console.log('✅ Selectores Bootstrap Select reseteados');
+            } catch (error) {
+                console.warn('⚠️ Error reseteando selectores:', error);
+            }
+            
+            // Resetear maquinarias múltiples
+            maquinariasSeleccionadas = [];
+            actualizarVisualizacionMaquinarias();
+            document.getElementById('maquinaria-select').value = '';
+            document.getElementById('nueva-maquinaria').style.display = 'none';
+            document.getElementById('nueva-maquinaria').value = '';
+            
+            // Resetear campos dinámicos
+            document.getElementById('btn-nueva-tarea').style.display = 'none';
+            document.getElementById('nueva-tarea').style.display = 'none';
+            document.getElementById('nueva-tarea').value = '';
+            
+            document.getElementById('btn-nuevo-objetivo').style.display = 'none';
+        };
+
+        async function guardarLabor(event) {
+            event.preventDefault();
+            
+            // Validar campos obligatorios
+            const camposObligatorios = ['tipo_labor', 'fecha_labor', 'finca_select', 'cuartel_select', 'objetivo', 'operador'];
+            for (const campo of camposObligatorios) {
+                const elemento = document.getElementById(campo);
+                if (campo === 'finca_select') {
+                    // Validar que haya al menos una finca seleccionada
+                    const fincasSeleccionadas = $('#finca_select').selectpicker('val') || [];
+                    if (fincasSeleccionadas.length === 0) {
+                        mostrarMensaje('Debes seleccionar al menos una finca', 'error');
+                        elemento.focus();
+                        return;
+                    }
+                } else if (campo === 'cuartel_select') {
+                    // Validar que haya al menos un cuartel seleccionado
+                    const cuartelesSeleccionados = $('#cuartel_select').selectpicker('val') || [];
+                    if (cuartelesSeleccionados.length === 0) {
+                        mostrarMensaje('Debes seleccionar al menos un cuartel', 'error');
+                        elemento.focus();
+                        return;
+                    }
+                } else if (!elemento.value) {
+                    mostrarMensaje(`El campo ${elemento.previousElementSibling.textContent.replace(' *', '')} es obligatorio`, 'error');
+                    elemento.focus();
+                    return;
+                }
+            }
+            
+            // Obtener valores seleccionados
+            const fincasSeleccionadas = $('#finca_select').selectpicker('val') || [];
+            const cuartelesSeleccionados = $('#cuartel_select').selectpicker('val') || [];
+            
+            if (fincasSeleccionadas.length === 0) {
+                mostrarMensaje('⚠️ Debes seleccionar al menos una finca', 'warning');
+                $('#finca_select').focus();
+                return;
+            }
+
+            if (cuartelesSeleccionados.length === 0) {
+                mostrarMensaje('⚠️ Debes seleccionar al menos un cuartel', 'warning');
+                $('#cuartel_select').focus();
+                return;
+            }
+
+            try {
+                // Crear un array de labores, una para cada cuartel seleccionado
+                const laboresParaInsertar = [];
+                
+                for (const cuartelId of cuartelesSeleccionados) {
+                    // Obtener la finca del cuartel para asegurar consistencia
+                    const { data: cuartelData, error: cuartelError } = await supabase
+                        .from('cuarteles')
+                        .select('finca_id')
+                        .eq('id', cuartelId)
+                        .single();
+                    
+                    if (cuartelError) {
+                        console.error('Error obteniendo finca del cuartel:', cuartelError);
+                        continue;
+                    }
+
+                    const laborData = {
+                        usuario_id: currentUser.id,
+                        tipo_labor: document.getElementById('tipo_labor').value,
+                        fecha: document.getElementById('fecha_labor').value,
+                        finca_id: parseInt(cuartelData.finca_id),
+                        cuartel_id: parseInt(cuartelId),
+                        objetivo: document.getElementById('objetivo').value,
+                        tiempo_horas: parseFloat(document.getElementById('tiempo_horas').value) || 0,
+                        operador_id: document.getElementById('operador').value,
+                        maquinaria: document.getElementById('maquinaria').value || 'ninguna',
+                        superficie_hectareas: parseFloat(document.getElementById('superficie_trabajada').value) || null,
+                        costo: parseFloat(document.getElementById('costo').value) || null,
+                        resultado: document.getElementById('resultado').value || null,
+                        observaciones: document.getElementById('observaciones').value || null
+                    };
+                    
+                    laboresParaInsertar.push(laborData);
+                }
+
+                console.log(`📝 Insertando ${laboresParaInsertar.length} labores en cuarteles:`, cuartelesSeleccionados);
+                console.log('📊 Datos a insertar:', laboresParaInsertar);
+
+                // Insertar todas las labores de una vez
+                const { data, error } = await supabase
+                    .from('labores_suelo')
+                    .insert(laboresParaInsertar)
+                    .select();
+
+                if (error) throw error;
+
+                console.log('✅ Labores registradas:', data.length);
+                
+                // Mostrar mensaje de éxito con cantidad
+                const mensaje = cuartelesSeleccionados.length === 1 
+                    ? 'Labor registrada exitosamente' 
+                    : `Labor registrada exitosamente en ${cuartelesSeleccionados.length} cuarteles`;
+                mostrarMensaje(mensaje, 'success');
+                
+                // Limpiar formulario y ocultarlo
+                cancelarFormulario();
+                
+                // Recargar lista de labores y objetivos
+                await Promise.all([
+                    cargarLabores(),
+                    cargarObjetivos()
+                ]);
+                
+            } catch (error) {
+                console.error('❌ Error guardando labores:', error);
+                mostrarMensaje('Error al registrar las labores: ' + error.message, 'error');
+            }
+        }
+
+        function renderizarLabores(pagina = 1) {
+            currentPage = pagina;
+            totalItems = laboresData.length;
+            
+            const container = document.getElementById('labores-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!laboresData || laboresData.length === 0) {
+                mostrarEstadoVacio();
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            // Calcular índices para paginación
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const laboresPagina = laboresData.slice(startIndex, endIndex);
+            
+            const html = laboresPagina.map(labor => `
+                <div class="border-bottom p-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h6 class="mb-1">${getTipoLaborLabel(labor.tipo_labor)}</h6>
+                            <small class="text-muted">${formatearFecha(labor.fecha)}</small>
+                            ${labor.objetivo ? `<br><small class="text-primary"><i class="bi bi-target"></i> ${labor.objetivo}</small>` : ''}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>${labor.fincas?.nombre_finca || 'N/A'}</strong><br>
+                            <small class="text-muted">${labor.cuarteles?.nombre || 'N/A'}</small>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>${labor.tiempo_horas || 0}h</strong><br>
+                            <small class="text-muted">${formatearMaquinarias(labor.maquinaria)}</small>
+                        </div>
+                        <div class="col-md-2">
+                            ${(() => {
+                                const operador = labor.aplicadores_operarios;
+                                if (operador) {
+                                    const nombreCompleto = operador.apellido 
+                                        ? `${operador.nombre} ${operador.apellido}`
+                                        : operador.nombre;
+                                    return nombreCompleto;
+                                }
+                                return 'N/A';
+                            })()}
+                            ${labor.costo ? `<br><small class="text-success">$${labor.costo}</small>` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${labor.resultado ? `<span class="badge bg-${getResultadoColor(labor.resultado)}">${labor.resultado}</span>` : ''}
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="verDetalleLabor('${labor.id}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarLabor('${labor.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+            
+            // Actualizar información y controles de paginación
+            actualizarPaginacion();
+        }
+
+        function actualizarPaginacion() {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startItem = (currentPage - 1) * itemsPerPage + 1;
+            const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+            
+            // Actualizar información
+            document.getElementById('info-paginacion').textContent = 
+                `Mostrando ${startItem}-${endItem} de ${totalItems} labores`;
+            
+            // Generar controles de paginación
+            const paginacionContainer = document.getElementById('paginacion-labores');
+            
+            if (totalPages <= 1) {
+                paginacionContainer.innerHTML = '';
+                return;
+            }
+            
+            let paginacionHTML = '';
+            
+            // Botón anterior
+            paginacionHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cambiarPagina(${currentPage - 1})">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+            
+            // Números de página
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginacionHTML += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="cambiarPagina(${i})">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginacionHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // Botón siguiente
+            paginacionHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cambiarPagina(${currentPage + 1})">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+            
+            paginacionContainer.innerHTML = paginacionHTML;
+        }
+
+        window.cambiarPagina = function(nuevaPagina) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (nuevaPagina < 1 || nuevaPagina > totalPages) return;
+            
+            renderizarLabores(nuevaPagina);
+        };
+
+        function getResultadoColor(resultado) {
+            const colores = {
+                'excelente': 'success',
+                'bueno': 'primary',
+                'regular': 'warning',
+                'malo': 'danger'
+            };
+            return colores[resultado] || 'secondary';
+        }
+
+        function formatearMaquinarias(maquinariaStr) {
+            if (!maquinariaStr || maquinariaStr === 'ninguna') {
+                return 'Sin maq.';
+            }
+            
+            // Si contiene comas, son múltiples maquinarias
+            if (maquinariaStr.includes(',')) {
+                const maquinarias = maquinariaStr.split(',');
+                if (maquinarias.length > 2) {
+                    return `${getMaquinariaLabel(maquinarias[0])}, ${getMaquinariaLabel(maquinarias[1])} +${maquinarias.length - 2}`;
+                } else {
+                    return maquinarias.map(m => getMaquinariaLabel(m.trim())).join(', ');
+                }
+            }
+            
+            return getMaquinariaLabel(maquinariaStr);
+        }
+
+        function mostrarEstadoVacio() {
+            document.getElementById('empty-state').style.display = 'block';
+            document.getElementById('labores-list').innerHTML = '';
+        }
+
+        function getTipoLaborLabel(tipo) {
+            const tipos = {
+                'arado': 'Arado',
+                'rastreo': 'Rastreo',
+                'subsolado': 'Subsolado',
+                'cultivada': 'Cultivada',
+                'aporque': 'Aporque',
+                'desorillada': 'Desorillada',
+                'injerto': 'Injerto',
+                'poda': 'Poda',
+                'desmalezado': 'Desmalezado',
+                'limpieza_general': 'Limpieza General',
+                'mantenimiento_riego': 'Mantenimiento de Riego',
+                'cosecha': 'Cosecha'
+            };
+            return tipos[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1).replace(/_/g, ' ');
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            // Implementar sistema de notificaciones
+            console.log(`${tipo.toUpperCase()}: ${mensaje}`);
+            alert(mensaje); // Temporal - mejorar con toast notifications
+        }
+
+        // Funciones globales para acciones de la lista
+        window.verDetalleLabor = function(laborId) {
+            const labor = laboresData.find(l => l.id === laborId);
+            if (!labor) {
+                mostrarMensaje('Labor no encontrada', 'error');
+                return;
+            }
+
+            // Construir contenido del modal
+            const operador = labor.aplicadores_operarios;
+            const nombreOperador = operador 
+                ? (operador.apellido ? `${operador.nombre} ${operador.apellido}` : operador.nombre)
+                : 'No especificado';
+
+            const contenido = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-primary mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información General</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Tipo de Labor:</strong> ${getTipoLaborLabel(labor.tipo_labor)}</p>
+                                <p><strong>Fecha:</strong> ${new Date(labor.fecha).toLocaleDateString('es-ES', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}</p>
+                                <p><strong>Finca:</strong> ${labor.fincas?.nombre_finca || 'No especificada'}</p>
+                                <p><strong>Cuartel:</strong> ${labor.cuarteles?.nombre || 'No especificado'}</p>
+                                <p><strong>Operador:</strong> ${nombreOperador}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="bi bi-gear"></i> Detalles Técnicos</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Tiempo:</strong> ${labor.tiempo_horas || 0} horas</p>
+                                <p><strong>Superficie:</strong> ${labor.superficie_hectareas ? `${labor.superficie_hectareas} ha` : 'No especificada'}</p>
+                                <p><strong>Maquinaria:</strong> ${formatearMaquinariasDetalle(labor.maquinaria)}</p>
+                                <p><strong>Costo:</strong> ${labor.costo ? `$${labor.costo}` : 'No especificado'}</p>
+                                <p><strong>Resultado:</strong> 
+                                    ${labor.resultado 
+                                        ? `<span class="badge bg-${getResultadoColor(labor.resultado)}">${labor.resultado}</span>`
+                                        : 'No evaluado'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="bi bi-target"></i> Objetivo y Observaciones</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Objetivo:</strong>
+                                    <p class="text-primary mt-1">${labor.objetivo || 'No especificado'}</p>
+                                </div>
+                                <div>
+                                    <strong>Observaciones:</strong>
+                                    <p class="text-muted mt-1">${labor.observaciones || 'Sin observaciones registradas'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-calendar"></i> <strong>Registrado el:</strong> 
+                                ${labor.created_at ? new Date(labor.created_at).toLocaleString('es-ES') : 'Fecha no disponible'}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Mostrar modal
+            document.getElementById('contenido-detalle-labor').innerHTML = contenido;
+            document.getElementById('btn-eliminar-labor-modal').onclick = () => eliminarLabor(laborId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalDetalleLabor'));
+            modal.show();
+        };
+
+        function formatearMaquinariasDetalle(maquinariaStr) {
+            if (!maquinariaStr || maquinariaStr === 'ninguna') {
+                return '<span class="text-muted">Sin maquinaria especificada</span>';
+            }
+            
+            if (maquinariaStr.includes(',')) {
+                const maquinarias = maquinariaStr.split(',');
+                return maquinarias.map(m => `<span class="badge bg-secondary me-1">${getMaquinariaLabel(m.trim())}</span>`).join('');
+            }
+            
+            return `<span class="badge bg-secondary">${getMaquinariaLabel(maquinariaStr)}</span>`;
+        }
+
+        window.eliminarLabor = async function(laborId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar esta labor?')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('labores_suelo')
+                    .delete()
+                    .eq('id', laborId);
+                
+                if (error) throw error;
+                
+                mostrarMensaje('Labor eliminada exitosamente', 'success');
+                await cargarLabores();
+                
+            } catch (error) {
+                console.error('❌ Error eliminando labor:', error);
+                mostrarMensaje('Error al eliminar la labor', 'error');
+            }
+        };
+
+        // ===== SISTEMA DE FILTROS AVANZADOS =====
+        let filtrosActivos = {
+            fincas: [],
+            cuarteles: [],
+            fechaDesde: null,
+            fechaHasta: null
+        };
+
+        window.mostrarFiltrosAvanzados = function() {
+            const panel = document.getElementById('filtros-avanzados');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                cargarOpcionesFiltros();
+            } else {
+                panel.style.display = 'none';
+            }
+        };
+
+        async function cargarOpcionesFiltros() {
+            try {
+                // Cargar fincas para filtro
+                const filtroFincas = document.getElementById('filtro-fincas');
+                if (filtroFincas) {
+                    // Destruir y recrear selectores Bootstrap Select para evitar duplicados
+                    $('#filtro-fincas').selectpicker('destroy');
+                    $('#filtro-cuarteles').selectpicker('destroy');
+                    
+                    filtroFincas.innerHTML = '';
+                    fincasData.forEach(finca => {
+                        const option = document.createElement('option');
+                        option.value = finca.id;
+                        option.textContent = finca.nombre_finca;
+                        filtroFincas.appendChild(option);
+                    });
+
+                    // Cargar todos los cuarteles para filtro
+                    const { data: cuarteles, error } = await supabase
+                        .from('cuarteles')
+                        .select('id, nombre, finca_id, fincas(nombre_finca)')
+                        .in('finca_id', fincasData.map(f => f.id))
+                        .order('fincas(nombre_finca), nombre');
+
+                    if (error) throw error;
+
+                    const filtroCuarteles = document.getElementById('filtro-cuarteles');
+                    filtroCuarteles.innerHTML = '';
+                    cuarteles.forEach(cuartel => {
+                        const option = document.createElement('option');
+                        option.value = cuartel.id;
+                        option.textContent = `${cuartel.nombre} (${cuartel.fincas?.nombre_finca || 'Sin finca'})`;
+                        filtroCuarteles.appendChild(option);
+                    });
+
+                    // Reinicializar Bootstrap Select después de cargar las opciones
+                    $('#filtro-fincas').selectpicker({
+                        title: 'Seleccionar fincas...',
+                        liveSearch: true,
+                        actionsBox: true
+                    });
+                    $('#filtro-cuarteles').selectpicker({
+                        title: 'Seleccionar cuarteles...',
+                        liveSearch: true,
+                        actionsBox: true
+                    });
+                }
+
+            } catch (error) {
+                console.error('❌ Error cargando opciones de filtro:', error);
+            }
+        }
+
+        window.aplicarFiltros = function() {
+            const fincasSeleccionadas = $('#filtro-fincas').selectpicker('val') || [];
+            const cuartelesSeleccionados = $('#filtro-cuarteles').selectpicker('val') || [];
+            const fechaDesde = document.getElementById('filtro-fecha-desde').value;
+            const fechaHasta = document.getElementById('filtro-fecha-hasta').value;
+
+            filtrosActivos = {
+                fincas: fincasSeleccionadas,
+                cuarteles: cuartelesSeleccionados,
+                fechaDesde: fechaDesde,
+                fechaHasta: fechaHasta
+            };
+
+            filtrarLabores();
+        };
+
+        function filtrarLabores() {
+            let laboresFiltradas = [...laboresData];
+
+            // Filtrar por fincas
+            if (filtrosActivos.fincas.length > 0) {
+                laboresFiltradas = laboresFiltradas.filter(labor => 
+                    filtrosActivos.fincas.includes(labor.finca_id.toString())
+                );
+            }
+
+            // Filtrar por cuarteles
+            if (filtrosActivos.cuarteles.length > 0) {
+                laboresFiltradas = laboresFiltradas.filter(labor => 
+                    filtrosActivos.cuarteles.includes(labor.cuartel_id.toString())
+                );
+            }
+
+            // Filtrar por fecha desde
+            if (filtrosActivos.fechaDesde) {
+                laboresFiltradas = laboresFiltradas.filter(labor => 
+                    labor.fecha >= filtrosActivos.fechaDesde
+                );
+            }
+
+            // Filtrar por fecha hasta
+            if (filtrosActivos.fechaHasta) {
+                laboresFiltradas = laboresFiltradas.filter(labor => 
+                    labor.fecha <= filtrosActivos.fechaHasta
+                );
+            }
+
+            // Renderizar labores filtradas
+            renderizarLaboresFiltradas(laboresFiltradas);
+        };
+
+        function renderizarLaboresFiltradas(laboresFiltradas) {
+            const container = document.getElementById('labores-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!laboresFiltradas || laboresFiltradas.length === 0) {
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = `
+                    <i class="bi bi-funnel display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">No hay labores que coincidan con los filtros</h5>
+                    <p class="text-muted">Ajusta los filtros o 
+                        <button class="btn btn-link p-0" onclick="limpiarFiltros()">limpia todos los filtros</button>
+                    </p>
+                `;
+                container.innerHTML = '';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            const html = laboresFiltradas.map(labor => `
+                <div class="border-bottom p-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h6 class="mb-1">${getTipoLaborLabel(labor.tipo_labor)}</h6>
+                            <small class="text-muted">${formatearFecha(labor.fecha)}</small>
+                            ${labor.objetivo ? `<br><small class="text-primary"><i class="bi bi-target"></i> ${labor.objetivo}</small>` : ''}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>${labor.fincas?.nombre_finca || 'N/A'}</strong><br>
+                            <small class="text-muted">${labor.cuarteles?.nombre || 'N/A'}</small>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>${labor.tiempo_horas || 0}h</strong><br>
+                            <small class="text-muted">${formatearMaquinarias(labor.maquinaria)}</small>
+                        </div>
+                        <div class="col-md-2">
+                            ${(() => {
+                                const operador = labor.aplicadores_operarios;
+                                if (operador) {
+                                    const nombreCompleto = operador.apellido 
+                                        ? `${operador.nombre} ${operador.apellido}`
+                                        : operador.nombre;
+                                    return nombreCompleto;
+                                }
+                                return 'N/A';
+                            })()}
+                            ${labor.costo ? `<br><small class="text-success">$${labor.costo}</small>` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${labor.resultado ? `<span class="badge bg-${getResultadoColor(labor.resultado)}">${labor.resultado}</span>` : ''}
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="verDetalleLabor('${labor.id}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarLabor('${labor.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        window.limpiarFiltros = function() {
+            $('#filtro-fincas').selectpicker('deselectAll');
+            $('#filtro-cuarteles').selectpicker('deselectAll');
+            document.getElementById('filtro-fecha-desde').value = '';
+            document.getElementById('filtro-fecha-hasta').value = '';
+            
+            filtrosActivos = {
+                fincas: [],
+                cuarteles: [],
+                fechaDesde: null,
+                fechaHasta: null
+            };
+            
+            renderizarLabores(); // Mostrar todas las labores
+        };
+    </script>
+</body>
+</html>

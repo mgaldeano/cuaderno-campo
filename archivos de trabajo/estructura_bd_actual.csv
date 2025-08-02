@@ -416,3 +416,19 @@ GROUP BY cuartel_id, operador_id;
 - Implementar funciones para manejo de aplicaciones de agroquímicos y fertilizaciones
 - Crear funciones de validación de datos y restricciones de negocio
 - Desarrollar funciones para cálculos de superficies y rendimientos
+labores_suelo,id,uuid,NO
+labores_suelo,fecha,timestamp with time zone,NO
+labores_suelo,finca_id,bigint,NO
+labores_suelo,cuartel_id,bigint,NO
+labores_suelo,tipo_labor,text,NO
+labores_suelo,objetivo,text,NO
+labores_suelo,tiempo_horas,numeric,SI
+labores_suelo,operador_id,uuid,NO
+labores_suelo,maquinaria,text,SI
+labores_suelo,superficie_hectareas,numeric,SI
+labores_suelo,costo,numeric,SI
+labores_suelo,resultado,text,SI
+labores_suelo,observaciones,text,SI
+labores_suelo,usuario_id,uuid,NO
+labores_suelo,created_at,timestamp with time zone,SI
+labores_suelo,updated_at,timestamp with time zone,SI

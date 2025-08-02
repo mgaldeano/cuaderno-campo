@@ -1,3 +1,23 @@
+# Futuras tareas agregadas (01/08/2025):
+## ✅ COMPLETADO: Sistema de Labores Agrícolas
+- **Implementación completa** del módulo `labores-suelo.html` con funcionalidades avanzadas:
+  - ✅ Tabla `labores_suelo` creada en Supabase con RLS habilitado
+  - ✅ Sistema dinámico de categorías: Suelo, Cultivo, Mantenimiento, Cosecha
+  - ✅ Campos personalizables: tareas, maquinaria y objetivos reutilizables
+  - ✅ Campos opcionales: tiempo (horas), superficie, costo, resultado
+  - ✅ Interfaz completa con Bootstrap 5 y validación en tiempo real
+  - ✅ CRUD completo con listado, filtros y acciones de gestión
+  - ✅ Documentación actualizada en esquema de BD
+- **Archivos creados/modificados**:
+  - `labores-suelo.html` - Interfaz principal (23k+ líneas)
+  - `scripts-debug/crear_tabla_labores_suelo.sql` - Script de creación de tabla
+  - `archivos de trabajo/ESQUEMA_BD_ACTUALIZADO.md` - Documentación actualizada
+- **Funcionalidades destacadas**:
+  - Objetivos reutilizables con dropdown inteligente
+  - Maquinaria y tareas dinámicas expandibles por usuario
+  - Seguimiento de costos y efectividad de labores
+  - Integración completa con fincas, cuarteles y operadores
+
 # Futuras tareas agregadas (31/07/2025):
 - Limpieza de políticas RLS: eliminación de reglas redundantes en tablas fincas y cuarteles
 - Corrección de carga de fincas y cuarteles para roles admin, superadmin e ingeniero
