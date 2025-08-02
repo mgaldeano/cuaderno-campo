@@ -1,11 +1,11 @@
 # Esquema de Base de Datos Actualizado
 
-**Fecha:** 30 de julio de 2025  
-**Estado:** ✅ Validado y funcional
+**Fecha:** 1 de agosto de 2025  
+**Estado:** ✅ Validado y funcional - **Incluye nueva tabla labores_suelo**
 
 ## Resumen de Tablas
 
-El sistema cuenta con **15 tablas principales** y **1 vista** para gestionar la información agrícola:
+El sistema cuenta con **16 tablas principales** y **1 vista** para gestionar la información agrícola:
 
 | Tabla | Registros Tipo | Descripción |
 |-------|----------------|-------------|
@@ -17,6 +17,7 @@ El sistema cuenta con **15 tablas principales** y **1 vista** para gestionar la 
 | `fertilizantes` | Catálogos | Productos de fertilización con composición química |
 | `fincas` | Ubicaciones | Propiedades agrícolas principales |
 | `fitosanitarios` | Catálogos | Productos para control de plagas y enfermedades |
+| `labores_suelo` | Actividades | **NUEVO** - Registro de labores y actividades agrícolas |
 | `metodos_de_aplicacion` | Catálogos | Formas de aplicar productos (pulverización, riego, etc.) |
 | `operario_finca` | Relaciones | Asignación de operarios a fincas |
 | `organizaciones` | Entidades | Empresas o cooperativas que agrupan usuarios |
@@ -61,7 +62,42 @@ Propiedades agrícolas principales.
 | `departamento` | text | YES | Departamento de ubicación |
 | `created_at` | timestamp | YES | Fecha de creación |
 
-### 🗺️ `cuarteles`
+### � `labores_suelo` ⭐ **NUEVA**
+Registro de labores y actividades agrícolas realizadas en las fincas.
+
+| Columna | Tipo | Nullable | Descripción |
+|---------|------|----------|-------------|
+| `id` | uuid | NO | Identificador único |
+| `fecha` | timestamp with time zone | NO | Fecha y hora de la labor |
+| `finca_id` | bigint | NO | Finca donde se realizó |
+| `cuartel_id` | bigint | NO | Cuartel específico |
+| `tipo_labor` | text | NO | Tipo de actividad (arado, poda, cosecha, etc.) |
+| `objetivo` | text | NO | Propósito de la labor |
+| `tiempo_horas` | numeric(6,2) | YES | Tiempo invertido en horas (default: 0) |
+| `operador_id` | uuid | NO | Operario que ejecutó la labor |
+| `maquinaria` | text | YES | Maquinaria/herramientas utilizadas (default: 'ninguna') |
+| `superficie_hectareas` | numeric(10,2) | YES | Superficie trabajada en hectáreas |
+| `costo` | numeric(10,2) | YES | Costo total de la labor |
+| `resultado` | text | YES | Efectividad: excelente/bueno/regular/malo |
+| `observaciones` | text | YES | Notas y comentarios adicionales |
+| `usuario_id` | uuid | NO | Usuario que registró la labor |
+| `created_at` | timestamp with time zone | YES | Fecha de creación del registro |
+| `updated_at` | timestamp with time zone | YES | Fecha de última modificación |
+
+**Categorías de Labores:**
+- **Suelo**: Arado, rastreo, subsolado, cultivada, aporque, desorillada
+- **Cultivo**: Injertos
+- **Mantenimiento**: Poda, desmalezado, limpieza general, mantenimiento de riego
+- **Cosecha**: Recolección
+
+**Características especiales:**
+- ✅ RLS habilitado (usuarios ven solo sus labores)
+- ✅ Campos dinámicos (maquinaria y tareas personalizables)
+- ✅ Objetivos reutilizables
+- ✅ Trigger automático para `updated_at`
+- ✅ Índices optimizados para consultas por fecha, finca, tipo
+
+### �🗺️ `cuarteles`
 Subdivisiones de las fincas donde se cultivan especies específicas.
 
 | Columna | Tipo | Nullable | Descripción |
