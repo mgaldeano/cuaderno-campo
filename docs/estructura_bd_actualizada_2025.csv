@@ -208,3 +208,28 @@ visitas,id_cuartel,bigint,SI
 visitas,id_ingeniero,uuid,NO
 visitas,adjuntos,jsonb,SI
 visitas,enviado_mail,boolean,SI
+fertilizaciones,id,bigint,NO
+fertilizaciones,usuario_id,uuid,NO
+fertilizaciones,finca_id,bigint,NO
+fertilizaciones,cuartel_id,bigint,NO
+fertilizaciones,fertilizante_id,uuid,NO
+fertilizaciones,fecha,date,NO
+fertilizaciones,dosis,numeric,NO
+fertilizaciones,unidad_dosis,character varying,NO
+fertilizaciones,metodo_aplicacion,character varying,NO
+fertilizaciones,sistema_aplicacion,character varying,SI
+fertilizaciones,superficie_aplicada,numeric,SI
+fertilizaciones,operador_id,uuid,SI
+fertilizaciones,equipo_trabajadores,text,SI
+fertilizaciones,costo_total,numeric,SI
+fertilizaciones,clima,character varying,SI
+fertilizaciones,humedad_suelo,character varying,SI
+fertilizaciones,observaciones,text,SI
+fertilizaciones,created_at,timestamp with time zone,SI
+fertilizaciones,updated_at,timestamp with time zone,SI
+fertilizaciones,dosis_referencia,numeric,SI
+fertilizaciones,unidad_dosis_referencia,character varying,SI
+fertilizaciones,cantidad_aplicada,numeric,SI
+fertilizaciones,unidad_cantidad,character varying,SI
+fertilizaciones,superficie_cuartel,numeric,SI
+fertilizaciones,dosis_real_calculada,numeric,SI

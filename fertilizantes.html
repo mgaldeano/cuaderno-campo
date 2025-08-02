@@ -84,13 +84,29 @@
         <!-- Título y descripción -->
         <div class="row mb-4">
           <div class="col-12">
-            <h1 class="h2 mb-3">
-              <i class="bi bi-droplet-fill me-2 text-success"></i>
-              Fertilizantes
-            </h1>
-            <p class="text-muted">
-              Gestiona el catálogo de fertilizantes con sus fórmulas y composición nutricional.
-            </p>
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h1 class="h2 mb-3">
+                  <i class="bi bi-droplet-fill me-2 text-success"></i>
+                  Catálogo de Fertilizantes
+                  <span class="badge bg-warning text-dark ms-2">Personal Técnico</span>
+                </h1>
+                <p class="text-muted mb-2">
+                  Gestiona el catálogo maestro de fertilizantes con sus fórmulas y composición nutricional.
+                </p>
+                <div class="alert alert-info border-0 py-2">
+                  <i class="bi bi-info-circle me-2"></i>
+                  <small>
+                    <strong>Nota:</strong> Esta tabla contiene los aportes nutricionales de referencia. 
+                    Las cantidades aplicadas se registran en el módulo de Fertilizaciones.
+                  </small>
+                </div>
+              </div>
+              <div class="text-end">
+                <small class="text-muted">Usuario: <strong>${userData.nombre}</strong></small><br>
+                <small class="text-muted">Rol: <strong>${userData.rol}</strong></small>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -103,7 +119,7 @@
                   <i class="bi bi-search"></i>
                 </span>
                 <input type="search" id="searchInput" class="form-control" 
-                       placeholder="Buscar por producto, fórmula o nutriente...">
+                       placeholder="Buscar por producto, tipo, fórmula, detalles técnicos o nutriente...">
               </div>
             </div>
             <div class="col-md-4 text-end mt-2 mt-md-0">
@@ -121,21 +137,23 @@
             <table id="fertilizantesTable" class="table table-hover mb-0">
               <thead class="table-success">
                 <tr>
-                  <th style="width: 15%">Producto</th>
-                  <th style="width: 10%">Fórmula</th>
-                  <th style="width: 6%">N %</th>
-                  <th style="width: 6%">P %</th>
-                  <th style="width: 6%">K %</th>
-                  <th style="width: 6%">Ca %</th>
-                  <th style="width: 6%">Mg %</th>
-                  <th style="width: 6%">S %</th>
-                  <th style="width: 5%">Fe %</th>
-                  <th style="width: 5%">Mn %</th>
-                  <th style="width: 5%">Zn %</th>
-                  <th style="width: 5%">Cu %</th>
-                  <th style="width: 5%">Bo %</th>
-                  <th style="width: 5%">Mo %</th>
-                  <th style="width: 15%" class="text-center">Acciones</th>
+                  <th style="width: 10%">Producto</th>
+                  <th style="width: 8%">Tipo</th>
+                  <th style="width: 6%">Fórmula</th>
+                  <th style="width: 4%">N %</th>
+                  <th style="width: 4%">P %</th>
+                  <th style="width: 4%">K %</th>
+                  <th style="width: 4%">Ca %</th>
+                  <th style="width: 4%">Mg %</th>
+                  <th style="width: 4%">S %</th>
+                  <th style="width: 3%">Fe %</th>
+                  <th style="width: 3%">Mn %</th>
+                  <th style="width: 3%">Zn %</th>
+                  <th style="width: 3%">Cu %</th>
+                  <th style="width: 3%">Bo %</th>
+                  <th style="width: 3%">Mo %</th>
+                  <th style="width: 15%">Detalles Técnicos</th>
+                  <th style="width: 12%" class="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -162,6 +180,62 @@
       throw new Error("No autorizado");
     }
 
+    // VERIFICAR ROL DEL USUARIO
+    const { data: userData, error: userError } = await supabase
+      .from('usuarios')
+      .select('nombre, rol, organizacion_id')
+      .eq('id', user.id)
+      .single();
+    
+    if (userError) {
+      console.error('Error al obtener datos del usuario:', userError);
+      window.location.href = "login-nuevo.html";
+      throw new Error("No autorizado");
+    }
+
+    // CONTROL DE ACCESO: Administradores, superadmin e ingenieros
+    const rolesPermitidos = ['administrador', 'superadmin', 'ingeniero'];
+    if (!rolesPermitidos.includes(userData.rol)) {
+      document.body.innerHTML = `
+        <div class="container mt-5">
+          <div class="row justify-content-center">
+            <div class="col-md-8">
+              <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                  <h4 class="mb-0">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    Acceso Restringido
+                  </h4>
+                </div>
+                <div class="card-body text-center">
+                  <i class="bi bi-lock-fill display-1 text-warning mb-3"></i>
+                  <h5>Esta sección es solo para personal técnico</h5>
+                  <p class="text-muted mb-4">
+                    La gestión de fertilizantes está reservada para usuarios con rol de administrador, superadmin o ingeniero.
+                    <br>Su rol actual es: <strong>${userData.rol}</strong>
+                  </p>
+                  <p class="text-muted">
+                    Si necesita agregar o modificar fertilizantes, contacte a su administrador o ingeniero.
+                  </p>
+                  <div class="mt-4">
+                    <button onclick="window.history.back()" class="btn btn-secondary me-2">
+                      <i class="bi bi-arrow-left me-1"></i>Volver
+                    </button>
+                    <a href="index.html" class="btn btn-primary">
+                      <i class="bi bi-house me-1"></i>Ir al Inicio
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      throw new Error("Acceso denegado - Rol insuficiente");
+    }
+
+    console.log("✅ Acceso autorizado para:", userData.nombre, "- Rol:", userData.rol);
+
     // Cargar header
     fetch('header.html')
       .then(res => res.text())
@@ -182,12 +256,15 @@
     // Cargar fertilizantes
     async function fetchFertilizantes() {
       try {
-        const { data, error } = await supabase.from('fertilizantes').select('*').order('producto');
+        console.log("🔍 Cargando catálogo de fertilizantes...");
+        const { data, error } = await supabase.from('fertilizantes').select('*').order('tipo', 'producto');
         if (error) throw error;
         fertilizantes = data || [];
         renderTable();
-        showStatus(`${fertilizantes.length} fertilizantes cargados`, 'success');
+        showStatus(`${fertilizantes.length} fertilizantes en el catálogo`, 'success');
+        console.log("✅ Catálogo cargado:", fertilizantes.length, "fertilizantes");
       } catch (err) {
+        console.error("❌ Error al cargar catálogo:", err);
         showStatus('Error al cargar fertilizantes: ' + err.message, 'error');
       }
     }
@@ -197,7 +274,9 @@
       const filtro = searchInput.value.toLowerCase();
       const fertilizantesFiltrados = fertilizantes.filter(f =>
         (f.producto || '').toLowerCase().includes(filtro) ||
+        (f.tipo || '').toLowerCase().includes(filtro) ||
         (f.formula || '').toLowerCase().includes(filtro) ||
+        (f.detalles_tecnicos || '').toLowerCase().includes(filtro) ||
         String(f.n || '').toLowerCase().includes(filtro) ||
         String(f.p || '').toLowerCase().includes(filtro) ||
         String(f.k || '').toLowerCase().includes(filtro)
@@ -208,7 +287,7 @@
       if (fertilizantesFiltrados.length === 0) {
         table.innerHTML = `
           <tr>
-            <td colspan="15" class="text-center text-muted py-4">
+            <td colspan="17" class="text-center text-muted py-4">
               <i class="bi bi-inbox fs-1 d-block mb-2"></i>
               ${filtro ? 'No se encontraron fertilizantes que coincidan con la búsqueda' : 'No hay fertilizantes registrados'}
             </td>
@@ -228,6 +307,15 @@
                      data-field="producto" maxlength="100" required>
             </td>
             <td>
+              <select class="form-select form-select-sm" data-field="tipo" required>
+                <option value="inorganico" ${(f.tipo || 'inorganico') === 'inorganico' ? 'selected' : ''}>Inorgánico</option>
+                <option value="organico" ${f.tipo === 'organico' ? 'selected' : ''}>Orgánico</option>
+                <option value="bioestimulante" ${f.tipo === 'bioestimulante' ? 'selected' : ''}>Bioestimulante</option>
+                <option value="hidroponico" ${f.tipo === 'hidroponico' ? 'selected' : ''}>Hidropónico</option>
+                <option value="otros" ${f.tipo === 'otros' ? 'selected' : ''}>Otros</option>
+              </select>
+            </td>
+            <td>
               <input class="form-control form-control-sm" value="${f.formula || ''}" 
                      data-field="formula" maxlength="50">
             </td>
@@ -243,6 +331,10 @@
             <td><input class="form-control form-control-sm" value="${f.cu || ''}" data-field="cu" type="number" step="0.01" min="0" max="100"></td>
             <td><input class="form-control form-control-sm" value="${f.bo || ''}" data-field="bo" type="number" step="0.01" min="0" max="100"></td>
             <td><input class="form-control form-control-sm" value="${f.mo || ''}" data-field="mo" type="number" step="0.01" min="0" max="100"></td>
+            <td>
+              <textarea class="form-control form-control-sm" rows="2" placeholder="Detalles técnicos, compatibilidades, recomendaciones..." 
+                        data-field="detalles_tecnicos" maxlength="500">${f.detalles_tecnicos || ''}</textarea>
+            </td>
             <td class="text-center">
               <button class="btn btn-success btn-action" data-action="save" title="Guardar">
                 <i class="bi bi-check-lg"></i>
@@ -254,8 +346,18 @@
           `;
         } else {
           // Modo visualización
+          const tipoDisplay = {
+            'inorganico': { label: 'Inorgánico', color: 'bg-primary' },
+            'organico': { label: 'Orgánico', color: 'bg-success' },
+            'bioestimulante': { label: 'Bioestimulante', color: 'bg-warning text-dark' },
+            'hidroponico': { label: 'Hidropónico', color: 'bg-info text-dark' },
+            'otros': { label: 'Otros', color: 'bg-secondary' }
+          };
+          const tipo = tipoDisplay[f.tipo] || tipoDisplay['otros'];
+          
           tr.innerHTML = `
             <td><strong>${f.producto || ''}</strong></td>
+            <td><span class="badge ${tipo.color}">${tipo.label}</span></td>
             <td>${f.formula ? `<span class="formula-badge">${f.formula}</span>` : '<span class="text-muted">-</span>'}</td>
             <td class="text-center">${formatNutrient(f.n)}</td>
             <td class="text-center">${formatNutrient(f.p)}</td>
@@ -269,6 +371,15 @@
             <td class="text-center">${formatNutrient(f.cu)}</td>
             <td class="text-center">${formatNutrient(f.bo)}</td>
             <td class="text-center">${formatNutrient(f.mo)}</td>
+            <td>
+              <div class="text-wrap" style="max-width: 200px; font-size: 0.85rem;">
+                ${f.detalles_tecnicos ? 
+                  (f.detalles_tecnicos.length > 100 ? 
+                    `<span title="${f.detalles_tecnicos}">${f.detalles_tecnicos.substring(0, 100)}...</span>` : 
+                    f.detalles_tecnicos) : 
+                  '<span class="text-muted fst-italic">Sin detalles</span>'}
+              </div>
+            </td>
             <td class="text-center">
               <div class="btn-group btn-group-sm">
                 <button class="btn btn-outline-primary btn-action" data-action="edit" title="Editar">
@@ -366,12 +477,12 @@
         btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
         
         try {
-          const inputs = tr.querySelectorAll('input[data-field]');
+          const inputs = tr.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
           const values = {};
           inputs.forEach(input => {
             const field = input.dataset.field;
             const value = input.value.trim();
-            if (field === 'producto') {
+            if (field === 'producto' || field === 'tipo') {
               values[field] = value || null;
             } else if (['n','p','k','ca','mg','s','fe','mn','zn','cu','bo','mo'].includes(field)) {
               values[field] = value ? parseFloat(value) : null;
@@ -384,17 +495,23 @@
             throw new Error('El nombre del producto es obligatorio');
           }
           
+          if (!values.tipo) {
+            values.tipo = 'inorganico'; // Valor por defecto
+          }
+          
           if (id.startsWith('nuevo-')) {
             delete values.id;
+            console.log("🔧 ADMIN: Creando nuevo fertilizante:", values.producto, "por", userData.nombre);
             const { error } = await supabase.from('fertilizantes').insert([values]);
             if (error) throw error;
-            showStatus('Fertilizante agregado correctamente', 'success');
+            showStatus('Fertilizante agregado correctamente al catálogo maestro', 'success');
           } else {
+            console.log("🔧 ADMIN: Actualizando fertilizante ID:", id, "por", userData.nombre);
             const { error } = await supabase.from('fertilizantes')
               .update(values)
               .eq('id', id);
             if (error) throw error;
-            showStatus('Fertilizante actualizado correctamente', 'success');
+            showStatus('Fertilizante actualizado en el catálogo maestro', 'success');
           }
           editingId = null;
           await fetchFertilizantes();
@@ -427,9 +544,11 @@
       const nuevo = {
         id: 'nuevo-' + Date.now(),
         producto: '',
+        tipo: 'inorganico',
         formula: '',
         n: '', p: '', k: '', ca: '', mg: '', s: '',
-        fe: '', mn: '', zn: '', cu: '', bo: '', mo: ''
+        fe: '', mn: '', zn: '', cu: '', bo: '', mo: '',
+        detalles_tecnicos: ''
       };
       fertilizantes.unshift(nuevo);
       editingId = nuevo.id;
