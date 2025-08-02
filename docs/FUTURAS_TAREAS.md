@@ -1,3 +1,37 @@
+# Futuras tareas agregadas (02/08/2025):
+## 🚧 EN DESARROLLO: Sistema de Fertilizaciones
+- **Planificación completa** del módulo `fertilizaciones.html` con cumplimiento Global GAP:
+  - ✅ Documentación detallada en `docs/SISTEMA_FERTILIZACIONES.md`
+  - ✅ Esquema de base de datos con tablas `fertilizaciones` y `fertilizantes_disponibles`
+  - ✅ Cálculo automático de unidades de nutrientes (N-P-K)
+  - ✅ Reportes específicos para cumplimiento Global GAP
+  - ✅ Integración planificada con sistema existente
+  - ✅ Implementación de tablas en Supabase
+  - ✅ Desarrollo de interfaz `fertilizaciones.html`
+  - [ ] Sistema de reportes con dashboard nutricional
+- **Futuras extensiones identificadas**:
+  - [ ] **🚜 Gestión de Maquinarias y Herramientas**
+    - Registro de equipos de aplicación
+    - Calendarios de calibración (requisito Global GAP)
+    - Historial de mantenimiento
+    - Certificados de calibración digitalizados
+    - Alertas de vencimiento automáticas
+
+## 🔧 PENDIENTE: Gestión de Maquinarias y Herramientas
+- **Descripción**: Sistema completo para gestión de equipos agrícolas y cumplimiento Global GAP
+- **Funcionalidades principales**:
+  - [ ] **CRUD de equipos**: Registro de tractores, pulverizadoras, fertilizadoras, etc.
+  - [ ] **Calendarios de calibración**: Programación automática de calibraciones
+  - [ ] **Historial de mantenimiento**: Registro de reparaciones y servicios
+  - [ ] **Certificados digitales**: Almacenamiento de certificados de calibración
+  - [ ] **Alertas automáticas**: Notificaciones de vencimientos próximos
+  - [ ] **Integración**: Vinculación con aplicaciones de fertilizantes y fitosanitarios
+- **Cumplimiento Global GAP**: 
+  - Registros de calibración de equipos de aplicación requeridos
+  - Trazabilidad completa equipo → aplicación → resultado
+  - Documentación para auditorías
+- **Prioridad**: Media - después de completar sistema de fertilizaciones
+
 # Futuras tareas agregadas (01/08/2025):
 ## ✅ COMPLETADO: Sistema de Labores Agrícolas
 - **Implementación completa** del módulo `labores-suelo.html` con funcionalidades avanzadas:

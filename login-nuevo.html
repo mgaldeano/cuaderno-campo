@@ -592,10 +592,13 @@
     // Google OAuth
     googleAuthButton.addEventListener('click', async () => {
       try {
+        // Determinar la URL base correcta
+        const baseUrl = window.location.href.replace('/login-nuevo.html', '');
+        
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/setup-wizard.html'
+            redirectTo: baseUrl + '/setup-wizard.html'
           }
         });
         

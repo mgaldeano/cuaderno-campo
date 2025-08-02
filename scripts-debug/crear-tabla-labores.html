@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Tabla labores_suelo</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🛠️ Crear Tabla labores_suelo</h1>
+    <div id="status"></div>
+    
+    <h2>Instrucciones</h2>
+    <div class="info">
+        <p><strong>¡Importante!</strong> Para crear la tabla necesitas acceso al panel de administración de Supabase.</p>
+        <p>Este script verificará si la tabla existe y te dará las instrucciones para crearla manualmente.</p>
+    </div>
+
+    <button onclick="verificarTabla()" id="checkBtn">🔍 Verificar Tabla</button>
+    <button onclick="mostrarSQL()" id="sqlBtn">📋 Mostrar SQL para Crear</button>
+
+    <div id="sqlContent" style="display: none;">
+        <h3>SQL para crear en el panel de Supabase:</h3>
+        <pre id="sqlCode"></pre>
+        <p><strong>Pasos:</strong></p>
+        <ol>
+            <li>Ve al panel de Supabase → SQL Editor</li>
+            <li>Copia y pega el SQL de arriba</li>
+            <li>Ejecuta el script</li>
+            <li>Vuelve aquí y haz click en "Verificar Tabla"</li>
+        </ol>
+    </div>
+
+    <script type="module">
+        import { supabase } from '../supabaseClient.js';
+
+        window.supabase = supabase;
+
+        window.verificarTabla = async function() {
+            const statusDiv = document.getElementById('status');
+            const checkBtn = document.getElementById('checkBtn');
+            
+            checkBtn.disabled = true;
+            checkBtn.textContent = '🔄 Verificando...';
+            
+            try {
+                statusDiv.innerHTML = '<div class="info">🔍 Verificando si la tabla labores_suelo existe...</div>';
+                
+                // Intentar hacer una consulta simple a la tabla
+                const { data, error } = await supabase
+                    .from('labores_suelo')
+                    .select('id')
+                    .limit(1);
+                
+                if (error) {
+                    if (error.message.includes('relation "public.labores_suelo" does not exist')) {
+                        statusDiv.innerHTML = `
+                            <div class="error">
+                                ❌ La tabla <code>labores_suelo</code> no existe.<br>
+                                👉 Haz click en "Mostrar SQL para Crear" y sigue las instrucciones.
+                            </div>
+                        `;
+                    } else {
+                        statusDiv.innerHTML = `
+                            <div class="error">
+                                ❌ Error verificando tabla: ${error.message}
+                            </div>
+                        `;
+                    }
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            ✅ ¡Excelente! La tabla <code>labores_suelo</code> existe y está lista para usar.<br>
+                            🎉 Puedes usar <code>labores-suelo.html</code> sin problemas.
+                        </div>
+                    `;
+                }
+                
+            } catch (err) {
+                statusDiv.innerHTML = `
+                    <div class="error">
+                        💥 Error inesperado: ${err.message}
+                    </div>
+                `;
+            } finally {
+                checkBtn.disabled = false;
+                checkBtn.textContent = '🔍 Verificar Tabla';
+            }
+        };
+
+        window.mostrarSQL = function() {
+            const sqlContent = document.getElementById('sqlContent');
+            const sqlCode = document.getElementById('sqlCode');
+            
+            const sql = `-- Crear tabla labores_suelo
+CREATE TABLE IF NOT EXISTS labores_suelo (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    fecha timestamp with time zone NOT NULL DEFAULT now(),
+    finca_id bigint NOT NULL REFERENCES fincas(id) ON DELETE CASCADE,
+    cuartel_id bigint NOT NULL REFERENCES cuarteles(id) ON DELETE CASCADE,
+    tipo_labor text NOT NULL CHECK (tipo_labor IN ('preparacion', 'siembra', 'mantenimiento', 'cosecha')),
+    labor_especifica text NOT NULL,
+    objetivo text,
+    operador_id uuid REFERENCES aplicadores_operarios(id),
+    superficie_hectareas numeric(10,2),
+    profundidad_cm numeric(5,1),
+    horas_trabajadas numeric(6,2),
+    maquinaria text,
+    implemento text,
+    condicion_suelo text,
+    condicion_climatica text,
+    temperatura_celsius numeric(4,1),
+    observaciones text,
+    usuario_id uuid NOT NULL REFERENCES usuarios(id),
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+-- Crear índices
+CREATE INDEX IF NOT EXISTS idx_labores_suelo_fecha ON labores_suelo(fecha);
+CREATE INDEX IF NOT EXISTS idx_labores_suelo_finca ON labores_suelo(finca_id);
+CREATE INDEX IF NOT EXISTS idx_labores_suelo_cuartel ON labores_suelo(cuartel_id);
+CREATE INDEX IF NOT EXISTS idx_labores_suelo_tipo ON labores_suelo(tipo_labor);
+CREATE INDEX IF NOT EXISTS idx_labores_suelo_usuario ON labores_suelo(usuario_id);
+
+-- Configurar RLS
+ALTER TABLE labores_suelo ENABLE ROW LEVEL SECURITY;
+
+-- Políticas RLS
+CREATE POLICY "Usuarios pueden ver labores de su organización" ON labores_suelo
+    FOR SELECT USING (
+        usuario_id = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM usuarios u1, usuarios u2
+            WHERE u1.id = auth.uid() 
+            AND u2.id = labores_suelo.usuario_id
+            AND u1.organizacion_id = u2.organizacion_id
+        )
+    );
+
+CREATE POLICY "Usuarios pueden insertar labores" ON labores_suelo
+    FOR INSERT WITH CHECK (usuario_id = auth.uid());
+
+CREATE POLICY "Usuarios pueden actualizar sus labores" ON labores_suelo
+    FOR UPDATE USING (usuario_id = auth.uid());
+
+CREATE POLICY "Usuarios pueden eliminar sus labores" ON labores_suelo
+    FOR DELETE USING (usuario_id = auth.uid());`;
+
+            sqlCode.textContent = sql;
+            sqlContent.style.display = 'block';
+            
+            // Scroll al contenido SQL
+            sqlContent.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Verificar automáticamente al cargar
+        window.addEventListener('load', () => {
+            setTimeout(verificarTabla, 1000);
+        });
+    </script>
+</body>
+</html>

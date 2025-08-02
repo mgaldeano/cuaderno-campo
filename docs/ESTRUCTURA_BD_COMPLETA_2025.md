@@ -1,8 +1,8 @@
 # 📊 ESTRUCTURA COMPLETA DE BASE DE DATOS - CUADERNO DE CAMPO
 
-**Fecha de actualización:** 1 de agosto de 2025  
+**Fecha de actualización:** 2 de agosto de 2025  
 **Estado:** ✅ Validado y funcional  
-**Última revisión:** RLS y permisos actualizados
+**Última revisión:** Tabla fertilizaciones agregada - Sistema completo
 
 ---
 
@@ -13,9 +13,9 @@
 - **Autenticación:** Habilitada con RLS (Row Level Security)
 - **Roles:** `anon`, `authenticated`, `public`
 
-### Tablas Principales: 15 + 1 Vista
+### Tablas Principales: 16 + 1 Vista
 - **Entidades:** usuarios, organizaciones, fincas, cuarteles, especies, variedades
-- **Actividades:** riegos, tareas, visitas
+- **Actividades:** riegos, tareas, visitas, fertilizaciones
 - **Catálogos:** fertilizantes, fitosanitarios, metodos_de_aplicacion, tipos_tarea
 - **Relaciones:** cuartel_variedades, operario_finca, aplicadores_operarios
 
@@ -233,6 +233,51 @@ CREATE TABLE tipos_tarea (
 **Políticas RLS activas:**
 - ✅ `Solo lectura para usuarios autenticados`
 
+### 🌱 **fertilizaciones** (Registro de fertilizaciones)
+```sql
+CREATE TABLE fertilizaciones (
+    id bigint PRIMARY KEY,
+    usuario_id uuid NOT NULL,
+    finca_id bigint NOT NULL,
+    cuartel_id bigint NOT NULL,
+    fertilizante_id bigint NOT NULL,
+    fecha date NOT NULL,
+    dosis numeric NOT NULL,                    -- Campo legacy (mantener compatibilidad)
+    unidad_dosis character varying NOT NULL,   -- Campo legacy
+    metodo_aplicacion character varying NOT NULL,
+    sistema_aplicacion character varying,      -- inorganico, organico, foliares, etc.
+    superficie_aplicada numeric,               -- Campo legacy
+    operador_id uuid,                          -- UUID del operador
+    equipo_trabajadores text,
+    costo_total numeric,
+    clima character varying,
+    humedad_suelo character varying,
+    observaciones text,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    
+    -- NUEVOS CAMPOS (enfoque cantidades reales)
+    dosis_referencia numeric,                  -- Dosis recomendada (referencia)
+    unidad_dosis_referencia character varying DEFAULT 'kg/ha',
+    cantidad_aplicada numeric,                 -- CANTIDAD REAL aplicada (campo principal)
+    unidad_cantidad character varying DEFAULT 'kg',  -- kg, litros, gramos, ml
+    superficie_cuartel numeric,                -- Superficie específica del cuartel
+    dosis_real_calculada numeric              -- cantidad_aplicada / superficie_cuartel
+);
+```
+
+**Políticas RLS activas:**
+- ✅ `Solo dueño puede insertar fertilizaciones`
+- ✅ `Solo dueño puede modificar sus fertilizaciones`
+- ✅ `Solo dueño puede ver sus fertilizaciones`
+- ✅ `Admins e ingenieros pueden ver todas las fertilizaciones`
+
+**Campos Críticos:**
+- `cantidad_aplicada` - **Campo principal** para control de inventario
+- `dosis_referencia` - Información orientativa del fabricante
+- `superficie_cuartel` - Superficie específica tratada
+- `dosis_real_calculada` - Cálculo automático para análisis
+
 ### 🏥 **visitas** (Visitas técnicas)
 ```sql
 CREATE TABLE visitas (
@@ -332,6 +377,10 @@ riegos → cuarteles (N:1) [cuartel_id]
 riegos → usuarios (N:1) [operador_id]
 tareas → cuarteles (N:1) [cuartel_id]
 tareas → tipos_tarea (N:1) [tipo_tarea_id]
+fertilizaciones → fincas (N:1) [finca_id]
+fertilizaciones → cuarteles (N:1) [cuartel_id]
+fertilizaciones → usuarios (N:1) [usuario_id, operador_id]
+fertilizaciones → fertilizantes (N:1) [fertilizante_id]
 visitas → usuarios (N:1) [id_productor, id_ingeniero]
 visitas → fincas (N:1) [id_finca]
 visitas → cuarteles (N:1) [id_cuartel]
@@ -376,11 +425,20 @@ operario_finca → fincas (N:1) [finca_id]
 - `riegos.objetivo` - ⭐ Objetivo del riego (disponible)
 - `fincas.nombre_finca` - Usar este campo (NO `nombre`)
 - `aplicadores_operarios.apellido` - Para formato "Apellido, Nombre"
+- `fertilizaciones.cantidad_aplicada` - ⭐ Campo principal para inventario
+- `fertilizaciones.sistema_aplicacion` - Tipo de fertilización
 
 ### Campos Duales:
 - `riegos.labor` vs `riegos.labores` - Ambos disponibles
 - `cuarteles.especie` vs `especies.nombre` - Texto libre vs catálogo
 - `cuarteles.variedad` vs `variedades.nombre` - Texto libre vs catálogo
+- `fertilizaciones.dosis` vs `fertilizaciones.cantidad_aplicada` - Legacy vs actual
+
+### Campos de Fertilizaciones:
+- `dosis_referencia` - Información orientativa del fabricante
+- `cantidad_aplicada` - **Campo principal** para control real
+- `superficie_cuartel` - Superficie específica tratada
+- `dosis_real_calculada` - Cálculo automático para análisis
 
 ---
 
@@ -440,6 +498,6 @@ SELECT * FROM cuarteles WHERE finca_id IN (
 
 ---
 
-**✅ Estructura validada el 1/08/2025**  
-**🔄 Última sincronización: RLS y permisos funcionales**  
+**✅ Estructura validada el 2/08/2025**  
+**🔄 Última sincronización: Tabla fertilizaciones agregada - Sistema completo**  
 **📱 Compatible con aplicación web y futuras expansiones móviles**

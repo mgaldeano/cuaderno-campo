@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fertilizaciones - Cuaderno de Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="estilos.css">
+    
+    <style>        
+        .card-tipo-fertilizacion {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 180px;
+        }
+        
+        .card-tipo-fertilizacion:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card-tipo-fertilizacion.selected {
+            border-color: var(--bs-primary);
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.05) 100%);
+        }
+        
+        .fertilizacion-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tipo-inorganico { color: #0d6efd; }
+        .tipo-organico { color: #198754; }
+        .tipo-bioestimulante { color: #fd7e14; }
+        .tipo-fertirrigacion { color: #20c997; }
+        .tipo-hidroponico { color: #6f42c1; }
+        
+        .nutrient-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 0.1rem;
+            display: inline-block;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+        
+        .section-title {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .cuartel-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .clima-btn {
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+        
+        .clima-btn.active {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        
+        .humedad-btn {
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+        
+        .humedad-btn.active {
+            background: #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
+        
+        .floating-save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+        }
+        
+        .bootstrap-select .dropdown-menu {
+            max-height: 300px !important;
+        }
+        
+        .fertilizante-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .tabla-cantidades table {
+            font-size: 0.9rem;
+        }
+        
+        .tabla-cantidades .cantidad-input {
+            min-width: 120px;
+        }
+
+        /* Estilos para diferentes tipos de fertilizantes - SOLO BOTONES */
+        .btn.tipo-inorganico {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: white !important;
+        }
+        
+        .btn.tipo-organico {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+            color: white !important;
+        }
+        
+        .btn.tipo-bioestimulante {
+            background-color: #fd7e14 !important;
+            border-color: #fd7e14 !important;
+            color: white !important;
+        }
+        
+        .btn.tipo-hidroponico {
+            background-color: #6f42c1 !important;
+            border-color: #6f42c1 !important;
+            color: white !important;
+        }
+        
+        .btn.tipo-fertirrigacion {
+            background-color: #20c997 !important;
+            border-color: #20c997 !important;
+            color: white !important;
+        }
+        
+        .header-tipo-inorganico {
+            background-color: #0d6efd !important;
+        }
+        
+        .header-tipo-organico {
+            background-color: #198754 !important;
+        }
+        
+        .header-tipo-bioestimulante {
+            background-color: #fd7e14 !important;
+        }
+        
+        .header-tipo-hidroponico {
+            background-color: #6f42c1 !important;
+        }
+        
+        .header-tipo-fertirrigacion {
+            background-color: #20c997 !important;
+        }
+
+        /* Estilos para bordes de secciones según tipo de fertilizante */
+        .seccion-tipo-inorganico {
+            border-left-color: #0d6efd !important;
+        }
+        
+        .seccion-tipo-organico {
+            border-left-color: #198754 !important;
+        }
+        
+        .seccion-tipo-bioestimulante {
+            border-left-color: #fd7e14 !important;
+        }
+        
+        .seccion-tipo-hidroponico {
+            border-left-color: #6f42c1 !important;
+        }
+        
+        .seccion-tipo-fertirrigacion {
+            border-left-color: #20c997 !important;
+        }
+        
+        .tabla-cantidades .unidad-input {
+            min-width: 80px;
+        }
+        
+        .total-cuartel {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .cantidad-input.is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header-container"></div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Título Principal -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold text-primary mb-0">
+                            <i class="fas fa-seedling me-2"></i>Fertilizaciones
+                        </h2>
+                        <p class="text-muted mb-0">Sistema de registro y gestión de fertilizaciones - Cumplimiento Global GAP</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary" onclick="mostrarGestionFertilizantes()">
+                            <i class="fas fa-cog me-1"></i>Gestionar Fertilizantes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cards de Tipos de Fertilización -->
+        <div class="row mb-5 justify-content-center px-4">
+            <div class="col-12">
+                <h5 class="mb-4 text-secondary text-center">
+                    <i class="fas fa-tags me-2"></i>Seleccionar Tipo de Fertilización
+                </h5>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4 px-3">
+                <div class="card card-tipo-fertilizacion text-center h-100" onclick="seleccionarTipo('inorganico')">
+                    <div class="card-body d-flex flex-column justify-content-center p-4">
+                        <i class="fas fa-flask fertilizacion-icon tipo-inorganico"></i>
+                        <h6 class="card-title fw-bold">Fertilizante Inorgánico</h6>
+                        <small class="text-muted">NPK, Urea, Fosfatos</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4 px-3">
+                <div class="card card-tipo-fertilizacion text-center h-100" onclick="seleccionarTipo('organico')">
+                    <div class="card-body d-flex flex-column justify-content-center p-4">
+                        <i class="fas fa-leaf fertilizacion-icon tipo-organico"></i>
+                        <h6 class="card-title fw-bold">Fertilizante Orgánico</h6>
+                        <small class="text-muted">Compost, Humus, Estiércol</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4 px-3">
+                <div class="card card-tipo-fertilizacion text-center h-100" onclick="seleccionarTipo('bioestimulante')">
+                    <div class="card-body d-flex flex-column justify-content-center p-4">
+                        <i class="fas fa-magic fertilizacion-icon tipo-bioestimulante"></i>
+                        <h6 class="card-title fw-bold">Bioestimulantes</h6>
+                        <small class="text-muted">Extractos, Aminoácidos</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4 px-3">
+                <div class="card card-tipo-fertilizacion text-center h-100" onclick="seleccionarTipo('fertirrigacion')">
+                    <div class="card-body d-flex flex-column justify-content-center p-4">
+                        <i class="fas fa-tint fertilizacion-icon tipo-fertirrigacion"></i>
+                        <h6 class="card-title fw-bold">Fertirrigación</h6>
+                        <small class="text-muted">Solución nutritiva</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulario de Registro -->
+        <div class="row" id="formulario-container" style="display: none;">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header text-white bg-primary" id="header-formulario">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>Registrar Nueva Fertilización
+                            <span id="tipo-seleccionado-badge" class="badge bg-light ms-2"></span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="formFertilizacion">
+                            <!-- Información Básica -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-info-circle"></i>Información Básica
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fecha" class="form-label">Fecha de Aplicación <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="fecha" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="operador" class="form-label">Operador Responsable</label>
+                                        <select class="form-select selectpicker" id="operador" data-live-search="true" data-size="5" title="Seleccionar operador...">
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fincas" class="form-label">Finca(s) <span class="text-danger">*</span></label>
+                                        <select class="form-select selectpicker" id="fincas" multiple data-live-search="true" 
+                                                data-selected-text-format="count > 1" title="Seleccionar finca(s)..." required>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label for="cuarteles" class="form-label mb-0">Cuartel(es) <span class="text-danger">*</span></label>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-seleccionar-todos-cuarteles" 
+                                                    onclick="seleccionarTodosCuarteles()" style="display: none;">
+                                                <i class="fas fa-check-square me-1"></i>Seleccionar todos
+                                            </button>
+                                        </div>
+                                        <select class="form-select selectpicker" id="cuarteles" multiple data-live-search="true" 
+                                                data-selected-text-format="count > 1" title="Seleccionar cuartel(es)..." required>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalles del Fertilizante -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-flask"></i>Detalles del Fertilizante
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-8 mb-3">
+                                        <label for="fertilizante" class="form-label">Fertilizante <span class="text-danger">*</span></label>
+                                        <select class="form-select selectpicker" id="fertilizante" data-live-search="true" 
+                                                data-size="5" title="" required>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label for="metodo-aplicacion" class="form-label">Método de Aplicación <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="metodo-aplicacion" required>
+                                            <option value="">Seleccionar método...</option>
+                                            <option value="foliar">Foliar</option>
+                                            <option value="suelo">Al Suelo</option>
+                                            <option value="fertirrigacion">Fertirrigación</option>
+                                            <option value="hidroponico">Hidropónico</option>
+                                            <option value="granulado">Granulado</option>
+                                            <option value="liquido">Líquido</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Información del Fertilizante Seleccionado -->
+                                <div id="info-fertilizante" class="fertilizante-info" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="text-success mb-2">
+                                                <i class="fas fa-info-circle me-1"></i>Información Nutricional
+                                            </h6>
+                                            <div id="composicion-fertilizante"></div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6 class="text-success mb-2">Fabricante</h6>
+                                            <div id="fabricante-fertilizante"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cantidades por Cuartel -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-weight"></i>Cantidades por Cuartel
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="dosis-referencia" class="form-label">Dosis de Referencia</label>
+                                        <input type="number" class="form-control" id="dosis-referencia" step="0.01" min="0" 
+                                               placeholder="Ej: 250">
+                                        <small class="text-muted">Valor orientativo del fabricante</small>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label for="unidad-dosis" class="form-label">Unidad</label>
+                                        <select class="form-select" id="unidad-dosis">
+                                            <option value="kg/ha">kg/ha</option>
+                                            <option value="l/ha">l/ha</option>
+                                            <option value="gr/planta">gr/planta</option>
+                                            <option value="ml/planta">ml/planta</option>
+                                            <option value="kg/m²">kg/m²</option>
+                                            <option value="l/m²">l/m²</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label for="superficie-total" class="form-label">Superficie Total (ha)</label>
+                                        <input type="number" class="form-control" id="superficie-total" step="0.01" min="0" readonly>
+                                        <small class="text-muted">Suma automática de cuarteles</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tabla de Cantidades por Cuartel -->
+                                <div id="tabla-cantidades" style="display: none;">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-table me-1"></i>Cantidades Aplicadas por Cuartel
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th>Cuartel</th>
+                                                    <th>Superficie (ha)</th>
+                                                    <th>Cantidad Aplicada <span class="text-danger">*</span></th>
+                                                    <th>Unidad</th>
+                                                    <th>Cantidad Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbody-cantidades">
+                                            </tbody>
+                                            <tfoot class="table-secondary">
+                                                <tr>
+                                                    <th>TOTAL</th>
+                                                    <th id="total-superficie">0.00 ha</th>
+                                                    <th>-</th>
+                                                    <th>-</th>
+                                                    <th id="total-cantidad">0.00 kg/l</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Condiciones y Observaciones -->
+                            <div class="form-section">
+                                <div class="section-title">
+                                    <i class="fas fa-cloud-sun"></i>Condiciones y Observaciones
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Condiciones Climáticas <span class="text-danger">*</span></label>
+                                        <div class="btn-group w-100" role="group" id="grupo-clima">
+                                            <button type="button" class="btn clima-btn" onclick="seleccionarClima(this, 'soleado')">
+                                                <i class="fas fa-sun"></i> Soleado
+                                            </button>
+                                            <button type="button" class="btn clima-btn active" onclick="seleccionarClima(this, 'nublado')">
+                                                <i class="fas fa-cloud"></i> Nublado
+                                            </button>
+                                            <button type="button" class="btn clima-btn" onclick="seleccionarClima(this, 'lluvia')">
+                                                <i class="fas fa-cloud-rain"></i> Lluvia
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback" id="error-clima" style="display: none;">
+                                            Por favor seleccione las condiciones climáticas
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label class="form-label">Humedad del Suelo <span class="text-danger">*</span></label>
+                                        <div class="btn-group w-100" role="group" id="grupo-humedad">
+                                            <button type="button" class="btn humedad-btn" onclick="seleccionarHumedad(this, 'seco')">
+                                                <i class="fas fa-thermometer-empty"></i> Seco
+                                            </button>
+                                            <button type="button" class="btn humedad-btn active" onclick="seleccionarHumedad(this, 'humedo')">
+                                                <i class="fas fa-thermometer-half"></i> Húmedo
+                                            </button>
+                                            <button type="button" class="btn humedad-btn" onclick="seleccionarHumedad(this, 'saturado')">
+                                                <i class="fas fa-thermometer-full"></i> Saturado
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback" id="error-humedad" style="display: none;">
+                                            Por favor seleccione la humedad del suelo
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="costo-total" class="form-label">Costo Total (opcional)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="costo-total" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="equipo-trabajadores" class="form-label">Equipo de Trabajadores</label>
+                                        <input type="text" class="form-control" id="equipo-trabajadores" 
+                                               placeholder="Nombres del equipo aplicador...">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" rows="3" 
+                                              placeholder="Observaciones adicionales sobre la aplicación..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Botones de Acción -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" onclick="cancelarFormulario()">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </button>
+                                <div>
+                                    <button type="button" class="btn btn-outline-primary me-2" onclick="limpiarFormulario()">
+                                        <i class="fas fa-eraser me-1"></i>Limpiar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="btn-registrar">
+                                        <i class="fas fa-save me-1"></i>Registrar Fertilización
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botón Flotante de Guardado Rápido -->
+        <button class="btn btn-primary btn-lg floating-save-btn" id="btn-guardar-flotante" 
+                style="display: none;" onclick="document.getElementById('formFertilizacion').requestSubmit()">
+            <i class="fas fa-save"></i>
+        </button>
+        
+        <!-- Listado de Fertilizaciones -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-list me-2 text-primary"></i>
+                                <span>Fertilizaciones Registradas</span>
+                                <span class="badge bg-primary ms-2" id="total-fertilizaciones">0</span>
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" id="btn-actualizar-fertilizaciones">
+                                    <i class="fas fa-sync-alt me-1"></i> Actualizar
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#listado-fertilizaciones" aria-expanded="true" aria-controls="listado-fertilizaciones" id="toggle-list-btn">
+                                    <i class="fas fa-minus-circle me-1"></i> Ocultar Listado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="listado-fertilizaciones">
+                        <div class="card-body p-4">
+                            <!-- Filtros -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="filtro-fecha-desde" class="form-label">Desde:</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtro-fecha-desde">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtro-fecha-hasta" class="form-label">Hasta:</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtro-fecha-hasta">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtro-finca-list" class="form-label">Finca:</label>
+                                    <select class="form-select form-select-sm" id="filtro-finca-list">
+                                        <option value="">Todas las fincas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtro-tipo-fertilizacion" class="form-label">Tipo:</label>
+                                    <select class="form-select form-select-sm" id="filtro-tipo-fertilizacion">
+                                        <option value="">Todos los tipos</option>
+                                        <option value="inorganico">Inorgánico</option>
+                                        <option value="organico">Orgánico</option>
+                                        <option value="bioestimulante">Bioestimulante</option>
+                                        <option value="fertirrigacion">Fertirrigación</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button class="btn btn-outline-secondary btn-sm w-100" id="btn-aplicar-filtros">
+                                        <i class="fas fa-filter me-1"></i> Filtrar
+                                    </button>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button class="btn btn-outline-warning btn-sm w-100" id="btn-limpiar-filtros">
+                                        <i class="fas fa-times me-1"></i> Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de fertilizaciones -->
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Finca</th>
+                                            <th>Cuartel</th>
+                                            <th>Fertilizante</th>
+                                            <th>Tipo</th>
+                                            <th>Dosis</th>
+                                            <th>Superficie</th>
+                                            <th>Operador</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-fertilizaciones-body">
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                                    Cargando fertilizaciones...
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Paginación -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted">
+                                    <small>Mostrando <span id="registros-desde">0</span> - <span id="registros-hasta">0</span> de <span id="total-registros">0</span> registros</small>
+                                </div>
+                                <nav aria-label="Paginación de fertilizaciones">
+                                    <ul class="pagination pagination-sm mb-0" id="paginacion-fertilizaciones">
+                                        <!-- La paginación se genera dinámicamente -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/i18n/defaults-es_ES.min.js"></script>
+    <script type="module" src="supabaseClient.js"></script>
+    <script type="module" src="combo-utils.js"></script>
+    
+    <script type="module">
+        // Importar funciones necesarias (ESTRUCTURA SIMPLE COMO RIEGO.HTML)
+        import { supabase } from './supabaseClient.js';
+        import { 
+            cargarOperadoresCombo, 
+            cargarFincasCombo, 
+            cargarCuartelesPorFincasCombo 
+        } from './combo-utils.js';
+
+        // Exponer supabase globalmente para debugging
+        window.supabase = supabase;
+
+        // Validar login y obtener user (NIVEL SUPERIOR como en riego.html)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = "login-nuevo.html";
+            throw new Error("No autorizado");
+        }
+
+        // Cargar header
+        fetch('header.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('header-container').innerHTML = html;
+                import('./header.js');
+            })
+            .catch(error => console.warn("⚠️ Error cargando header:", error));
+
+        // Variables globales
+        let tipoSeleccionado = '';
+        let fertilizantesDisponibles = [];
+        let cuartelesData = [];
+        let climaSeleccionado = 'nublado'; // Valor predeterminado
+        let humedadSeleccionada = 'humedo'; // Valor predeterminado
+        let cargandoFertilizantes = false; // FLAG para evitar cargas simultáneas
+
+        // Establecer fecha actual
+        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+        
+        // Event listeners
+        document.getElementById('fincas').addEventListener('change', cargarCuartelesPorFincas);
+        document.getElementById('cuarteles').addEventListener('change', generarTablaCantidades);
+        document.getElementById('fertilizante').addEventListener('change', mostrarInfoFertilizante);
+        document.getElementById('dosis-referencia').addEventListener('input', aplicarDosisReferencia);
+        document.getElementById('unidad-dosis').addEventListener('change', aplicarDosisReferencia);
+        
+        // CARGAR DATOS INICIALES
+        console.log("🔍 Cargando datos iniciales...");
+        await Promise.all([
+            cargarOperadores(),
+            cargarFincas()
+            // NO cargar fertilizantes hasta seleccionar tipo
+        ]);
+        console.log("✅ Datos iniciales cargados");
+        
+        // NO cargar fertilizantes hasta que se seleccione un tipo
+        console.log("ℹ️ Fertilizantes se cargarán al seleccionar tipo de aplicación");
+        
+        // Mostrar/ocultar botón flotante según scroll
+        window.addEventListener('scroll', function() {
+            const btnFlotante = document.getElementById('btn-guardar-flotante');
+            const formulario = document.getElementById('formulario-container');
+            
+            if (formulario.style.display !== 'none' && window.scrollY > 300) {
+                btnFlotante.style.display = 'block';
+            } else {
+                btnFlotante.style.display = 'none';
+            }
+        });
+        
+        // Submit del formulario
+        document.getElementById('formFertilizacion').addEventListener('submit', guardarFertilizacion);
+        console.log("✅ FERTILIZACIONES: Event listeners del formulario registrados");
+        
+        // FUNCIONES
+        async function cargarOperadores() {
+            console.log("🔍 FERTILIZACIONES: cargarOperadores() iniciado");
+            try {
+                const { data, error } = await supabase
+                    .from('aplicadores_operarios')
+                    .select('*')
+                    .order('nombre');
+                
+                if (error) throw error;
+                console.log("✅ FERTILIZACIONES: Operadores obtenidos:", data.length);
+                console.log("🔍 FERTILIZACIONES: Detalles de operadores:", data);
+                
+                const selectOperador = document.getElementById('operador');
+                selectOperador.innerHTML = '<option value="">Seleccione un operador</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach((operador, index) => {
+                        console.log(`  Operador ${index + 1}:`, operador);
+                        const option = document.createElement('option');
+                        option.value = operador.id;
+                        // Revisar estructura de datos del operador
+                        const nombre = operador.nombre_pila || operador.nombre || '';
+                        const apellido = operador.apellido || '';
+                        const nombreCompleto = `${nombre} ${apellido}`.trim() || operador.email || `Operador ${operador.id}`;
+                        option.textContent = nombreCompleto;
+                        selectOperador.appendChild(option);
+                    });
+                } else {
+                    console.warn("⚠️ FERTILIZACIONES: No se encontraron operadores");
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.textContent = "No hay operadores disponibles";
+                    option.disabled = true;
+                    selectOperador.appendChild(option);
+                }
+                
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#operador').selectpicker('refresh');
+                }
+                console.log("✅ FERTILIZACIONES: cargarOperadores() completado");
+            } catch (error) {
+                console.error('❌ FERTILIZACIONES: Error al cargar operadores:', error);
+                mostrarAlerta('Error al cargar operadores: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarFincas() {
+            try {
+                const { data, error } = await supabase
+                    .from('fincas')
+                    .select('*')
+                    .order('nombre_finca');
+                
+                if (error) throw error;
+                
+                const selectFincas = document.getElementById('fincas');
+                // Limpiar completamente las opciones existentes
+                selectFincas.innerHTML = '';
+                
+                // Agregar opción por defecto solo una vez
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Seleccione una o más fincas';
+                selectFincas.appendChild(defaultOption);
+                
+                // Agregar fincas únicas
+                const fincasUnicas = new Map();
+                data.forEach(finca => {
+                    if (finca.id && finca.nombre_finca && !fincasUnicas.has(finca.id)) {
+                        fincasUnicas.set(finca.id, finca);
+                        const option = document.createElement('option');
+                        option.value = finca.id;
+                        option.textContent = finca.nombre_finca;
+                        selectFincas.appendChild(option);
+                    }
+                });
+                
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#fincas').selectpicker('destroy');
+                    jQuery('#fincas').selectpicker({
+                        title: 'Seleccione una o más fincas...',
+                        selectedTextFormat: 'count > 1',
+                        liveSearch: true
+                    });
+                }
+                
+                console.log("✅ Fincas cargadas:", fincasUnicas.size, "fincas únicas");
+            } catch (error) {
+                console.error('Error al cargar fincas:', error);
+                mostrarAlerta('Error al cargar fincas', 'error');
+            }
+        }
+
+        async function cargarFertilizantes() {
+            const timestamp = new Date().toLocaleTimeString();
+            const callId = Math.random().toString(36).substr(2, 9);
+            
+            // Evitar cargas simultáneas
+            if (cargandoFertilizantes) {
+                console.log(`⏳ [${timestamp}] [${callId}] Ya se está cargando fertilizantes, omitiendo...`);
+                return;
+            }
+            
+            cargandoFertilizantes = true;
+            console.log(`🔍 [${timestamp}] [${callId}] *** INICIANDO CARGA DE FERTILIZANTES ***`);
+            console.log(`🔍 [${timestamp}] [${callId}] Tipo seleccionado actual: "${tipoSeleccionado}"`);
+            
+            try {
+                
+                // Usar directamente la tabla fertilizantes con filtro por tipo
+                let queryBuilder = supabase
+                    .from('fertilizantes')
+                    .select('*');
+                
+                // Aplicar filtro por tipo según el sistema de aplicación
+                let tiposFiltro = [];
+                if (tipoSeleccionado) {
+                    console.log("🔍 Filtrando fertilizantes por tipo de aplicación:", tipoSeleccionado);
+                    
+                    // ⚠️ VERIFICACIÓN TEMPORAL: Cargar TODOS los fertilizantes primero para análisis
+                    console.log("🔍 VERIFICACIÓN: Cargando todos los fertilizantes para análisis...");
+                    const { data: todosFertilizantes, error: errorTodos } = await supabase
+                        .from('fertilizantes')
+                        .select('id, producto, tipo')
+                        .order('producto');
+                    
+                    if (!errorTodos && todosFertilizantes) {
+                        const tiposExistentes = [...new Set(todosFertilizantes.map(f => f.tipo || 'sin_tipo'))];
+                        console.log("📊 ANÁLISIS DE DATOS EXISTENTES:");
+                        console.log("  📋 Total fertilizantes:", todosFertilizantes.length);
+                        console.log("  🏷️ Tipos encontrados:", tiposExistentes);
+                        console.log("  📈 Distribución por tipo:", 
+                            tiposExistentes.map(tipo => ({
+                                tipo,
+                                cantidad: todosFertilizantes.filter(f => (f.tipo || 'sin_tipo') === tipo).length
+                            }))
+                        );
+                        
+                        // Mostrar algunos ejemplos
+                        console.log("  📝 Ejemplos por tipo:");
+                        tiposExistentes.forEach(tipo => {
+                            const ejemplos = todosFertilizantes
+                                .filter(f => (f.tipo || 'sin_tipo') === tipo)
+                                .slice(0, 3)
+                                .map(f => f.producto);
+                            console.log(`    ${tipo}: ${ejemplos.join(', ')}`);
+                        });
+                    }
+                    
+                    // FILTROS POR MÉTODO DE APLICACIÓN
+                    if (tipoSeleccionado === 'fertirrigacion') {
+                        console.log("🌊 Aplicando filtro fertirrigación: hidroponico, inorganico");
+                        tiposFiltro = ['hidroponico', 'inorganico'];
+                    } else if (tipoSeleccionado === 'foliar') {
+                        console.log("🍃 Aplicando filtro foliar: inorganico, bioestimulante");
+                        tiposFiltro = ['inorganico', 'bioestimulante'];
+                    } else if (tipoSeleccionado === 'granulado') {
+                        console.log("🌾 Aplicando filtro granulado: inorganico, organico");
+                        tiposFiltro = ['inorganico', 'organico'];
+                    }
+                    // FILTROS POR TIPO DIRECTO
+                    else if (tipoSeleccionado === 'inorganico') {
+                        console.log("⚗️ Aplicando filtro directo: solo inorganicos");
+                        tiposFiltro = ['inorganico'];
+                    } else if (tipoSeleccionado === 'organico') {
+                        console.log("🌱 Aplicando filtro directo: solo organicos");
+                        tiposFiltro = ['organico'];
+                    } else if (tipoSeleccionado === 'hidroponico') {
+                        console.log("💧 Aplicando filtro directo: solo hidroponicos");
+                        tiposFiltro = ['hidroponico'];
+                    } else if (tipoSeleccionado === 'bioestimulante') {
+                        console.log("🧬 Aplicando filtro directo: solo bioestimulantes");
+                        tiposFiltro = ['bioestimulante'];
+                    } else if (tipoSeleccionado === 'otros') {
+                        console.log("📦 Aplicando filtro directo: solo otros");
+                        tiposFiltro = ['otros'];
+                    }
+                    
+                    // Aplicar filtro a la consulta
+                    if (tiposFiltro.length > 0) {
+                        queryBuilder = queryBuilder.in('tipo', tiposFiltro);
+                        console.log("🔧 Aplicando filtro SQL con tipos:", tiposFiltro);
+                    }
+                    
+                    if (todosFertilizantes) {
+                        // Verificar si existen los tipos que queremos filtrar
+                        const tiposExistentesEnDB = [...new Set(todosFertilizantes.map(f => f.tipo || 'sin_tipo'))];
+                        const tiposEncontradosEnFiltro = tiposFiltro.filter(tipo => tiposExistentesEnDB.includes(tipo));
+                        console.log("  ✅ Tipos del filtro que SÍ existen:", tiposEncontradosEnFiltro);
+                        console.log("  ❌ Tipos del filtro que NO existen:", tiposFiltro.filter(tipo => !tiposExistentesEnDB.includes(tipo)));
+                        
+                        if (tiposEncontradosEnFiltro.length === 0) {
+                            console.log("🚨 PROBLEMA: Ningún tipo del filtro existe en la BD!");
+                        }
+                    }
+                    
+                    console.log("🔍 Tipos a filtrar:", tiposFiltro);
+                } else {
+                    console.log("ℹ️ Sin tipo seleccionado, mostrando todos los fertilizantes");
+                }
+                
+                // Ejecutar consulta
+                console.log("🎯 EJECUTANDO CONSULTA con filtros:", tiposFiltro);
+                let { data, error } = await queryBuilder.order('tipo', 'producto');
+                
+                if (error) {
+                    console.error("❌ Error al cargar fertilizantes:", error);
+                    throw error;
+                }
+                
+                fertilizantesDisponibles = data || [];
+                
+                // FILTRO DE SEGURIDAD EN JAVASCRIPT: Si la consulta SQL no filtró correctamente
+                if (tipoSeleccionado && tiposFiltro.length > 0 && fertilizantesDisponibles.length > 0) {
+                    const fertilizantesAntesFiltro = fertilizantesDisponibles.length;
+                    
+                    // Verificar si el filtro SQL funcionó
+                    const tiposEncontrados = [...new Set(fertilizantesDisponibles.map(f => f.tipo))];
+                    console.log("🔍 Tipos encontrados en los datos:", tiposEncontrados);
+                    console.log("🔍 Tipos esperados:", tiposFiltro);
+                    
+                    // Si hay tipos que no deberían estar, aplicar filtro JS
+                    const tiposIndeseados = tiposEncontrados.filter(tipo => !tiposFiltro.includes(tipo));
+                    if (tiposIndeseados.length > 0) {
+                        console.log("⚠️ Filtro SQL no funcionó correctamente. Aplicando filtro JavaScript...");
+                        console.log("🧹 Removiendo tipos:", tiposIndeseados);
+                        
+                        fertilizantesDisponibles = fertilizantesDisponibles.filter(f => 
+                            tiposFiltro.includes(f.tipo)
+                        );
+                        
+                        console.log(`🔧 Filtro JS aplicado: ${fertilizantesAntesFiltro} → ${fertilizantesDisponibles.length} fertilizantes`);
+                    } else {
+                        console.log("✅ Filtro SQL funcionó correctamente");
+                    }
+                }
+                
+                console.log("✅ Fertilizantes cargados:", {
+                    cantidad: fertilizantesDisponibles.length,
+                    tipoSeleccionado,
+                    tipos: fertilizantesDisponibles.map(f => f.tipo).filter((t, i, arr) => arr.indexOf(t) === i),
+                    ejemplos: fertilizantesDisponibles.slice(0, 5).map(f => ({ 
+                        producto: f.producto, 
+                        tipo: f.tipo 
+                    }))
+                });
+                
+                const selectFertilizante = document.getElementById('fertilizante');
+                console.log("🧹 LIMPIANDO SELECT de fertilizantes...");
+                console.log("  - Options antes de limpiar:", selectFertilizante.options.length);
+                selectFertilizante.innerHTML = '<option value="">Seleccionar fertilizante...</option>';
+                console.log("  - Options después de limpiar:", selectFertilizante.options.length);
+                
+                if (fertilizantesDisponibles.length === 0) {
+                    console.warn("⚠️ No se encontraron fertilizantes para el tipo:", tipoSeleccionado);
+                    const tipoNombre = {
+                        'inorganico': 'inorgánicos',
+                        'organico': 'orgánicos', 
+                        'hidroponico': 'hidropónicos',
+                        'bioestimulante': 'bioestimulantes',
+                        'fertirrigacion': 'fertirrigación',
+                        'foliar': 'aplicación foliar',
+                        'granulado': 'aplicación granulada'
+                    };
+                    const nombreTipo = tipoNombre[tipoSeleccionado] || tipoSeleccionado;
+                    selectFertilizante.innerHTML = `<option value="">No hay fertilizantes disponibles para ${nombreTipo}</option>`;
+                } else {
+                    console.log("✅ Agregando fertilizantes al select:", fertilizantesDisponibles.length);
+                    console.log("🔍 DEBUG: Estado del select antes de agregar:");
+                    console.log("  - Options actuales:", selectFertilizante.options.length);
+                    
+                    fertilizantesDisponibles.forEach((fertilizante, index) => {
+                        const nombreFertilizante = fertilizante.producto || 'Sin nombre';
+                        const fabricante = fertilizante.fabricante || '';
+                        const tipoInfo = fertilizante.tipo ? ` [${fertilizante.tipo}]` : '';
+                        const displayText = fabricante ? `${nombreFertilizante} (${fabricante})${tipoInfo}` : `${nombreFertilizante}${tipoInfo}`;
+                        
+                        const option = document.createElement('option');
+                        option.value = fertilizante.id;
+                        option.textContent = displayText;
+                        selectFertilizante.appendChild(option);
+                        
+                        console.log(`  📝 Agregado: ${displayText}`);
+                    });
+                    
+                    console.log("🔍 DEBUG: Estado del select después de agregar:");
+                    console.log("  - Options finales:", selectFertilizante.options.length);
+                    console.log("  - Fertilizantes mostrados:", Array.from(selectFertilizante.options).slice(1).map(opt => opt.textContent));
+                }
+                
+                // Destruir y recrear selectpicker para evitar duplicados
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#fertilizante').selectpicker('destroy');
+                    jQuery('#fertilizante').selectpicker({
+                        title: 'Seleccionar fertilizante...',
+                        liveSearch: true,
+                        size: 5
+                    });
+                }
+                
+                console.log(`✅ [${timestamp}] [${callId}] Fertilizantes cargados desde tabla fertilizantes:`, fertilizantesDisponibles.length);
+                console.log(`🏁 [${timestamp}] [${callId}] *** FINALIZANDO CARGA DE FERTILIZANTES ***`);
+                
+            } catch (error) {
+                console.error(`❌ [${timestamp}] [${callId}] Error al cargar fertilizantes:`, error);
+                mostrarAlerta('Error al cargar fertilizantes: ' + error.message, 'error');
+            } finally {
+                cargandoFertilizantes = false; // Resetear flag
+                console.log(`🔓 [${timestamp}] [${callId}] Flag de carga liberado`);
+            }
+        }
+
+        async function cargarCuartelesPorFincas() {
+            const fincasSelect = document.getElementById('fincas');
+            const fincasSeleccionadas = Array.from(fincasSelect.selectedOptions)
+                .map(option => option.value)
+                .filter(value => value && value.trim() !== ''); // Filtrar valores vacíos
+            const cuartelesSelect = document.getElementById('cuarteles');
+            
+            console.log("🔍 Cargando cuarteles para fincas:", fincasSeleccionadas);
+            
+            // Limpiar cuarteles existentes
+            cuartelesSelect.innerHTML = '';
+            cuartelesData = [];
+            
+            if (fincasSeleccionadas.length === 0) {
+                // LIMPIEZA COMPLETA: Destruir selectpicker primero
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#cuarteles').selectpicker('destroy');
+                }
+                
+                cuartelesSelect.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Primero seleccione una o más fincas';
+                cuartelesSelect.appendChild(defaultOption);
+                
+                // Ocultar botón "Seleccionar todos"
+                document.getElementById('btn-seleccionar-todos-cuarteles').style.display = 'none';
+                
+                // RECREAR selectpicker desde cero
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#cuarteles').selectpicker({
+                        title: 'Seleccionar cuartel(es)...',
+                        selectedTextFormat: 'count > 1',
+                        liveSearch: true
+                    });
+                }
+                return;
+            }
+            
+            try {
+                // Convertir fincas a enteros y validar
+                const fincasValidas = fincasSeleccionadas
+                    .map(id => parseInt(id))
+                    .filter(id => !isNaN(id) && id > 0);
+                
+                if (fincasValidas.length === 0) {
+                    console.warn("⚠️ No hay fincas válidas seleccionadas");
+                    return;
+                }
+                
+                console.log("🔍 Consultando cuarteles para fincas válidas:", fincasValidas);
+                
+                const { data, error } = await supabase
+                    .from('cuarteles')
+                    .select(`
+                        *,
+                        fincas!inner(nombre_finca)
+                    `)
+                    .in('finca_id', fincasValidas)
+                    .order('nombre');
+                
+                if (error) throw error;
+                
+                console.log("✅ Cuarteles obtenidos:", data.length);
+                cuartelesData = data;
+                
+                // LIMPIEZA COMPLETA: Destruir selectpicker primero
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#cuarteles').selectpicker('destroy');
+                }
+                
+                // Limpiar completamente las opciones existentes
+                cuartelesSelect.innerHTML = '';
+                
+                // Agregar opción por defecto solo una vez
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Seleccione cuarteles';
+                cuartelesSelect.appendChild(defaultOption);
+                
+                // Agregar cuarteles únicos con nombre de finca (usando Set para evitar duplicados)
+                const cuartelesUnicos = new Map();
+                const cuartelesAgregados = new Set(); // Control adicional para evitar duplicados
+                
+                data.forEach(cuartel => {
+                    const cuartelKey = `${cuartel.id}-${cuartel.nombre}`;
+                    if (cuartel.id && cuartel.nombre && !cuartelesUnicos.has(cuartel.id) && !cuartelesAgregados.has(cuartelKey)) {
+                        cuartelesUnicos.set(cuartel.id, cuartel);
+                        cuartelesAgregados.add(cuartelKey);
+                        
+                        const option = document.createElement('option');
+                        option.value = cuartel.id;
+                        const nombreFinca = cuartel.fincas?.nombre_finca || 'Finca desconocida';
+                        option.textContent = `${cuartel.nombre} (de ${nombreFinca}) - ${cuartel.superficie} ha`;
+                        cuartelesSelect.appendChild(option);
+                    }
+                });
+                
+                // RECREAR selectpicker desde cero
+                if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                    jQuery('#cuarteles').selectpicker({
+                        title: 'Seleccionar cuartel(es)...',
+                        selectedTextFormat: 'count > 1',
+                        liveSearch: true,
+                        noneResultsText: 'No se encontraron cuarteles',
+                        deselectAllText: 'Deseleccionar todos',
+                        selectAllText: 'Seleccionar todos'
+                    });
+                }
+                
+                // Mostrar/ocultar botón "Seleccionar todos" según cantidad de cuarteles
+                const btnSeleccionarTodos = document.getElementById('btn-seleccionar-todos-cuarteles');
+                if (cuartelesUnicos.size > 1) {
+                    btnSeleccionarTodos.style.display = 'inline-block';
+                } else {
+                    btnSeleccionarTodos.style.display = 'none';
+                }
+                
+                console.log("✅ Selectpicker de cuarteles recreado SIN DUPLICADOS con", cuartelesUnicos.size, "cuarteles únicos");
+                
+            } catch (error) {
+                console.error('Error al cargar cuarteles:', error);
+                mostrarAlerta('Error al cargar cuarteles', 'error');
+            }
+        }
+
+        function generarTablaCantidades() {
+            const cuartelesSeleccionados = Array.from(document.getElementById('cuarteles').selectedOptions);
+            const tabla = document.getElementById('tabla-cantidades');
+            const tbody = document.getElementById('tbody-cantidades');
+            const superficieTotalInput = document.getElementById('superficie-total');
+            
+            if (cuartelesSeleccionados.length === 0) {
+                tabla.style.display = 'none';
+                superficieTotalInput.value = '0.00';
+                document.getElementById('calculo-nutrientes').style.display = 'none';
+                return;
+            }
+            
+            let superficieTotal = 0;
+            tbody.innerHTML = '';
+            
+            cuartelesSeleccionados.forEach((option, index) => {
+                const cuartelId = option.value;
+                const cuartel = cuartelesData.find(c => c.id == cuartelId);
+                
+                if (cuartel) {
+                    superficieTotal += parseFloat(cuartel.superficie) || 0;
+                    
+                    const row = document.createElement('tr');
+                    const nombreFinca = cuartel.fincas?.nombre_finca || 'Finca desconocida';
+                    row.innerHTML = `
+                        <td><strong>${cuartel.nombre} (de ${nombreFinca})</strong></td>
+                        <td>${cuartel.superficie} ha</td>
+                        <td>
+                            <input type="number" class="form-control cantidad-input" 
+                                   data-cuartel-id="${cuartel.id}" 
+                                   data-superficie="${cuartel.superficie}"
+                                   step="0.01" min="0" required
+                                   placeholder="Cantidad aplicada">
+                        </td>
+                        <td>
+                            <select class="form-select unidad-input" data-cuartel-id="${cuartel.id}">
+                                <option value="kg">kg</option>
+                                <option value="l">litros</option>
+                                <option value="gr">gramos</option>
+                                <option value="ml">ml</option>
+                            </select>
+                        </td>
+                        <td class="total-cuartel" id="total-${cuartel.id}">0.00 kg</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+            
+            superficieTotalInput.value = superficieTotal.toFixed(2);
+            document.getElementById('total-superficie').textContent = superficieTotal.toFixed(2) + ' ha';
+            
+            tabla.style.display = 'block';
+            
+            // Agregar event listeners a los inputs de cantidad
+            document.querySelectorAll('.cantidad-input').forEach(input => {
+                input.addEventListener('input', calcularTotales);
+            });
+            
+            document.querySelectorAll('.unidad-input').forEach(select => {
+                select.addEventListener('change', calcularTotales);
+            });
+            
+            console.log("✅ Tabla de cantidades generada para", cuartelesSeleccionados.length, "cuarteles");
+        }
+
+        function aplicarDosisReferencia() {
+            const dosisReferencia = parseFloat(document.getElementById('dosis-referencia').value) || 0;
+            const unidadDosis = document.getElementById('unidad-dosis').value;
+            
+            if (dosisReferencia === 0) return;
+            
+            // Aplicar dosis de referencia a todos los cuarteles
+            document.querySelectorAll('.cantidad-input').forEach(input => {
+                const superficie = parseFloat(input.dataset.superficie) || 0;
+                let cantidadCalculada = 0;
+                
+                if (unidadDosis.includes('/ha')) {
+                    cantidadCalculada = dosisReferencia * superficie;
+                } else if (unidadDosis.includes('/m²')) {
+                    cantidadCalculada = dosisReferencia * superficie * 10000; // convertir ha a m²
+                } else {
+                    cantidadCalculada = dosisReferencia; // para unidades por planta
+                }
+                
+                input.value = cantidadCalculada.toFixed(2);
+                
+                // Establecer unidad correspondiente
+                const unidadSelect = document.querySelector(`select[data-cuartel-id="${input.dataset.cuartelId}"]`);
+                if (unidadSelect) {
+                    if (unidadDosis.includes('kg')) unidadSelect.value = 'kg';
+                    else if (unidadDosis.includes('l')) unidadSelect.value = 'l';
+                    else if (unidadDosis.includes('gr')) unidadSelect.value = 'gr';
+                    else if (unidadDosis.includes('ml')) unidadSelect.value = 'ml';
+                }
+            });
+            
+            calcularTotales();
+        }
+
+        function calcularTotales() {
+            let totalGeneral = 0;
+            let unidadPrincipal = 'kg';
+            
+            document.querySelectorAll('.cantidad-input').forEach(input => {
+                const cantidad = parseFloat(input.value) || 0;
+                const cuartelId = input.dataset.cuartelId;
+                const unidadSelect = document.querySelector(`select[data-cuartel-id="${cuartelId}"]`);
+                const unidad = unidadSelect ? unidadSelect.value : 'kg';
+                
+                // Actualizar total del cuartel
+                const totalCuartelElement = document.getElementById(`total-${cuartelId}`);
+                if (totalCuartelElement) {
+                    totalCuartelElement.textContent = `${cantidad.toFixed(2)} ${unidad}`;
+                }
+                
+                // Sumar al total general (convertir todo a kg para el total)
+                let cantidadEnKg = cantidad;
+                if (unidad === 'gr') cantidadEnKg = cantidad / 1000;
+                else if (unidad === 'l') cantidadEnKg = cantidad; // asumir densidad 1
+                else if (unidad === 'ml') cantidadEnKg = cantidad / 1000;
+                
+                totalGeneral += cantidadEnKg;
+                
+                // Determinar unidad principal más común
+                if (unidad === 'l' && unidadPrincipal === 'kg') unidadPrincipal = 'l';
+            });
+            
+            // Actualizar total general
+            document.getElementById('total-cantidad').textContent = `${totalGeneral.toFixed(2)} ${unidadPrincipal}`;
+        }
+
+        function mostrarInfoFertilizante() {
+            const fertilizanteId = document.getElementById('fertilizante').value;
+            const infoDiv = document.getElementById('info-fertilizante');
+            
+            if (!fertilizanteId) {
+                infoDiv.style.display = 'none';
+                return;
+            }
+            
+            const fertilizante = fertilizantesDisponibles.find(f => f.id == fertilizanteId);
+            if (fertilizante) {
+                const composicionDiv = document.getElementById('composicion-fertilizante');
+                if (composicionDiv) {
+                    // Construir solo los nutrientes con valores positivos
+                    let nutrientes = [];
+                    
+                    // Macronutrientes principales (compatible con ambos esquemas)
+                    const n = fertilizante.porcentaje_n || fertilizante.n;
+                    const p = fertilizante.porcentaje_p || fertilizante.p;
+                    const k = fertilizante.porcentaje_k || fertilizante.k;
+                    const ca = fertilizante.porcentaje_ca || fertilizante.ca;
+                    const mg = fertilizante.porcentaje_mg || fertilizante.mg;
+                    const s = fertilizante.porcentaje_s || fertilizante.s;
+                    
+                    if (n && parseFloat(n) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">N: ${n}%</span>`);
+                    }
+                    if (p && parseFloat(p) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">P: ${p}%</span>`);
+                    }
+                    if (k && parseFloat(k) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">K: ${k}%</span>`);
+                    }
+                    if (ca && parseFloat(ca) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Ca: ${ca}%</span>`);
+                    }
+                    if (mg && parseFloat(mg) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Mg: ${mg}%</span>`);
+                    }
+                    if (s && parseFloat(s) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">S: ${s}%</span>`);
+                    }
+                    
+                    // Micronutrientes (solo en esquema antiguo por ahora)
+                    if (fertilizante.fe && parseFloat(fertilizante.fe) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Fe: ${fertilizante.fe}%</span>`);
+                    }
+                    if (fertilizante.mn && parseFloat(fertilizante.mn) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Mn: ${fertilizante.mn}%</span>`);
+                    }
+                    if (fertilizante.zn && parseFloat(fertilizante.zn) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Zn: ${fertilizante.zn}%</span>`);
+                    }
+                    if (fertilizante.cu && parseFloat(fertilizante.cu) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Cu: ${fertilizante.cu}%</span>`);
+                    }
+                    if (fertilizante.b && parseFloat(fertilizante.b) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">B: ${fertilizante.b}%</span>`);
+                    }
+                    if (fertilizante.mo && parseFloat(fertilizante.mo) > 0) {
+                        nutrientes.push(`<span class="nutrient-badge">Mo: ${fertilizante.mo}%</span>`);
+                    }
+                    
+                    // Procesar micronutrientes del nuevo esquema si existe
+                    if (fertilizante.micronutrientes) {
+                        try {
+                            const micros = typeof fertilizante.micronutrientes === 'string' 
+                                ? JSON.parse(fertilizante.micronutrientes) 
+                                : fertilizante.micronutrientes;
+                            
+                            Object.entries(micros).forEach(([nutriente, valor]) => {
+                                if (parseFloat(valor) > 0) {
+                                    nutrientes.push(`<span class="nutrient-badge">${nutriente}: ${valor}%</span>`);
+                                }
+                            });
+                        } catch (e) {
+                            console.log("No se pudieron parsear micronutrientes:", e);
+                        }
+                    }
+                    
+                    const tipoDisplay = {
+                        'inorganico': { label: 'Inorgánico', color: 'primary' },
+                        'organico': { label: 'Orgánico', color: 'success' },
+                        'bioestimulante': { label: 'Bioestimulante', color: 'warning' },
+                        'hidroponico': { label: 'Hidropónico', color: 'info' },
+                        'otros': { label: 'Otros', color: 'secondary' }
+                    };
+                    const tipo = tipoDisplay[fertilizante.tipo] || tipoDisplay['otros'];
+                    
+                    composicionDiv.innerHTML = `
+                        ${fertilizante.tipo ? `<p class="mb-2"><strong>Tipo:</strong> <span class="badge bg-${tipo.color}">${tipo.label}</span></p>` : ''}
+                        <div class="d-flex flex-wrap gap-2">
+                            ${nutrientes.join('')}
+                        </div>
+                        ${fertilizante.formula || fertilizante.composicion ? `<p class="mt-2 mb-0"><strong>Fórmula:</strong> ${fertilizante.formula || fertilizante.composicion}</p>` : ''}
+                        ${fertilizante.fabricante ? `<p class="mb-0"><strong>Fabricante:</strong> ${fertilizante.fabricante}</p>` : ''}
+                    `;
+                }
+                
+                infoDiv.style.display = 'block';
+            }
+        }
+
+        async function guardarFertilizacion(event) {
+            event.preventDefault();
+            
+            const fincasSeleccionadas = Array.from(document.getElementById('fincas').selectedOptions).map(o => o.value);
+            const cuartelesSeleccionados = Array.from(document.getElementById('cuarteles').selectedOptions).map(o => o.value);
+            const fertilizanteSeleccionado = document.getElementById('fertilizante').value;
+            
+            if (fincasSeleccionadas.length === 0 || cuartelesSeleccionados.length === 0 || !fertilizanteSeleccionado) {
+                mostrarAlerta('Por favor complete todos los campos obligatorios', 'error');
+                return;
+            }
+            
+            // Validar condiciones climáticas y humedad (obligatorias)
+            if (!climaSeleccionado) {
+                document.getElementById('error-clima').style.display = 'block';
+                document.getElementById('grupo-clima').classList.add('is-invalid');
+                mostrarAlerta('Por favor seleccione las condiciones climáticas', 'error');
+                return;
+            } else {
+                document.getElementById('error-clima').style.display = 'none';
+                document.getElementById('grupo-clima').classList.remove('is-invalid');
+            }
+            
+            if (!humedadSeleccionada) {
+                document.getElementById('error-humedad').style.display = 'block';
+                document.getElementById('grupo-humedad').classList.add('is-invalid');
+                mostrarAlerta('Por favor seleccione la humedad del suelo', 'error');
+                return;
+            } else {
+                document.getElementById('error-humedad').style.display = 'none';
+                document.getElementById('grupo-humedad').classList.remove('is-invalid');
+            }
+            
+            // Recopilar cantidades por cuartel
+            const cantidadesPorCuartel = [];
+            let totalFertilizante = 0;
+            let hayErrores = false;
+            
+            document.querySelectorAll('.cantidad-input').forEach(input => {
+                const cantidad = parseFloat(input.value) || 0;
+                const cuartelId = input.dataset.cuartelId;
+                const superficie = parseFloat(input.dataset.superficie) || 0;
+                const unidadSelect = document.querySelector(`select[data-cuartel-id="${cuartelId}"]`);
+                const unidad = unidadSelect ? unidadSelect.value : 'kg';
+                
+                if (cantidad === 0) {
+                    hayErrores = true;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                    
+                    const cuartel = cuartelesData.find(c => c.id == cuartelId);
+                    cantidadesPorCuartel.push({
+                        cuartel_id: cuartelId,
+                        cuartel_nombre: cuartel ? cuartel.nombre : 'N/A',
+                        superficie: superficie,
+                        cantidad_aplicada: cantidad,
+                        unidad: unidad,
+                        dosis_por_ha: superficie > 0 ? (cantidad / superficie).toFixed(2) : 0
+                    });
+                    
+                    // Convertir a kg para total
+                    let cantidadEnKg = cantidad;
+                    if (unidad === 'gr') cantidadEnKg = cantidad / 1000;
+                    else if (unidad === 'l') cantidadEnKg = cantidad;
+                    else if (unidad === 'ml') cantidadEnKg = cantidad / 1000;
+                    
+                    totalFertilizante += cantidadEnKg;
+                }
+            });
+            
+            if (hayErrores) {
+                mostrarAlerta('Por favor complete las cantidades para todos los cuarteles', 'error');
+                return;
+            }
+            
+            try {
+                console.log("🔍 Guardando fertilización con cantidades por cuartel...");
+                
+                const fertilizanteInfo = fertilizantesDisponibles.find(f => f.id == fertilizanteSeleccionado);
+                const fertilizanteNombre = fertilizanteInfo ? (fertilizanteInfo.nombre || fertilizanteInfo.producto) : 'N/A';
+                const unidadDosis = document.getElementById('unidad-dosis').value;
+                const superficieTotal = parseFloat(document.getElementById('superficie-total').value) || 0;
+                const dosisReferencia = parseFloat(document.getElementById('dosis-referencia').value) || 0;
+                
+                // Determinar unidad principal más común
+                let unidadPrincipal = 'kg';
+                const unidades = cantidadesPorCuartel.map(c => c.unidad);
+                const unidadMasFrecuente = unidades.sort((a,b) =>
+                    unidades.filter(v => v===a).length - unidades.filter(v => v===b).length
+                ).pop();
+                if (unidadMasFrecuente) unidadPrincipal = unidadMasFrecuente;
+                
+                // Preparar registros de fertilización - UNO POR CADA CUARTEL
+                const registrosFertilizacion = [];
+                
+                for (const cuartelData of cantidadesPorCuartel) {
+                    const cuartel = cuartelesData.find(c => c.id == cuartelData.cuartel_id);
+                    const fincaId = cuartel ? cuartel.finca_id : null;
+                    
+                    if (!fincaId) {
+                        console.error(`No se encontró finca para cuartel ${cuartelData.cuartel_id}`);
+                        continue;
+                    }
+                    
+                    // Convertir cantidad a kg para consistencia
+                    let cantidadEnKg = cuartelData.cantidad_aplicada;
+                    if (cuartelData.unidad === 'gr') cantidadEnKg = cuartelData.cantidad_aplicada / 1000;
+                    else if (cuartelData.unidad === 'ml') cantidadEnKg = cuartelData.cantidad_aplicada / 1000;
+                    
+                    const dosisCalculada = cuartelData.superficie > 0 ? (cantidadEnKg / cuartelData.superficie) : 0;
+                    
+                    const registroFertilizacion = {
+                        usuario_id: user.id,
+                        finca_id: parseInt(fincaId),
+                        cuartel_id: parseInt(cuartelData.cuartel_id),
+                        fertilizante_uuid: fertilizanteSeleccionado,
+                        fecha: document.getElementById('fecha').value,
+                        
+                        // Datos específicos del cuartel
+                        dosis: dosisCalculada,
+                        unidad_dosis: unidadDosis || 'kg/ha',
+                        superficie_aplicada: cuartelData.superficie,
+                        
+                        // Dosis de referencia (informativa)
+                        dosis_referencia: dosisReferencia || null,
+                        unidad_dosis_referencia: unidadDosis || 'kg/ha',
+                        
+                        // Cantidades reales aplicadas en este cuartel
+                        cantidad_aplicada: cantidadEnKg,
+                        unidad_cantidad: 'kg', // Normalizado a kg
+                        superficie_cuartel: cuartelData.superficie,
+                        dosis_real_calculada: dosisCalculada,
+                        
+                        // Información de aplicación
+                        metodo_aplicacion: document.getElementById('metodo-aplicacion').value,
+                        sistema_aplicacion: tipoSeleccionado,
+                        operador_id: document.getElementById('operador').value || null,
+                        equipo_trabajadores: document.getElementById('equipo-trabajadores').value,
+                        
+                        // Condiciones y costos
+                        costo_total: parseFloat(document.getElementById('costo-total').value) || null,
+                        clima: climaSeleccionado,
+                        humedad_suelo: humedadSeleccionada,
+                        observaciones: `${document.getElementById('observaciones').value || ''}
+
+📊 APLICACIÓN POR CUARTEL:
+• Cuartel: ${cuartelData.cuartel_nombre}
+• Cantidad aplicada: ${cuartelData.cantidad_aplicada} ${cuartelData.unidad}
+• Superficie: ${cuartelData.superficie} ha
+• Dosis real: ${cuartelData.dosis_por_ha} ${cuartelData.unidad}/ha
+• Fertilizante: ${fertilizanteNombre}
+
+📈 RESUMEN DE APLICACIÓN COMPLETA:
+• Cantidad total aplicada: ${totalFertilizante.toFixed(2)} ${unidadPrincipal}
+• Superficie total: ${superficieTotal} ha
+• Dosis promedio: ${superficieTotal > 0 ? (totalFertilizante / superficieTotal).toFixed(2) : 0} ${unidadPrincipal}/ha
+• Cuarteles tratados: ${cantidadesPorCuartel.length}`
+                    };
+                    
+                    registrosFertilizacion.push(registroFertilizacion);
+                }
+                
+                console.log(`📝 Preparando ${registrosFertilizacion.length} registros para insertar:`);
+                registrosFertilizacion.forEach((registro, index) => {
+                    console.log(`  Registro ${index + 1}:`, {
+                        finca_id: registro.finca_id,
+                        cuartel_id: registro.cuartel_id,
+                        cantidad: registro.cantidad_aplicada,
+                        superficie: registro.superficie_cuartel
+                    });
+                });
+
+                // Guardar todos los registros en tabla fertilizaciones
+                const { error } = await supabase
+                    .from('fertilizaciones')
+                    .insert(registrosFertilizacion);
+                
+                if (error) {
+                    console.error('Error específico:', error);
+                    throw error;
+                }
+                
+                console.log(`✅ ${registrosFertilizacion.length} registros de fertilización guardados exitosamente`);
+                mostrarAlerta(`Fertilización registrada exitosamente. ${registrosFertilizacion.length} registros guardados. Total aplicado: ${totalFertilizante.toFixed(2)} kg en ${cantidadesPorCuartel.length} cuarteles`, 'success');
+                
+                // Actualizar listado de fertilizaciones
+                if (typeof cargarFertilizaciones === 'function') {
+                    cargarFertilizaciones(paginaActual);
+                }
+                
+                // Limpiar formulario y cerrar
+                limpiarFormulario();
+                cancelarFormulario();
+                
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                mostrarAlerta(`Error al guardar la fertilización: ${error.message}`, 'error');
+            }
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            // Crear o encontrar el contenedor de alertas
+            let alertContainer = document.getElementById('alert-container');
+            if (!alertContainer) {
+                alertContainer = document.createElement('div');
+                alertContainer.id = 'alert-container';
+                alertContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    max-width: 400px;
+                    width: auto;
+                `;
+                document.body.appendChild(alertContainer);
+            }
+            
+            const alertaDiv = document.createElement('div');
+            alertaDiv.className = `alert alert-${tipo === 'error' ? 'danger' : tipo} alert-dismissible fade show mb-3 shadow`;
+            alertaDiv.style.cssText = `
+                border-radius: 8px;
+                border: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideInRight 0.3s ease-out;
+            `;
+            alertaDiv.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1">
+                        <strong>${tipo === 'success' ? '✅ Éxito' : tipo === 'error' ? '❌ Error' : 'ℹ️ Información'}:</strong>
+                        <div class="mt-1">${mensaje}</div>
+                    </div>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Agregar animación CSS si no existe
+            if (!document.getElementById('alert-animations')) {
+                const style = document.createElement('style');
+                style.id = 'alert-animations';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            opacity: 0;
+                            transform: translateX(300px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(0);
+                        }
+                    }
+                    @keyframes slideOutRight {
+                        from {
+                            opacity: 1;
+                            transform: translateX(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateX(300px);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            alertContainer.appendChild(alertaDiv);
+            
+            // Auto-remover después de 6 segundos con animación
+            setTimeout(() => {
+                alertaDiv.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (alertaDiv.parentNode) {
+                        alertaDiv.remove();
+                    }
+                }, 300);
+            }, 6000);
+            
+            // Permitir cerrar manualmente
+            alertaDiv.querySelector('.btn-close').addEventListener('click', () => {
+                alertaDiv.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (alertaDiv.parentNode) {
+                        alertaDiv.remove();
+                    }
+                }, 300);
+            });
+        }
+
+        function seleccionarTipo(tipo) {
+            console.log(`🎯 ===== SELECCIONANDO TIPO: "${tipo}" =====`);
+            tipoSeleccionado = tipo;
+            console.log(`🎯 Variable tipoSeleccionado actualizada a: "${tipoSeleccionado}"`);
+            
+            // Actualizar UI
+            document.querySelectorAll('.card-tipo-fertilizacion').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('formulario-container').style.display = 'block';
+            document.getElementById('tipo-seleccionado-badge').textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            
+            // Cambiar colores de los elementos según el tipo seleccionado
+            actualizarColoresTipo(tipo);
+            
+            // CARGAR fertilizantes por primera vez con el filtro YA aplicado
+            console.log(`🔄 Cargando fertilizantes filtrados para tipo: "${tipo}"`);
+            cargarFertilizantes().then(() => {
+                console.log(`✅ Carga inicial completada para tipo: "${tipo}"`);
+            });
+            
+            document.getElementById('formulario-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function actualizarColoresTipo(tipo) {
+            console.log(`🎨 Actualizando colores para tipo: ${tipo}`);
+            
+            // Elementos que van a cambiar de color
+            const headerFormulario = document.getElementById('header-formulario');
+            const btnRegistrar = document.getElementById('btn-registrar');
+            const btnGuardarFlotante = document.getElementById('btn-guardar-flotante');
+            const secciones = document.querySelectorAll('.form-section');
+            
+            // Remover todas las clases de tipo anteriores - SOLO de botones
+            const tiposClases = ['tipo-inorganico', 'tipo-organico', 'tipo-bioestimulante', 'tipo-hidroponico', 'tipo-fertirrigacion'];
+            const headerClases = ['header-tipo-inorganico', 'header-tipo-organico', 'header-tipo-bioestimulante', 'header-tipo-hidroponico', 'header-tipo-fertirrigacion'];
+            const seccionClases = ['seccion-tipo-inorganico', 'seccion-tipo-organico', 'seccion-tipo-bioestimulante', 'seccion-tipo-hidroponico', 'seccion-tipo-fertirrigacion'];
+            
+            // Limpiar clases anteriores del header
+            headerClases.forEach(clase => headerFormulario.classList.remove(clase));
+            
+            // Limpiar clases anteriores de los botones
+            tiposClases.forEach(clase => {
+                btnRegistrar.classList.remove(clase);
+                btnGuardarFlotante.classList.remove(clase);
+            });
+            
+            // Limpiar clases anteriores de las secciones
+            secciones.forEach(seccion => {
+                seccionClases.forEach(clase => seccion.classList.remove(clase));
+            });
+            
+            // Agregar las nuevas clases según el tipo
+            switch(tipo) {
+                case 'inorganico':
+                    headerFormulario.classList.add('header-tipo-inorganico');
+                    btnRegistrar.classList.add('tipo-inorganico');
+                    btnGuardarFlotante.classList.add('tipo-inorganico');
+                    secciones.forEach(seccion => seccion.classList.add('seccion-tipo-inorganico'));
+                    break;
+                case 'organico':
+                    headerFormulario.classList.add('header-tipo-organico');
+                    btnRegistrar.classList.add('tipo-organico');
+                    btnGuardarFlotante.classList.add('tipo-organico');
+                    secciones.forEach(seccion => seccion.classList.add('seccion-tipo-organico'));
+                    break;
+                case 'bioestimulante':
+                    headerFormulario.classList.add('header-tipo-bioestimulante');
+                    btnRegistrar.classList.add('tipo-bioestimulante');
+                    btnGuardarFlotante.classList.add('tipo-bioestimulante');
+                    secciones.forEach(seccion => seccion.classList.add('seccion-tipo-bioestimulante'));
+                    break;
+                case 'hidroponico':
+                    headerFormulario.classList.add('header-tipo-hidroponico');
+                    btnRegistrar.classList.add('tipo-hidroponico');
+                    btnGuardarFlotante.classList.add('tipo-hidroponico');
+                    secciones.forEach(seccion => seccion.classList.add('seccion-tipo-hidroponico'));
+                    break;
+                case 'fertirrigacion':
+                    headerFormulario.classList.add('header-tipo-fertirrigacion');
+                    btnRegistrar.classList.add('tipo-fertirrigacion');
+                    btnGuardarFlotante.classList.add('tipo-fertirrigacion');
+                    secciones.forEach(seccion => seccion.classList.add('seccion-tipo-fertirrigacion'));
+                    break;
+                default:
+                    console.warn(`Tipo de fertilizante no reconocido: ${tipo}`);
+            }
+            
+            console.log(`✅ Colores actualizados para tipo: ${tipo} (header, botones y secciones)`);
+        }
+
+        function seleccionarClima(button, clima) {
+            climaSeleccionado = clima;
+            
+            document.querySelectorAll('.clima-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            button.classList.add('active');
+        }
+
+        function seleccionarHumedad(button, humedad) {
+            humedadSeleccionada = humedad;
+            
+            document.querySelectorAll('.humedad-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            button.classList.add('active');
+        }
+
+        function cancelarFormulario() {
+            document.getElementById('formulario-container').style.display = 'none';
+            tipoSeleccionado = '';
+            
+            document.querySelectorAll('.card-tipo-fertilizacion').forEach(card => {
+                card.classList.remove('selected');
+            });
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('formFertilizacion').reset();
+            
+            // Limpiar datos de cuarteles y tabla
+            cuartelesData = [];
+            document.getElementById('superficie-total').value = '0.00';
+            document.getElementById('tabla-cantidades').style.display = 'none';
+            document.getElementById('tbody-cantidades').innerHTML = '';
+            
+            // Limpiar info de fertilizante
+            document.getElementById('info-fertilizante').style.display = 'none';
+            
+            // Limpiar selectores de clima y humedad pero mantener valores predeterminados
+            document.querySelectorAll('.clima-btn, .humedad-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Restablecer valores predeterminados
+            climaSeleccionado = 'nublado';
+            humedadSeleccionada = 'humedo';
+            
+            // Reactivar botones predeterminados
+            document.querySelector('.clima-btn[onclick*="nublado"]').classList.add('active');
+            document.querySelector('.humedad-btn[onclick*="humedo"]').classList.add('active');
+            
+            // Resetear cuarteles - LIMPIEZA COMPLETA
+            const cuartelesSelect = document.getElementById('cuarteles');
+            
+            // Destruir selectpicker primero
+            if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                jQuery('#cuarteles').selectpicker('destroy');
+            }
+            
+            cuartelesSelect.innerHTML = '<option value="">Primero seleccione una o más fincas</option>';
+            
+            // Ocultar botón "Seleccionar todos"
+            document.getElementById('btn-seleccionar-todos-cuarteles').style.display = 'none';
+            
+            // Refresh todos los selectpickers
+            if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                jQuery('#fincas').selectpicker('deselectAll');
+                jQuery('#fincas').selectpicker('refresh');
+                
+                // Recrear cuarteles selectpicker
+                jQuery('#cuarteles').selectpicker({
+                    title: 'Seleccionar cuartel(es)...',
+                    selectedTextFormat: 'count > 1',
+                    liveSearch: true
+                });
+                
+                jQuery('#operador').selectpicker('val', '');
+                jQuery('#operador').selectpicker('refresh');
+                
+                jQuery('#fertilizante').selectpicker('val', '');
+                jQuery('#fertilizante').selectpicker('refresh');
+            }
+            
+            // Restablecer fecha actual
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            
+            // Limpiar totales
+            document.getElementById('total-superficie').textContent = '0.00 ha';
+            document.getElementById('total-cantidad').textContent = '0.00 kg/l';
+            
+            console.log("✅ Formulario limpiado completamente");
+        }
+
+        function mostrarGestionFertilizantes() {
+            mostrarAlerta('🔒 Gestión de Fertilizantes: Por seguridad, los fertilizantes deben ser gestionados por el administrador del sistema. Contacte a su administrador para agregar nuevos fertilizantes.', 'info');
+        }
+
+        function seleccionarTodosCuarteles() {
+            const cuartelesSelect = document.getElementById('cuarteles');
+            const todasLasOpciones = Array.from(cuartelesSelect.options)
+                .filter(option => option.value !== '') // Excluir opción por defecto
+                .map(option => option.value);
+            
+            if (todasLasOpciones.length === 0) {
+                mostrarAlerta('No hay cuarteles disponibles para seleccionar', 'warning');
+                return;
+            }
+            
+            // Seleccionar todas las opciones usando jQuery selectpicker
+            if (typeof jQuery !== 'undefined' && jQuery.fn.selectpicker) {
+                jQuery('#cuarteles').selectpicker('val', todasLasOpciones);
+                jQuery('#cuarteles').selectpicker('refresh');
+            } else {
+                // Fallback para selección manual
+                todasLasOpciones.forEach(valor => {
+                    const option = cuartelesSelect.querySelector(`option[value="${valor}"]`);
+                    if (option) option.selected = true;
+                });
+            }
+            
+            // Actualizar la tabla de cantidades
+            generarTablaCantidades();
+            
+            mostrarAlerta(`Se seleccionaron ${todasLasOpciones.length} cuarteles`, 'success');
+        }
+
+        // Hacer las funciones globales para que funcionen con onClick - ANTES DE CARGAR DATOS
+        window.seleccionarTipo = seleccionarTipo;
+        window.seleccionarClima = seleccionarClima;
+        window.seleccionarHumedad = seleccionarHumedad;
+        window.cancelarFormulario = cancelarFormulario;
+        window.limpiarFormulario = limpiarFormulario;
+        window.mostrarGestionFertilizantes = mostrarGestionFertilizantes;
+        window.seleccionarTodosCuarteles = seleccionarTodosCuarteles;
+        console.log("✅ FERTILIZACIONES: Funciones globales exportadas");
+
+        // --- FUNCIONES PARA LISTADO DE FERTILIZACIONES ---
+        
+        // Variables para paginación
+        let paginaActual = 1;
+        const registrosPorPagina = 10;
+        let totalRegistros = 0;
+        let datosFertilizaciones = [];
+
+        // Toggle del listado
+        const toggleListBtn = document.getElementById('toggle-list-btn');
+        const listadoFertilizaciones = document.getElementById('listado-fertilizaciones');
+        
+        if (toggleListBtn) {
+            toggleListBtn.addEventListener('click', function() {
+                setTimeout(() => {
+                    const isVisible = listadoFertilizaciones.classList.contains('show');
+                    toggleListBtn.innerHTML = isVisible ? 
+                        '<i class="fas fa-plus-circle me-1"></i> Mostrar Listado' : 
+                        '<i class="fas fa-minus-circle me-1"></i> Ocultar Listado';
+                }, 150);
+            });
+        }
+
+        // Exponer funciones globalmente ANTES de cualquier uso
+        window.cargarFertilizaciones = function(pagina = 1) {
+            return cargarFertilizaciones(pagina);
+        };
+        window.aplicarFiltrosFertilizaciones = function() {
+            return aplicarFiltrosFertilizaciones();
+        };
+        window.limpiarFiltrosFertilizaciones = function() {
+            return limpiarFiltrosFertilizaciones();
+        };
+
+        // Cargar fertilizaciones con paginación
+        async function cargarFertilizaciones(pagina = 1) {
+            try {
+                paginaActual = pagina;
+                const tbody = document.getElementById('tabla-fertilizaciones-body');
+                
+                // Mostrar spinner
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                Cargando fertilizaciones...
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Obtener filtros
+                const fechaDesde = document.getElementById('filtro-fecha-desde').value;
+                const fechaHasta = document.getElementById('filtro-fecha-hasta').value;
+                const fincaId = document.getElementById('filtro-finca-list').value;
+                const tipoFertilizacion = document.getElementById('filtro-tipo-fertilizacion').value;
+
+                // SEGURIDAD: Obtener datos del usuario para filtrar por organización
+                const { data: userData, error: userError } = await supabase
+                    .from('usuarios')
+                    .select('organizacion_id')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (userError) throw userError;
+
+                // Construir query base para contar
+                let countQuery = supabase
+                    .from('fertilizaciones')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('usuario_id', user.id); // Filtrar por usuario
+
+                // Aplicar filtros al conteo
+                if (fechaDesde) {
+                    countQuery = countQuery.gte('fecha', fechaDesde);
+                }
+                if (fechaHasta) {
+                    countQuery = countQuery.lte('fecha', fechaHasta);
+                }
+                if (fincaId) {
+                    countQuery = countQuery.eq('finca_id', fincaId);
+                }
+                if (tipoFertilizacion) {
+                    countQuery = countQuery.eq('sistema_aplicacion', tipoFertilizacion);
+                }
+
+                // Obtener total para paginación
+                const { count, error: countError } = await countQuery;
+                if (countError) throw countError;
+                
+                totalRegistros = count || 0;
+
+                // Construir query para datos - usando relaciones explícitas
+                let dataQuery = supabase
+                    .from('fertilizaciones')
+                    .select(`
+                        id, fecha, dosis, unidad_dosis, superficie_aplicada, sistema_aplicacion, 
+                        metodo_aplicacion, cantidad_aplicada, unidad_cantidad, observaciones,
+                        fertilizante_uuid,
+                        fincas!finca_id(nombre_finca),
+                        cuarteles!cuartel_id(nombre),
+                        aplicadores_operarios!operador_id(nombre, apellido)
+                    `)
+                    .eq('usuario_id', user.id)
+                    .order('fecha', { ascending: false });
+
+                // Aplicar filtros a los datos
+                if (fechaDesde) {
+                    dataQuery = dataQuery.gte('fecha', fechaDesde);
+                }
+                if (fechaHasta) {
+                    dataQuery = dataQuery.lte('fecha', fechaHasta);
+                }
+                if (fincaId) {
+                    dataQuery = dataQuery.eq('finca_id', fincaId);
+                }
+                if (tipoFertilizacion) {
+                    dataQuery = dataQuery.eq('sistema_aplicacion', tipoFertilizacion);
+                }
+
+                // Aplicar paginación
+                const desde = (pagina - 1) * registrosPorPagina;
+                const hasta = desde + registrosPorPagina - 1;
+                
+                const { data: fertilizaciones, error: dataError } = await dataQuery
+                    .range(desde, hasta);
+
+                if (dataError) throw dataError;
+
+                datosFertilizaciones = fertilizaciones || [];
+                console.log("✅ Fertilizaciones cargadas:", datosFertilizaciones.length);
+
+                // Actualizar tabla
+                await actualizarTablaFertilizaciones();
+                
+                // Actualizar paginación
+                actualizarPaginacionFertilizaciones();
+                
+                // Actualizar contador
+                document.getElementById('total-fertilizaciones').textContent = totalRegistros;
+
+            } catch (error) {
+                console.error('❌ Error al cargar fertilizaciones:', error);
+                const tbody = document.getElementById('tabla-fertilizaciones-body');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error al cargar fertilizaciones: ${error.message}
+                        </td>
+                    </tr>
+                `;
+                mostrarAlerta('Error al cargar fertilizaciones: ' + error.message, 'error');
+            }
+        }
+
+        async function actualizarTablaFertilizaciones() {
+            const tbody = document.getElementById('tabla-fertilizaciones-body');
+            
+            if (datosFertilizaciones.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No se encontraron fertilizaciones registradas
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            // Obtener todos los UUIDs de fertilizantes únicos para hacer una sola consulta
+            const fertilizanteUUIDs = [...new Set(datosFertilizaciones
+                .map(fert => fert.fertilizante_uuid)
+                .filter(uuid => uuid))];
+            
+            console.log("🔍 UUIDs de fertilizantes a buscar:", fertilizanteUUIDs);
+            console.log("📊 Datos de fertilizaciones:", datosFertilizaciones.map(f => ({
+                id: f.id,
+                fecha: f.fecha,
+                fertilizante_uuid: f.fertilizante_uuid
+            })));
+            
+            // Cargar información de fertilizantes
+            let fertilizantesMap = new Map();
+            if (fertilizanteUUIDs.length > 0) {
+                try {
+                    console.log("🔍 Buscando fertilizantes para UUIDs:", fertilizanteUUIDs);
+                    
+                    // Primero intentar con fertilizantes_disponibles
+                    const { data: fertilizantesDisp, error: errorDisp } = await supabase
+                        .from('fertilizantes_disponibles')
+                        .select('id, nombre, fabricante')
+                        .in('id', fertilizanteUUIDs);
+                    
+                    console.log("📦 Fertilizantes encontrados en fertilizantes_disponibles:", fertilizantesDisp?.length || 0);
+                    
+                    if (!errorDisp && fertilizantesDisp) {
+                        fertilizantesDisp.forEach(fert => {
+                            fertilizantesMap.set(fert.id, fert.nombre || 'Sin nombre');
+                            console.log(`✅ Mapeado: ${fert.id} -> ${fert.nombre}`);
+                        });
+                    }
+                    
+                    // Si no encontramos todos, intentar con la tabla global fertilizantes
+                    const faltantes = fertilizanteUUIDs.filter(uuid => !fertilizantesMap.has(uuid));
+                    if (faltantes.length > 0) {
+                        console.log("🔍 Buscando fertilizantes faltantes en tabla global:", faltantes);
+                        
+                        const { data: fertilizantesGlob, error: errorGlob } = await supabase
+                            .from('fertilizantes')
+                            .select('id, producto, fabricante')
+                            .in('id', faltantes);
+                        
+                        console.log("📦 Fertilizantes encontrados en fertilizantes globales:", fertilizantesGlob?.length || 0);
+                        
+                        if (!errorGlob && fertilizantesGlob) {
+                            fertilizantesGlob.forEach(fert => {
+                                fertilizantesMap.set(fert.id, fert.producto || 'Sin nombre');
+                                console.log(`✅ Mapeado global: ${fert.id} -> ${fert.producto}`);
+                            });
+                        }
+                    }
+                    
+                    // Si aún quedan faltantes, intentar buscar por nombre/producto similar
+                    const aunFaltantes = fertilizanteUUIDs.filter(uuid => !fertilizantesMap.has(uuid));
+                    if (aunFaltantes.length > 0) {
+                        console.warn("⚠️ Fertilizantes no encontrados en ninguna tabla:", aunFaltantes);
+                        
+                        // Marcar como no encontrados pero intentar buscar en fertilizantesDisponibles global
+                        aunFaltantes.forEach(uuid => {
+                            // Intentar buscar en la variable global fertilizantesDisponibles
+                            const encontradoGlobal = fertilizantesDisponibles.find(f => f.id === uuid);
+                            if (encontradoGlobal) {
+                                const nombre = encontradoGlobal.nombre || encontradoGlobal.producto || 'Sin nombre';
+                                fertilizantesMap.set(uuid, nombre);
+                                console.log(`✅ Encontrado en variable global: ${uuid} -> ${nombre}`);
+                            } else {
+                                fertilizantesMap.set(uuid, `ID: ${uuid.substring(0, 8)}...`);
+                                console.warn(`❌ No encontrado en ningún lado: ${uuid}`);
+                            }
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error cargando fertilizantes para listado:', error);
+                    // En caso de error, usar los UUIDs parciales
+                    fertilizanteUUIDs.forEach(uuid => {
+                        if (!fertilizantesMap.has(uuid)) {
+                            fertilizantesMap.set(uuid, `Error: ${uuid.substring(0, 8)}...`);
+                        }
+                    });
+                }
+            }
+
+            datosFertilizaciones.forEach(fert => {
+                const fecha = new Date(fert.fecha).toLocaleDateString('es-ES');
+                const finca = fert.fincas?.nombre_finca || 'N/A';
+                const cuartel = fert.cuarteles?.nombre || 'N/A';
+                const operador = fert.aplicadores_operarios ? 
+                    `${fert.aplicadores_operarios.nombre || ''} ${fert.aplicadores_operarios.apellido || ''}`.trim() || 'N/A' : 
+                    'N/A';
+                
+                // Obtener información del fertilizante usando el Map
+                let fertilizanteNombre = 'N/A';
+                if (fert.fertilizante_uuid) {
+                    fertilizanteNombre = fertilizantesMap.get(fert.fertilizante_uuid);
+                    if (!fertilizanteNombre) {
+                        // Si no se encuentra, mostrar el UUID parcial para debug
+                        fertilizanteNombre = `No encontrado (${fert.fertilizante_uuid.substring(0, 8)}...)`;
+                        console.warn(`⚠️ Fertilizante no encontrado para UUID: ${fert.fertilizante_uuid}`);
+                    }
+                }
+                
+                const tipo = fert.sistema_aplicacion ? 
+                    fert.sistema_aplicacion.charAt(0).toUpperCase() + fert.sistema_aplicacion.slice(1) : 
+                    'N/A';
+                
+                const dosis = fert.dosis ? 
+                    `${fert.dosis} ${fert.unidad_dosis || ''}` : 
+                    'N/A';
+                
+                const superficie = fert.superficie_aplicada ? 
+                    `${fert.superficie_aplicada} ha` : 
+                    'N/A';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fecha}</td>
+                    <td>${finca}</td>
+                    <td>${cuartel}</td>
+                    <td>${fertilizanteNombre}</td>
+                    <td>
+                        <span class="badge bg-secondary">${tipo}</span>
+                    </td>
+                    <td>${dosis}</td>
+                    <td>${superficie}</td>
+                    <td>${operador}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary btn-sm" onclick="verDetallesFertilizacion(${fert.id})" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" onclick="editarFertilizacion(${fert.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="eliminarFertilizacion(${fert.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar paginación
+        function actualizarPaginacionFertilizaciones() {
+            const paginacion = document.getElementById('paginacion-fertilizaciones');
+            const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+            
+            // Actualizar información de registros
+            const desde = (paginaActual - 1) * registrosPorPagina + 1;
+            const hasta = Math.min(paginaActual * registrosPorPagina, totalRegistros);
+            
+            document.getElementById('registros-desde').textContent = totalRegistros > 0 ? desde : 0;
+            document.getElementById('registros-hasta').textContent = hasta;
+            document.getElementById('total-registros').textContent = totalRegistros;
+
+            if (totalPaginas <= 1) {
+                paginacion.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Botón anterior
+            if (paginaActual > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="cargarFertilizaciones(${paginaActual - 1})">Anterior</a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link">Anterior</span></li>`;
+            }
+
+            // Páginas
+            const inicio = Math.max(1, paginaActual - 2);
+            const fin = Math.min(totalPaginas, paginaActual + 2);
+
+            if (inicio > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="cargarFertilizaciones(1)">1</a></li>`;
+                if (inicio > 2) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            for (let i = inicio; i <= fin; i++) {
+                if (i === paginaActual) {
+                    html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                } else {
+                    html += `<li class="page-item"><a class="page-link" href="#" onclick="cargarFertilizaciones(${i})">${i}</a></li>`;
+                }
+            }
+
+            if (fin < totalPaginas) {
+                if (fin < totalPaginas - 1) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="cargarFertilizaciones(${totalPaginas})">${totalPaginas}</a></li>`;
+            }
+
+            // Botón siguiente
+            if (paginaActual < totalPaginas) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="cargarFertilizaciones(${paginaActual + 1})">Siguiente</a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link">Siguiente</span></li>`;
+            }
+
+            paginacion.innerHTML = html;
+        }
+
+        // Aplicar filtros
+        async function aplicarFiltrosFertilizaciones() {
+            paginaActual = 1;
+            await cargarFertilizaciones(1);
+        }
+
+        // Limpiar filtros
+        async function limpiarFiltrosFertilizaciones() {
+            document.getElementById('filtro-fecha-desde').value = '';
+            document.getElementById('filtro-fecha-hasta').value = '';
+            document.getElementById('filtro-finca-list').value = '';
+            document.getElementById('filtro-tipo-fertilizacion').value = '';
+            
+            paginaActual = 1;
+            await cargarFertilizaciones(1);
+        }
+
+        // Cargar fincas para filtros
+        async function cargarFincasParaFiltros() {
+            try {
+                const { data, error } = await supabase
+                    .from('fincas')
+                    .select('id, nombre_finca')
+                    .order('nombre_finca');
+                
+                if (error) throw error;
+                
+                const select = document.getElementById('filtro-finca-list');
+                select.innerHTML = '<option value="">Todas las fincas</option>';
+                
+                data.forEach(finca => {
+                    const option = document.createElement('option');
+                    option.value = finca.id;
+                    option.textContent = finca.nombre_finca;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error al cargar fincas para filtros:', error);
+            }
+        }
+
+        // Funciones de acciones (placeholder por ahora)
+        window.verDetallesFertilizacion = function(id) {
+            mostrarAlerta(`Ver detalles de fertilización ID: ${id}`, 'info');
+        };
+
+        window.editarFertilizacion = function(id) {
+            mostrarAlerta(`Editar fertilización ID: ${id} - Función en desarrollo`, 'warning');
+        };
+
+        window.eliminarFertilizacion = function(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta fertilización?')) {
+                mostrarAlerta(`Eliminar fertilización ID: ${id} - Función en desarrollo`, 'warning');
+            }
+        };
+
+        // Event listeners para los filtros y botones
+        document.getElementById('btn-aplicar-filtros').addEventListener('click', aplicarFiltrosFertilizaciones);
+        document.getElementById('btn-limpiar-filtros').addEventListener('click', limpiarFiltrosFertilizaciones);
+        document.getElementById('btn-actualizar-fertilizaciones').addEventListener('click', () => cargarFertilizaciones(paginaActual));
+
+        // Inicializar listado de fertilizaciones
+        Promise.all([
+            cargarFincasParaFiltros(),
+            cargarFertilizaciones(1)
+        ]).then(() => {
+            console.log("✅ Listado de fertilizaciones inicializado");
+        }).catch(error => {
+            console.error("❌ Error inicializando listado:", error);
+        });
+
+        // NOTA: Los datos ya se cargaron arriba en el Promise.all()
+        // No duplicar la carga aquí
+
+    </script>
+</body>
+</html>
